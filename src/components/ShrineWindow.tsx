@@ -1,9 +1,10 @@
 import gs from '@/styles/game.module.css'
+import ItemSlot from "./ItemSlot";
 import ProgressBar from "./ProgressBar";
 import Window from "./Window";
 
 export default function ShrineWindow() {
-  return <Window className="w-80">
+  return <Window className="!w-80">
     <Window.Title>Shrine</Window.Title>
     <div className="flex flex-col h-full relative">
       <div className="flex flex-col gap-y-3 z-10">
@@ -15,7 +16,7 @@ export default function ShrineWindow() {
 
       <div className="flex-grow flex flex-col gap-y-3 items-center place-content-end h-96 z-10">
         <span className="text-center">Drag and drop the Item you wish to sacrifice to the box below.</span>
-        <div className={gs.item}></div>
+        <ItemSlot />
         <div>
           <button className="bg-stone-900 px-3 py-1 border w-full">Sacrifice Item</button>
         </div>

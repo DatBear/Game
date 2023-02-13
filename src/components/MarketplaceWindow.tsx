@@ -2,6 +2,34 @@ import gs from '@/styles/game.module.css'
 import { Tab } from '@headlessui/react'
 import { Fragment, useEffect } from 'react';
 import Window from '@/components/Window';
+import Item, { ItemSubType } from "@/models/Item";
+import MarketItem from "@/models/MarketItem";
+import ItemSlot from "./ItemSlot";
+
+
+let marketItems: MarketItem[] = [
+  { price: 100, item: { subType: ItemSubType.Club, stats: Array(1), tier: 3 } },
+  { price: 110, item: { subType: ItemSubType.PaddedRobe, stats: Array(1), tier: 3 } },
+  { price: 120, item: { subType: ItemSubType.Fire, stats: Array(1), tier: 3 } },
+  { price: 130, item: { subType: ItemSubType.Fire, stats: Array(1), tier: 3 } },
+  { price: 140, item: { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 12 } },
+  { price: 150, item: { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 1 } },
+  { price: 160, item: { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 20 } },
+];
+
+let buyItem: MarketItem = marketItems[0];
+let sellItem: Item = marketItems[1].item;
+let transferItem: Item = marketItems[2].item;
+
+function MarketItemSlot({ marketItem }: { marketItem: MarketItem }) {
+  return (<div className="flex flex-col w-16">
+    <ItemSlot item={marketItem.item} />
+    <div className="flex flex-row bg-stone-500/50 items-center w-16">
+      <span className="flex-grow text-right px-1">{marketItem.price}</span>
+      <img src="svg/iconGold.svg" />
+    </div>
+  </div>)
+}
 
 export default function MarketplaceWindow() {
   return (<>
@@ -93,57 +121,14 @@ export default function MarketplaceWindow() {
             </form>
 
             <div className="flex flex-col flex-grow text-sm gap-y-4 basis-full sm:basis-8/12 w-min">
-              <div className="flex-grow grid grid-cols-5 gap-x-4 gap-y-3 overflow-y-auto sm:h-1 px-3">
-                <div className={gs.marketItem}>
-                  <div className={gs.item}>
-                    <img src="svg/iconFireCharm.svg" />
-                    <span className={gs.magicLevel}>+1</span>
-                    <span className={gs.tier}>III</span>
-                  </div>
-                  <div className={gs.price}>
-                    <span>100</span>
-                    <img src="svg/iconGold.svg" />
-                  </div>
-                </div>
-
-                <div className={gs.marketItem}>
-                  <div className={gs.item}>
-                    <img src="svg/iconPaddedRobe.svg" />
-                    <span className={gs.magicLevel}>+1</span>
-                    <span className={gs.tier}>IV</span>
-                  </div>
-                  <div className={gs.price}>
-                    <span>110</span>
-                    <img src="svg/iconGold.svg" />
-                  </div>
-                </div>
-
-                <div className={gs.marketItem}>
-                  <div className={gs.item}>
-                    <img src="svg/iconPaddedRobe.svg" />
-                    <span className={gs.magicLevel}>+1</span>
-                    <span className={gs.tier}>V</span>
-                  </div>
-                  <div className={gs.price}>
-                    <span>120</span>
-                    <img src="svg/iconGold.svg" />
-                  </div>
-                </div>
-
+              <div className="flex-grow grid grid-cols-5 gap-x-4 gap-y-3 overflow-y-auto sm:h-1 px-3 place-content-start">
+                {marketItems.map((x, idx) => {
+                  return <MarketItemSlot key={idx} marketItem={x} />
+                })}
               </div>
               <div className="flex flex-row items-center justify-end">
                 <div className="px-4">
-                  <div className={gs.marketItem}>
-                    <div className={gs.item}>
-                      <img src="svg/iconPaddedRobe.svg" />
-                      <span className={gs.magicLevel}>+2</span>
-                      <span className={gs.tier}>IV</span>
-                    </div>
-                    <div className={gs.price}>
-                      <span>110</span>
-                      <img src="svg/iconGold.svg" />
-                    </div>
-                  </div>
+                  <MarketItemSlot marketItem={buyItem} />
                 </div>
                 <div className="flex flex-col gap-y-4">
                   <input placeholder="Gold Password" type="password" />
@@ -156,20 +141,18 @@ export default function MarketplaceWindow() {
         <Window.TabPanel>
           <div id="sellItems" className="flex flex-col sm:flex-row pt-4 gap-4 h-96 sm:w-[40rem]">
             <div className="basis-1/5 flex flex-row sm:flex-col gap-5 justify-center sm:justify-start items-center">
-              <div className={`${gs.item} flex justify-center place-items-center`}>
+              <ItemSlot className="flex justify-center place-items-center">
                 <span className="text-2xl">?</span>
-              </div>
-              <div className={gs.item}><img src="svg/iconTrash.svg" /></div>
+              </ItemSlot>
+              <ItemSlot>
+                <img className="absolute inset-0 p-1 mx-auto w-full h-full" src="svg/iconTrash.svg" />
+              </ItemSlot>
             </div>
             <div className="basis-4/5 flex flex-col gap-y-4">
               <div className="flex-grow border p-4">No items found.</div>
               <div className="flex flex-row items-center justify-end">
                 <div className="px-4">
-                  <div className={gs.item}>
-                    <img src="svg/iconPaddedRobe.svg" />
-                    <span className={gs.magicLevel}>+2</span>
-                    <span className={gs.tier}>IV</span>
-                  </div>
+                  <ItemSlot item={sellItem} />
                 </div>
                 <div className="flex flex-col gap-4">
                   <label className="flex flex-row">
@@ -192,19 +175,15 @@ export default function MarketplaceWindow() {
         <Window.TabPanel>
           <div id="transfer" className="flex flex-col sm:flex-row pt-4 gap-4 h-96 sm:w-[40rem]">
             <div className="basis-1/5 flex flex-row sm:flex-col gap-5 justify-center sm:justify-start items-center">
-              <div className={`${gs.item} flex justify-center place-items-center`}>
+              <ItemSlot className="flex justify-center place-items-center">
                 <span className="text-2xl">?</span>
-              </div>
+              </ItemSlot>
             </div>
             <div className="basis-4/5 flex flex-col gap-y-4">
               <div className="flex-grow border p-4">No characters found.</div>
               <div className="flex flex-row items-center justify-end">
                 <div className="px-4">
-                  <div className={gs.item}>
-                    <img src="svg/iconPaddedRobe.svg" />
-                    <span className={gs.magicLevel}>+2</span>
-                    <span className={gs.tier}>IV</span>
-                  </div>
+                  <ItemSlot item={transferItem} />
                 </div>
                 <div>
                   <button className="bg-stone-900 w-full py-1 px-10 inline mx-auto border">Transfer Item</button>

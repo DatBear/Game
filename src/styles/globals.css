@@ -10,3 +10,13 @@
 body {
   @apply bg-black text-white;
 }
+
+/* utility classes */
+.text-2xs {
+  font-size: .6rem;
+  line-height: .8rem;
+}
+
+.item{
+  text-shadow: black -1px -1px 1px, black 1px -1px 1px, black -1px 1px 1px, black 1px 1px 1px, black -1px 0 0px;
+}
