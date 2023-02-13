@@ -1,14 +1,7 @@
-import Item, { ItemSubType } from "@/models/Item";
+import Item, { ItemSubType, ItemType } from "@/models/Item";
 import gs from '@/styles/game.module.css'
 import ItemSlot from "./ItemSlot";
 import Window from "./Window";
-
-let equipmentItems: Item[] = [
-  { subType: ItemSubType.Club, stats: Array(1), tier: 3 },
-  { subType: ItemSubType.PaddedRobe, stats: Array(1), tier: 3 },
-  { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
-  { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
-]
 
 let gearItems: Item[] = [
   { subType: ItemSubType.Club, stats: Array(1), tier: 3 },
@@ -17,12 +10,20 @@ let gearItems: Item[] = [
   { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
 ]
 
-let gear: { item: Item, slot: string }[] = [
-  { slot: 'Weapon', item: gearItems[0] },
-  { slot: 'Armor', item: gearItems[1] },
-  { slot: 'Charm', item: gearItems[2] },
-  { slot: 'Acc. Charm', item: gearItems[3] },
+let gear: { item: Item, slot: string, acceptType: ItemType }[] = [
+  { slot: 'Weapon', item: gearItems[0], acceptType: ItemType.Weapon },
+  { slot: 'Armor', item: gearItems[1], acceptType: ItemType.Armor },
+  { slot: 'Charm', item: gearItems[2], acceptType: ItemType.Charm },
+  { slot: 'Acc. Charm', item: gearItems[3], acceptType: ItemType.Charm },
 ];
+
+let equipmentItems: Item[] = [
+  { subType: ItemSubType.Club, stats: Array(1), tier: 4 },
+  { subType: ItemSubType.Club, stats: Array(1), tier: 3 },
+  { subType: ItemSubType.PaddedRobe, stats: Array(1), tier: 3 },
+  { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
+  { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
+]
 
 let items: Item[] = [
   { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 12 },
@@ -42,7 +43,7 @@ function InventoryWindow() {
           {gear.map((x, idx) => {
             return <div key={idx} className="flex flex-col items-center">
               <span className="block text-center">{x.slot}</span>
-              <ItemSlot item={x.item} />
+              <ItemSlot item={x.item} acceptTypes={[x.acceptType]} acceptMaxTier={3} />
             </div>
           })}
         </div>

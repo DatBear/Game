@@ -37,7 +37,7 @@ let Transmuting: Skill = {
 let Fishing: Skill = {
   name: 'Fishing',
   directions: 'Drop a fishing rod onto the box below to use it, or leave it blank to use a free loaner fishing rod.',
-  startAction: 'Transmute',
+  startAction: 'Fish',
   itemsRequired: 1,
   inputsRequired: ['Level']
 }

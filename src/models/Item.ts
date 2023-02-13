@@ -61,6 +61,12 @@ let itemTypes: Record<ItemType, ItemSubType[]> = {
   [ItemType.Object]: [ItemSubType.FishingRod, ItemSubType.Essence]
 }
 
+let getItemType = (subType: ItemSubType): ItemType => {
+  //todo make this not bad... it actually returns a string......
+  //return [...Object.entries(itemTypes)][0][0] as unknown as ItemType;
+  return parseInt([...Object.entries(itemTypes)].find((x) => x[1].find(x => x == subType) !== undefined)![0]) as ItemType;
+};
+
 let itemIcons: Record<ItemSubType, string> = {
   [ItemSubType.Sword]: "iconSword",
   [ItemSubType.Club]: "iconClub",
@@ -114,5 +120,5 @@ let itemTiers: Record<number, string> = {
   [14]: 'XIV'
 }
 
-export { itemTypes, itemIcons, itemTiers }
+export { itemTypes, getItemType, itemIcons, itemTiers }
 export default Item;

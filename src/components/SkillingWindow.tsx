@@ -16,7 +16,7 @@ export default function SkillingWindow({ skill }: SkillingWindowProps) {
       <div className="flex flex-row gap-x-3 items-center">
         {[...Array(skill.itemsRequired)].map((_, idx) => <ItemSlot key={idx} />)}
       </div>
-      {minSkillUpTier !== '' && <span>Minimum To Skill Up: Tier {minSkillUpTier}</span>}
+      {minSkillUpTier !== '' && <span>Minimum To Skill Up: {minSkillUpTier}</span>}
       {(skill.inputsRequired?.length ?? 0) > 0 && skill.inputsRequired?.map(x => {
         return <label key={x} className="flex flex-row gap-x-2 items-center">
           <span>{x}:</span>
