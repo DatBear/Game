@@ -20,14 +20,12 @@ type DragObject = {
   tier: number;
 };
 
-export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, noDrag, noDrop, children, className, ...props }: ItemProps) {
+export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, children, className, ...props }: ItemProps) {
   let classes = className;
   const ref = useRef(null);
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: type,
     hover(draggedItem) {
-      //console.log('hover', item, 'dragging', draggedItem);
-      classes = clsx(classes, 'bg-red-800');
     }, canDrop(draggedItem, monitor) {
       let canDrop = true;
       let dragObject = draggedItem as DragObject;
@@ -60,10 +58,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: type,
-    // data of the item to be available to the drop methods
     item: { subType: item?.subType, tier: item?.tier },
-
-    // method to collect additional data for drop handling like whether is currently being dragged
     collect: (monitor) => {
       return {
         isDragging: monitor.isDragging()
@@ -77,6 +72,8 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     drop(ref);
   }
 
+
+
   let sizeClass = small ? "w-6 h-6" : "w-16 h-16";
   let dragClass = isDragging ? '!border-green-500/25' : '';
   let dropClass = '';
@@ -86,7 +83,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     }
   }
 
-
+  let previewClass = clsx("!w-14 !h-14", isDragging ? 'inline' : 'hidden')
   return (<div ref={ref} className={clsx("item", className, sizeClass, dragClass, dropClass, "flex-none border relative bg-stone-900")} {...props}>
     <>
       {children}
@@ -99,6 +96,5 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
         {item.quantity && <span className={clsx(small && "text-2xs", "absolute bottom-0 left-0 px-px")}>{item.quantity}</span>}
       </>}
     </>
-
   </div>)
 }

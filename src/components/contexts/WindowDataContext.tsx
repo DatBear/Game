@@ -1,14 +1,17 @@
-import { createContext, useContext } from "react";
+import { createContext, MutableRefObject, RefObject, useContext } from "react";
+import { XYCoord } from "react-dnd";
 
 interface StateDefinition {
   tabbed: boolean;
   closeWindow: () => void;
+  windowRef: RefObject<HTMLDivElement>,
+  onDragEnd: (coords: XYCoord | null) => void;
 }
 
 const WindowDataContext = createContext<StateDefinition | null>(null);
 
-export default function WindowDataContextProvider({ tabbed, closeWindow, children }: StateDefinition & React.PropsWithChildren) {
-  return (<WindowDataContext.Provider value={{ tabbed, closeWindow }}>
+export default function WindowDataContextProvider({ tabbed, closeWindow, windowRef, onDragEnd, children }: StateDefinition & React.PropsWithChildren) {
+  return (<WindowDataContext.Provider value={{ tabbed, closeWindow, windowRef, onDragEnd }}>
     {children}
   </WindowDataContext.Provider>);
 }
