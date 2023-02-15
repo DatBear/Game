@@ -24,7 +24,7 @@ export default function SkillingWindow({ skill }: SkillingWindowProps) {
         </label>
       })}
       <div>
-        <button className="bg-stone-900 px-5 py-1 border">{skill.startAction}</button>
+        <button>{skill.startAction}</button>
       </div>
     </div>
   </Window >

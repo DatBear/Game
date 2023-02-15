@@ -12,6 +12,7 @@ type ItemProps = {
   acceptTypes?: ItemType[];
   acceptSubTypes?: ItemSubType[];
   acceptMaxTier?: number;
+  noDrag?: boolean;
   //todo add a source enum and acceptSource or something to give more drag+drop context
 } & React.PropsWithChildren & Partial<React.HTMLAttributes<HTMLDivElement>>;
 
@@ -20,13 +21,12 @@ type DragObject = {
   tier: number;
 };
 
-export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, children, className, ...props }: ItemProps) {
+export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, noDrag, children, className, ...props }: ItemProps) {
   let classes = className;
   const ref = useRef(null);
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: type,
-    hover(draggedItem) {
-    }, canDrop(draggedItem, monitor) {
+    canDrop(draggedItem, monitor) {
       let canDrop = true;
       let dragObject = draggedItem as DragObject;
       if (canDrop && (acceptTypes?.length ?? 0) > 0) {
@@ -66,7 +66,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     },
   }));
 
-  if (item) {
+  if (item && !(noDrag ?? false)) {
     drag(drop(ref));
   } else {
     drop(ref);
@@ -88,10 +88,10 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     <>
       {children}
       {item && !isDragging && <>
-        <img src={`svg/${itemIcons[item.subType]}.svg`} className="absolute inset-0 p-1 mx-auto w-full h-full" />
+        <img src={`svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`} className="absolute inset-0 p-1 mx-auto w-full h-full" />
         {!small && <>
-          <span className="absolute top-0 left-0 px-1">+{item.stats.length}</span>
-          <span className="absolute top-0 right-0 px-1">{itemTiers[item.tier]}</span>
+          {item.stats.length > 0 && <span className="absolute top-0 left-0 px-1">+{item.stats.length}</span>}
+          {item.tier > 0 && <span className="absolute top-0 right-0 px-1">{itemTiers[item.tier]}</span>}
         </>}
         {item.quantity && <span className={clsx(small && "text-2xs", "absolute bottom-0 left-0 px-px")}>{item.quantity}</span>}
       </>}

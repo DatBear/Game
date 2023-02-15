@@ -49,6 +49,10 @@
   @apply accent-blue-400;
 }
 
+.gameContainer button {
+  @apply bg-stone-900 py-1 px-10 border;
+}
+
 
 /* items */
 /* .item {

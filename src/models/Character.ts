@@ -1,3 +1,6 @@
+import EquippedItem, { EquippedItemSlot } from "./EquippedItem";
+import Item, { defaultEquippedItems, ItemSubType } from "./Item";
+
 export enum CharacterClass {
   Fighter = "Fighter",
   Barbarian = "Barbarian",
@@ -13,12 +16,20 @@ export enum CharacterClass {
   Alchemist = "Alchemist"
 }
 
+export enum Gender {
+  Male = "Male",
+  Female = "Female"
+}
 
 type Character = {
+  id: number;
   name: string;
   level: number;
   guild?: string;
   class: CharacterClass;
+  gender: Gender;
+  equippedItems: EquippedItem[];
+  inventoryItems: Item[];
 }
 
 export default Character;

@@ -16,7 +16,7 @@ export default function ShrineWindow() {
         <div className="text-center">Drag and drop the Item you wish to sacrifice to the box below.</div>
         <ItemSlot />
         <div>
-          <button className="bg-stone-900 px-3 py-1 border w-full">Sacrifice Item</button>
+          <button>Sacrifice Item</button>
         </div>
       </div>
     </div>

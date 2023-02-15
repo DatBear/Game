@@ -57,7 +57,7 @@ export default function GroupsWindow() {
               </label>
             </div>
             <div>
-              <button className="bg-stone-900 px-3 py-1 mx-auto border">Join Selected Group</button>
+              <button>Join Selected Group</button>
             </div>
           </div>
         </div>
@@ -79,7 +79,7 @@ export default function GroupsWindow() {
           <hr className="py-3" />
           <div className="flex place-content-center">
             <div>
-              <button className="bg-stone-900 px-3 py-1 mx-auto border">Create Group</button>
+              <button>Create Group</button>
             </div>
           </div>
         </div>
@@ -101,7 +101,7 @@ export default function GroupsWindow() {
                 <div className="w-12"><input defaultValue={5} /></div>
               </label>
               <div className="flex-grow w-full">
-                <button className="bg-stone-900 px-3 py-1 border w-full">Find players</button>
+                <button>Find players</button>
               </div>
             </div>
           </div>

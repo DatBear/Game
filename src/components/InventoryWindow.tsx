@@ -1,21 +1,22 @@
-import Item, { ItemSubType, ItemType } from "@/models/Item";
-import gs from '@/styles/game.module.css'
+import { EquippedItemSlot } from "@/models/EquippedItem";
+import Item, { classArmors, classCharms, classWeapons, ItemSubType, ItemType } from "@/models/Item";
+import { useUser } from "./contexts/UserContext";
 import ItemSlot from "./ItemSlot";
 import Window from "./Window";
 
-let gearItems: Item[] = [
-  { subType: ItemSubType.Club, stats: Array(1), tier: 3 },
-  { subType: ItemSubType.Robe, stats: Array(1), tier: 3 },
-  { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
-  { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
-]
+// let gearItems: Item[] = [
+//   { subType: ItemSubType.Club, stats: Array(1), tier: 3 },
+//   { subType: ItemSubType.Robe, stats: Array(1), tier: 3 },
+//   { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
+//   { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
+// ]
 
-let gear: { item: Item, slot: string, acceptType: ItemType }[] = [
-  { slot: 'Weapon', item: gearItems[0], acceptType: ItemType.Weapon },
-  { slot: 'Armor', item: gearItems[1], acceptType: ItemType.Armor },
-  { slot: 'Charm', item: gearItems[2], acceptType: ItemType.Charm },
-  { slot: 'Acc. Charm', item: gearItems[3], acceptType: ItemType.Charm },
-];
+// let gear: { item: Item, slot: string, acceptType: ItemType }[] = [
+//   { slot: 'Weapon', item: gearItems[0], acceptType: ItemType.Weapon },
+//   { slot: 'Armor', item: gearItems[1], acceptType: ItemType.Armor },
+//   { slot: 'Charm', item: gearItems[2], acceptType: ItemType.Charm },
+//   { slot: 'Acc. Charm', item: gearItems[3], acceptType: ItemType.Charm },
+// ];
 
 let equipmentItems: Item[] = [
   { subType: ItemSubType.Club, stats: Array(1), tier: 4 },
@@ -35,15 +36,26 @@ let equipmentSlots = 10;
 let itemSlots = 16;
 
 function InventoryWindow() {
+  const { user } = useUser();
+  let char = user.selectedCharacter!;
+  let equippedSlots = Object.values(EquippedItemSlot);
+  let equippableGear: Record<EquippedItemSlot, ItemSubType[]> = {
+    [EquippedItemSlot.Weapon]: [...classWeapons[char.class]],
+    [EquippedItemSlot.Armor]: [...classArmors[char.class]],
+    [EquippedItemSlot.Charm]: [...classCharms[char.class]],
+    [EquippedItemSlot.AccCharm]: [...classCharms[char.class]]
+  }
+
   return (<>
     <Window>
       <Window.Title>Inventory</Window.Title>
       <div>
         <div className="flex flex-row gap-7">
-          {gear.map((x, idx) => {
+          {equippedSlots.map((s, idx) => {
+            let slot = char?.equippedItems.find(x => x.slot == s);
             return <div key={idx} className="flex flex-col items-center">
-              <span className="block text-center">{x.slot}</span>
-              <ItemSlot item={x.item} acceptTypes={[x.acceptType]} acceptMaxTier={3} />
+              <span className="block text-center">{s}</span>
+              <ItemSlot item={slot?.item} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + char.level / 5)} />
             </div>
           })}
         </div>

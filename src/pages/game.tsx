@@ -1,27 +1,20 @@
-import GroupsWindow from "@/components/GroupsWindow";
-import InventoryWindow from '@/components/InventoryWindow'
-import MarketplaceWindow from "@/components/MarketplaceWindow";
-import ShrineWindow from "@/components/ShrineWindow";
-import SkillingWindow from "@/components/SkillingWindow";
-import Window from '@/components/Window';
 import gs from '@/styles/game.module.css'
-import { useEffect } from 'react';
-import { Cooking, Fishing, Glyphing, Suffusencing, Transmuting } from '@/models/Skill';
-import { DndProvider } from "react-dnd";
+import UIContextProvider from "@/components/contexts/UIContext";
+import UserContextProvider from "@/components/contexts/UserContext";
+import CharacterSelect from "@/components/scenes/CharacterSelect";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-let skills = [Cooking, Transmuting, Suffusencing, Fishing, Glyphing];
+import { DndProvider } from "react-dnd";
+import Town from "@/components/scenes/Town";
 
 export default function Game() {
-  return (<div className={gs.gameContainer}>
-    <DndProvider backend={HTML5Backend}>
-      <div className="flex flex-row flex-wrap gap-3 m-5">
-        <InventoryWindow />
-        <GroupsWindow />
-        <ShrineWindow />
-        <MarketplaceWindow />
-        {skills.map(x => <SkillingWindow key={x.name} skill={x} />)}
-      </div>
-    </DndProvider>
-  </div>);
-}
+  return (<DndProvider backend={HTML5Backend}>
+    <div className={gs.gameContainer}>
+      <UserContextProvider>
+        <CharacterSelect />
+        <UIContextProvider>
+          <Town />
+        </UIContextProvider>
+      </UserContextProvider>
+    </div>
+  </DndProvider>);
+};

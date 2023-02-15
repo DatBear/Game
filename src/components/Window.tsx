@@ -5,16 +5,17 @@ import { ButtonHTMLAttributes, createContext, MutableRefObject, ReactNode, useCa
 import WindowDataContextProvider, { useWindowData } from "./contexts/WindowDataContext";
 import { useDrag, useDragDropManager, useDragLayer, useDrop, XYCoord } from "react-dnd";
 
-type WindowProps = React.PropsWithChildren & {
+type WindowProps = {
   className?: string;
   tabbed?: boolean;
-};
+} & React.PropsWithChildren
+  & Partial<React.HTMLAttributes<HTMLDivElement>>;
 
 type _Data = ReturnType<typeof useWindowData>;
 
 let type = "Window";
 
-export default function Window({ children, className, tabbed }: WindowProps) {
+export default function Window({ children, className, tabbed, ...props }: WindowProps) {
   tabbed = tabbed ?? false;
 
   const windowRef = useRef<HTMLDivElement>(null);
@@ -27,7 +28,6 @@ export default function Window({ children, className, tabbed }: WindowProps) {
   }, [setShow]);
 
   const onDragEnd = (coords: XYCoord | null) => {
-    console.log('window drag ended', coords);
     if (windowRef.current !== null && coords !== null) {
       setCoords(coords);
     }
@@ -41,9 +41,9 @@ export default function Window({ children, className, tabbed }: WindowProps) {
     return tabbed ? <Tab.Group>{children}</Tab.Group> : children;
   })()
 
-  let positionStyle = coords ? { left: coords.x - 20, top: coords.y - 20 } : {}
+  let positionStyle = coords ? { ...props.style, left: coords.x - 20, top: coords.y - 20 } : props.style
   return <WindowDataContextProvider {...windowData}>
-    {show && <div ref={windowRef} style={positionStyle} className={clsx(gs.window, className, "bg-stone-800 p-3 text-red-50 border w-fit h-min absolute")}>
+    {show && <div ref={windowRef} style={positionStyle} className={clsx(gs.window, className, "bg-stone-800 p-3 text-red-50 border w-fit h-min")}>
       {tabbedChildren}
     </div>}
   </WindowDataContextProvider>
@@ -90,31 +90,20 @@ Window.Title = function ({ closeButton, dragHandle, children, className, ...prop
 
 let CloseButton = function () {
   const { closeWindow } = useWindowData('CloseButton');
-  return (<button onClick={() => closeWindow()} className="flex-none w-4 h-4"><img src="svg/iconClose.svg" /></button>);
+  return (<div onClick={() => closeWindow()} className="flex-none w-4 h-4"><img src="svg/iconClose.svg" /></div>);
 };
 
 let DragHandle = function () {
   const dragRef = useRef(null);
   const { windowRef, onDragEnd } = useWindowData('DragHandle');
 
-  const [{ isDragging }, drag, preview] = useDrag(() => ({
+  const [{ }, drag, preview] = useDrag(() => ({
     type: type,
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging()
-    }),
+    collect: (monitor) => ({}),
     end(draggedItem, monitor) {
       onDragEnd(monitor.getClientOffset());
     },
   }));
-
-  // const [{ }, drop] = useDrop({
-  //   accept: '*',
-  //   canDrop(item, monitor) {
-  //     return true;
-  //   },
-  //   collect: (monitor) => { }
-
-  // })
 
   preview(windowRef);
   drag(dragRef);

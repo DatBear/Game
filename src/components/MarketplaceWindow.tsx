@@ -117,7 +117,7 @@ export default function MarketplaceWindow() {
                   <input type="checkbox" defaultChecked /> Only show items I can use
                 </label>
               </div>
-              <button className="bg-stone-900 px-10 py-1 inline mx-auto border">Search</button>
+              <button className="mx-auto">Search</button>
             </form>
 
             <div className="flex flex-col flex-grow text-sm gap-y-4 basis-full sm:basis-8/12 w-min">
@@ -132,7 +132,7 @@ export default function MarketplaceWindow() {
                 </div>
                 <div className="flex flex-col gap-y-4">
                   <input placeholder="Gold Password" type="password" />
-                  <button className="bg-stone-900 px-10 py-1 inline w-full mx-auto border">Buy this item</button>
+                  <button>Buy this item</button>
                 </div>
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function MarketplaceWindow() {
                 </div>
                 <div className="flex flex-col gap-y-4">
                   <input placeholder="Gold Password" type="password" />
-                  <button className="bg-stone-900 w-full py-1 inline mx-auto border">Sell this item</button>
+                  <button>Sell this item</button>
                 </div>
               </div>
             </div>
@@ -186,7 +186,7 @@ export default function MarketplaceWindow() {
                   <ItemSlot item={transferItem} />
                 </div>
                 <div>
-                  <button className="bg-stone-900 w-full py-1 px-10 inline mx-auto border">Transfer Item</button>
+                  <button >Transfer Item</button>
                 </div>
               </div>
             </div>
