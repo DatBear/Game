@@ -2,14 +2,19 @@ import gs from "@/styles/game.module.css";
 import Skill from "@/models/Skill";
 import Window from "./Window";
 import ItemSlot from "./ItemSlot";
+import { UIWindow, useWindow } from "./contexts/UIContext";
+import { useCallback } from "react";
 
 type SkillingWindowProps = {
   skill: Skill;
+  window: UIWindow;
 };
 
-export default function SkillingWindow({ skill }: SkillingWindowProps) {
+export default function SkillingWindow({ skill, window }: SkillingWindowProps) {
   let minSkillUpTier = skill.name !== 'Fishing' ? 'Tier I' : '';//todo implement
-  return <Window className="!w-96">
+  const { closeWindow } = useWindow(window);
+
+  return <Window className="!w-96" close={() => closeWindow()}>
     <Window.Title>{skill.name}</Window.Title>
     <div className="flex flex-col gap-y-3 items-center">
       <div className="text-center">{skill.directions}</div>
@@ -27,5 +32,5 @@ export default function SkillingWindow({ skill }: SkillingWindowProps) {
         <button>{skill.startAction}</button>
       </div>
     </div>
-  </Window >
+  </Window>
 };

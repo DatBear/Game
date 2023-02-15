@@ -1,17 +1,19 @@
 import Character, { CharacterClass } from "@/models/Character";
 import Group from "@/models/Group";
+import { useCallback } from "react";
+import { useWindow, UIWindow } from "./contexts/UIContext";
 import Window from "./Window";
 
-let chars: Character[] = [
+let chars: Partial<Character>[] = [
   { name: 'randPlayer', level: 1, class: CharacterClass.Warlock, guild: 'Slashers of the Night' },
   { name: 'anotherPlayer', level: 50, class: CharacterClass.Paladin, guild: 'Mount Olympus' },
   { name: 'PlayerThree', level: 1, class: CharacterClass.Magician, guild: 'Almost Decent' },
 ];
 
 let groups: Group[] = [
-  { leader: chars[0], characters: [chars[0]], id: '1' },
-  { leader: chars[1], characters: [chars[1]], id: '2' },
-  { leader: chars[2], characters: [chars[2]], id: '3' },
+  { leader: chars[0] as Character, characters: [chars[0] as Character], id: '1' },
+  { leader: chars[1] as Character, characters: [chars[1] as Character], id: '2' },
+  { leader: chars[2] as Character, characters: [chars[2] as Character], id: '3' },
 ];
 
 function guildName(name?: string) {
@@ -33,8 +35,12 @@ function CharListing({ char }: { char: Character }) {
   </div>)
 }
 
+
+
 export default function GroupsWindow() {
-  return <Window tabbed>
+  const { closeWindow } = useWindow(UIWindow.Groups);
+
+  return <Window tabbed close={() => closeWindow()}>
     <Window.Title>
       <Window.TabList>
         <Window.Tab>Group List</Window.Tab>
@@ -87,7 +93,7 @@ export default function GroupsWindow() {
       <Window.TabPanel>
         <div id="findPlayers" className="flex flex-col text-sm p-1 h-48">
           <div className="flex-grow flex flex-col w-full p-1 gap-y-1 overflow-y-auto">
-            {chars.length > 0 && chars.map(x => <CharListing key={x.name} char={x} />)}
+            {chars.length > 0 && chars.map(x => <CharListing key={x.name} char={x as Character} />)}
           </div>
           <hr className="py-3" />
           <div className="flex flex-row">

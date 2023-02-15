@@ -42,3 +42,10 @@ export function useUser() {
   let context = useContext(UserContext);
   return context!;
 }
+
+export function useCharacter() {
+  const { user } = useUser();
+  return {
+    character: user.selectedCharacter!
+  };
+}

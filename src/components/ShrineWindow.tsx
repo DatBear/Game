@@ -1,10 +1,14 @@
 import gs from '@/styles/game.module.css'
+import { useCallback } from "react";
+import { useWindow, UIWindow } from "./contexts/UIContext";
 import ItemSlot from "./ItemSlot";
 import ProgressBar from "./ProgressBar";
 import Window from "./Window";
 
 export default function ShrineWindow() {
-  return <Window className="!w-80">
+  const { closeWindow } = useWindow(UIWindow.Shrine);
+
+  return <Window className="!w-80" close={() => closeWindow()}>
     <Window.Title>Shrine</Window.Title>
     <div className="flex flex-col h-full relative">
       <div className="flex flex-col gap-y-3">

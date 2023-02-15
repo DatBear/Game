@@ -1,6 +1,8 @@
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item, { classArmors, classCharms, classWeapons, ItemSubType, ItemType } from "@/models/Item";
-import { useUser } from "./contexts/UserContext";
+import { useCallback } from "react";
+import { UIWindow, useWindow } from "./contexts/UIContext";
+import { useCharacter, useUser } from "./contexts/UserContext";
 import ItemSlot from "./ItemSlot";
 import Window from "./Window";
 
@@ -36,26 +38,27 @@ let equipmentSlots = 10;
 let itemSlots = 16;
 
 function InventoryWindow() {
-  const { user } = useUser();
-  let char = user.selectedCharacter!;
+  const { character } = useCharacter();
+  const { closeWindow } = useWindow(UIWindow.Inventory);
+
   let equippedSlots = Object.values(EquippedItemSlot);
   let equippableGear: Record<EquippedItemSlot, ItemSubType[]> = {
-    [EquippedItemSlot.Weapon]: [...classWeapons[char.class]],
-    [EquippedItemSlot.Armor]: [...classArmors[char.class]],
-    [EquippedItemSlot.Charm]: [...classCharms[char.class]],
-    [EquippedItemSlot.AccCharm]: [...classCharms[char.class]]
+    [EquippedItemSlot.Weapon]: [...classWeapons[character.class]],
+    [EquippedItemSlot.Armor]: [...classArmors[character.class]],
+    [EquippedItemSlot.Charm]: [...classCharms[character.class]],
+    [EquippedItemSlot.AccCharm]: [...classCharms[character.class]]
   }
 
   return (<>
-    <Window>
+    <Window close={() => closeWindow()}>
       <Window.Title>Inventory</Window.Title>
       <div>
         <div className="flex flex-row gap-7">
           {equippedSlots.map((s, idx) => {
-            let slot = char?.equippedItems.find(x => x.slot == s);
+            let slot = character?.equippedItems.find(x => x.slot == s);
             return <div key={idx} className="flex flex-col items-center">
               <span className="block text-center">{s}</span>
-              <ItemSlot item={slot?.item} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + char.level / 5)} />
+              <ItemSlot item={slot?.item} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + character.level / 5)} />
             </div>
           })}
         </div>

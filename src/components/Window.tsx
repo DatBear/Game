@@ -8,6 +8,7 @@ import { useDrag, useDragDropManager, useDragLayer, useDrop, XYCoord } from "rea
 type WindowProps = {
   className?: string;
   tabbed?: boolean;
+  close?: () => void;
 } & React.PropsWithChildren
   & Partial<React.HTMLAttributes<HTMLDivElement>>;
 
@@ -15,7 +16,7 @@ type _Data = ReturnType<typeof useWindowData>;
 
 let type = "Window";
 
-export default function Window({ children, className, tabbed, ...props }: WindowProps) {
+export default function Window({ children, className, tabbed, close, ...props }: WindowProps) {
   tabbed = tabbed ?? false;
 
   const windowRef = useRef<HTMLDivElement>(null);
@@ -24,6 +25,10 @@ export default function Window({ children, className, tabbed, ...props }: Window
   const [show, setShow] = useState(true);
 
   const handleClose = useCallback(() => {
+    if (close) {
+      close();
+      return;
+    }
     setShow(false);
   }, [setShow]);
 
@@ -43,7 +48,7 @@ export default function Window({ children, className, tabbed, ...props }: Window
 
   let positionStyle = coords ? { ...props.style, left: coords.x - 20, top: coords.y - 20 } : props.style
   return <WindowDataContextProvider {...windowData}>
-    {show && <div ref={windowRef} style={positionStyle} className={clsx(gs.window, className, "bg-stone-800 p-3 text-red-50 border w-fit h-min")}>
+    {show && <div ref={windowRef} style={positionStyle} className={clsx(gs.window, className, "bg-stone-800 p-3 text-red-50 border w-fit h-min", "absolute")}>
       {tabbedChildren}
     </div>}
   </WindowDataContextProvider>
@@ -90,7 +95,7 @@ Window.Title = function ({ closeButton, dragHandle, children, className, ...prop
 
 let CloseButton = function () {
   const { closeWindow } = useWindowData('CloseButton');
-  return (<div onClick={() => closeWindow()} className="flex-none w-4 h-4"><img src="svg/iconClose.svg" /></div>);
+  return (<div onClick={() => closeWindow()} className="flex-none w-4 h-4 cursor-pointer"><img src="svg/iconClose.svg" /></div>);
 };
 
 let DragHandle = function () {
@@ -102,11 +107,11 @@ let DragHandle = function () {
     collect: (monitor) => ({}),
     end(draggedItem, monitor) {
       onDragEnd(monitor.getClientOffset());
-    },
+    }
   }));
 
   preview(windowRef);
   drag(dragRef);
 
-  return (<div ref={dragRef} className="flex-none w-4 h-4"><img src="svg/dragHandle.svg" /></div>)
+  return (<div ref={dragRef} className="flex-none w-4 h-4 cursor-grab"><img src="svg/dragHandle.svg" /></div>)
 }
