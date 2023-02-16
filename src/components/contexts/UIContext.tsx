@@ -56,18 +56,21 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
 
   return (<UIContext.Provider value={{ setWindowState, windowStates }}>
     {children}
-    {user.selectedCharacter && <div className="flex flex-row flex-wrap gap-3 p-5">
-      {renderWindow(UIWindow.Inventory, <InventoryWindow />)}
-      {renderWindow(UIWindow.Groups, <GroupsWindow />)}
-      {renderWindow(UIWindow.Shrine, <ShrineWindow />)}
-      {renderWindow(UIWindow.Marketplace, <MarketplaceWindow />)}
-      {renderWindow(UIWindow.Cooking, <SkillingWindow skill={Cooking} window={UIWindow.Cooking} />)}
-      {renderWindow(UIWindow.Fishing, <SkillingWindow skill={Fishing} window={UIWindow.Fishing} />)}
-      {renderWindow(UIWindow.Transmuting, <SkillingWindow skill={Transmuting} window={UIWindow.Transmuting} />)}
-      {renderWindow(UIWindow.Glyphing, <SkillingWindow skill={Glyphing} window={UIWindow.Glyphing} />)}
-      {renderWindow(UIWindow.Suffusencing, <SkillingWindow skill={Suffusencing} window={UIWindow.Suffusencing} />)}
-    </div>}
-
+    {user.selectedCharacter &&
+      <div className="flex flex-row flex-wrap gap-3 p-5 absolute left-0 top-0">
+        <div className="relative">
+          {renderWindow(UIWindow.Inventory, <InventoryWindow />)}
+          {renderWindow(UIWindow.Groups, <GroupsWindow />)}
+          {renderWindow(UIWindow.Shrine, <ShrineWindow />)}
+          {renderWindow(UIWindow.Marketplace, <MarketplaceWindow />)}
+          {renderWindow(UIWindow.Cooking, <SkillingWindow skill={Cooking} window={UIWindow.Cooking} />)}
+          {renderWindow(UIWindow.Fishing, <SkillingWindow skill={Fishing} window={UIWindow.Fishing} />)}
+          {renderWindow(UIWindow.Transmuting, <SkillingWindow skill={Transmuting} window={UIWindow.Transmuting} />)}
+          {renderWindow(UIWindow.Glyphing, <SkillingWindow skill={Glyphing} window={UIWindow.Glyphing} />)}
+          {renderWindow(UIWindow.Suffusencing, <SkillingWindow skill={Suffusencing} window={UIWindow.Suffusencing} />)}
+        </div>
+      </div>
+    }
   </UIContext.Provider>);
 }
 

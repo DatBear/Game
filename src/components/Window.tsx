@@ -56,7 +56,7 @@ export default function Window({ children, className, tabbed, close, ...props }:
 
 Window.TabList = function ({ children }: React.PropsWithChildren) {
   return <div className="flex flex-grow place-content-center px-3">
-    <Tab.List className="flex flex-row gap-x-2">
+    <Tab.List className="flex flex-row gap-x-2 sm:w-max">
       {children}
     </Tab.List>
   </div>

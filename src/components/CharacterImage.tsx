@@ -85,7 +85,6 @@ export default function CharacterImage({ character, className }: CharacterImageP
     if (key === '') return;
     position = position ?? 'absolute';
     let style = getStyles(key, sc);
-    console.log(key, style);
     return <img style={{ ...style, position: position }} src={`svg/${key}.svg`} className="max-w-none" />;
   }
 

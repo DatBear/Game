@@ -1,8 +1,10 @@
+import CharacterImage from "../CharacterImage";
 import { UIWindow, useUI, useWindow } from "../contexts/UIContext";
-import { useUser } from "../contexts/UserContext";
+import { useCharacter, useUser } from "../contexts/UserContext";
 
 export default function Town() {
   const { user } = useUser();
+  const { character } = useCharacter();
   const { setWindowState } = useUI();
 
   const showWindow = (window: UIWindow) => {
@@ -14,6 +16,10 @@ export default function Town() {
       <div className="flex flex-row gap-5">
         <button onClick={_ => showWindow(UIWindow.Inventory)}>Inventory</button>
         <button onClick={_ => showWindow(UIWindow.Groups)}>Groups</button>
+      </div>
+
+      <div>
+        <div className="w-24 h-48"><CharacterImage character={character} /></div>
       </div>
 
       <div className="flex flex-row flex-wrap gap-x-4 gap-y-8 h-full w-full">

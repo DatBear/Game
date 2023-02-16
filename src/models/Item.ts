@@ -1,5 +1,6 @@
 import Character, { CharacterClass } from "./Character";
 import EquippedItem, { EquippedItemSlot } from "./EquippedItem";
+import { v4 as uuid } from 'uuid';
 
 export enum ItemType {
   Weapon,
@@ -49,6 +50,7 @@ export enum ItemSubType {
 }
 
 type Item = {
+  id: string;
   tier: number;
   quantity?: number;
   subType: ItemSubType;
@@ -64,6 +66,8 @@ let itemTypes: Record<ItemType, ItemSubType[]> = {
 }
 
 let getItemType = (subType: ItemSubType): ItemType => {
+  //console.log(Object.entries(ItemType));
+  //return parseInt([...Object.entries(itemTypes)].find((x) => x[1].find(x => x == subType) !== undefined)![0]) as ItemType;
   return Object.entries(ItemType).find(itemType => itemTypes[itemType[1] as ItemType].find(x => x === subType) !== undefined)![1] as ItemType;
 };
 
@@ -169,6 +173,7 @@ let classCharms: Record<CharacterClass, ItemSubType[]> = {
 
 let defaultItem = (subType: ItemSubType) => {
   return {
+    id: uuid(),
     stats: [],
     subType: subType,
     tier: 1,
@@ -180,7 +185,7 @@ let defaultEquippedItems: Record<CharacterClass, EquippedItem[]> = {
   [CharacterClass.Barbarian]: [{ slot: EquippedItemSlot.Weapon, item: defaultItem(ItemSubType.Club) }],
   [CharacterClass.Rogue]: [
     { slot: EquippedItemSlot.Weapon, item: defaultItem(ItemSubType.Dagger) },
-    { slot: EquippedItemSlot.Armor, item: defaultItem(ItemSubType.ChainMail) },//todo remove
+    { slot: EquippedItemSlot.Armor, item: defaultItem(ItemSubType.ScaleArmor) },//todo remove
     { slot: EquippedItemSlot.Charm, item: defaultItem(ItemSubType.Lightning) }
   ],
   [CharacterClass.Magician]: [
@@ -194,7 +199,6 @@ let defaultEquippedItems: Record<CharacterClass, EquippedItem[]> = {
   [CharacterClass.Samurai]: [], [CharacterClass.Paladin]: [], [CharacterClass.Monk]: [], [CharacterClass.Ninja]: [],
   [CharacterClass.Warlock]: [], [CharacterClass.Headhunter]: [], [CharacterClass.Alchemist]: []
 }
-
 
 export { itemTypes, getItemType, itemIcons, itemTiers, classWeapons, classArmors, classCharms, defaultEquippedItems }
 export default Item;

@@ -1,7 +1,9 @@
-import Item, { itemIcons, itemTiers, itemTypes, ItemSubType, ItemType, getItemType } from "@/models/Item";
+import { EquippedItemSlot } from "@/models/EquippedItem";
+import Item, { itemIcons, itemTiers, itemTypes, ItemSubType, ItemType, getItemType, canEquipItem } from "@/models/Item";
 import clsx from "clsx";
 import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
+import { useCharacter } from "./contexts/UserContext";
 
 const type = "Item";
 
@@ -9,6 +11,7 @@ const type = "Item";
 type ItemProps = {
   item?: Item;
   small?: boolean;
+  slot?: EquippedItemSlot;
   acceptTypes?: ItemType[];
   acceptSubTypes?: ItemSubType[];
   acceptMaxTier?: number;
@@ -17,48 +20,60 @@ type ItemProps = {
 } & React.PropsWithChildren & Partial<React.HTMLAttributes<HTMLDivElement>>;
 
 type DragObject = {
-  subType: ItemSubType;
-  tier: number;
+  item: Item;
+  slot?: EquippedItemSlot;
 };
 
-export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, noDrag, children, className, ...props }: ItemProps) {
-  let classes = className;
+export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, slot, noDrag, children, className, ...props }: ItemProps) {
   const ref = useRef(null);
+  const { character, hasSelectedCharacter, canEquipItem, equipItem, canUnequipItem, unequipItem } = useCharacter();
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: type,
-    canDrop(draggedItem, monitor) {
-      let canDrop = true;
-      let dragObject = draggedItem as DragObject;
+    canDrop(dragging, monitor) {
+      const { item: draggedItem, slot: draggedSlot } = dragging as DragObject;
+      if (slot != null && item != null && draggedSlot == null) {
+        return canEquipItem(draggedItem, slot!);
+      }
+      if (slot == null && draggedSlot != null && draggedItem != null) {
+        return canUnequipItem();
+      }
+
+      let canDrop = draggedItem != null;
       if (canDrop && (acceptTypes?.length ?? 0) > 0) {
-        let draggedType = getItemType(dragObject.subType);
+        let draggedType = getItemType(draggedItem.subType);
         let canDropType = acceptTypes!.find(x => x === draggedType) !== undefined;
-        //console.log('candrop', canDropType, 'dragType', draggedType, 'accepted', acceptTypes, typeof draggedType);
         canDrop &&= canDropType;
       }
       if (canDrop && (acceptSubTypes?.length ?? 0) > 0) {
-        let canDropSubType = acceptSubTypes!.find(x => x == dragObject.subType) !== undefined;
-        //console.log('candrop', canDropSubType, 'dragSubType', dragObject.subType);
+        let canDropSubType = acceptSubTypes!.find(x => x == draggedItem.subType) !== undefined;
         canDrop &&= canDropSubType;
       }
       if (canDrop && (acceptMaxTier ?? -1) >= 0) {
-        let canDropTier = acceptMaxTier! >= dragObject.tier;
-        //console.log('candrop', canDropTier, 'dragTier', dragObject.tier, 'max tier', acceptMaxTier);
+        let canDropTier = acceptMaxTier! >= draggedItem.tier;
         canDrop &&= canDropTier;
       }
-      //console.log('canDrop', canDrop, draggedItem);
       return canDrop;
+    },
+    drop(dragging, monitor) {
+      const { item: draggedItem, slot: draggedSlot } = dragging as DragObject;
+      if (slot != null && draggedSlot == null && draggedItem != null) {
+        equipItem(draggedItem, slot);
+      }
+      if (slot == null && draggedSlot != null && draggedItem != null) {
+        unequipItem(draggedSlot);
+      }
     },
     collect(monitor) {
       return {
         canDrop: monitor.canDrop(),
-        isOver: monitor.isOver()
+        isOver: monitor.isOver() && (monitor.getItem() as DragObject)?.item?.id != item?.id,
       }
     },
   });
 
   const [{ isDragging }, drag] = useDrag(() => ({
     type: type,
-    item: { subType: item?.subType, tier: item?.tier },
+    item: { item, slot },
     collect: (monitor) => {
       return {
         isDragging: monitor.isDragging()

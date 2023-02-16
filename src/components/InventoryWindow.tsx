@@ -1,37 +1,16 @@
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item, { classArmors, classCharms, classWeapons, ItemSubType, ItemType } from "@/models/Item";
 import { useCallback } from "react";
+import { v4 as uuid } from "uuid";
 import { UIWindow, useWindow } from "./contexts/UIContext";
 import { useCharacter, useUser } from "./contexts/UserContext";
 import ItemSlot from "./ItemSlot";
 import Window from "./Window";
 
-// let gearItems: Item[] = [
-//   { subType: ItemSubType.Club, stats: Array(1), tier: 3 },
-//   { subType: ItemSubType.Robe, stats: Array(1), tier: 3 },
-//   { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
-//   { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
-// ]
-
-// let gear: { item: Item, slot: string, acceptType: ItemType }[] = [
-//   { slot: 'Weapon', item: gearItems[0], acceptType: ItemType.Weapon },
-//   { slot: 'Armor', item: gearItems[1], acceptType: ItemType.Armor },
-//   { slot: 'Charm', item: gearItems[2], acceptType: ItemType.Charm },
-//   { slot: 'Acc. Charm', item: gearItems[3], acceptType: ItemType.Charm },
-// ];
-
-let equipmentItems: Item[] = [
-  { subType: ItemSubType.Club, stats: Array(1), tier: 4 },
-  { subType: ItemSubType.Club, stats: Array(1), tier: 3 },
-  { subType: ItemSubType.PaddedRobe, stats: Array(1), tier: 3 },
-  { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
-  { subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
-]
-
 let items: Item[] = [
-  { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 12 },
-  { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 1 },
-  { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 20 },
+  { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 12 },
+  { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 1 },
+  { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 20 },
 ]
 
 let equipmentSlots = 10;
@@ -57,17 +36,17 @@ function InventoryWindow() {
           {equippedSlots.map((s, idx) => {
             let slot = character?.equippedItems.find(x => x.slot == s);
             return <div key={idx} className="flex flex-col items-center">
-              <span className="block text-center">{s}</span>
-              <ItemSlot item={slot?.item} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + character.level / 5)} />
+              <span className="block text-center w-max">{s}</span>
+              <ItemSlot item={slot?.item} slot={s} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + character.level / 5)} />
             </div>
           })}
         </div>
       </div>
       <div>
-        <span>Equipment ({equipmentItems.length}/{equipmentSlots})</span>
+        <span>Equipment ({character.inventoryItems.length}/{equipmentSlots})</span>
         <div className="grid grid-cols-5 gap-x-2 gap-y-3">
-          {equipmentItems.concat([...Array(equipmentSlots - equipmentItems.length)]).map((x, idx) => {
-            return <ItemSlot key={idx} item={x} />
+          {character.inventoryItems.concat([...Array(equipmentSlots - character.inventoryItems.length)]).map((x, idx) => {
+            return <ItemSlot key={x?.id ?? idx} item={x} />
           })}
         </div>
       </div>

@@ -7,31 +7,6 @@
   pointer-events: none;
 }
 
-/* .window {
-  @apply bg-stone-800 p-4 text-red-50 border w-fit h-min;
-}
-
-.window .title {
-  @apply flex flex-row items-start pb-2;
-}
-
-.window .title .dragHandle,
-.window .title .closeButton {
-  @apply flex-none w-4 h-4;
-}
-
-.window .title .tabs {
-  @apply flex flex-grow place-content-center;
-}
-
-.window .title .tabs button {
-  @apply border px-2 py-1 ui-not-selected:bg-stone-900 ui-selected:bg-stone-700;
-}
-
-.window .title .tabs button[aria-selected="true"] {
-  @apply bg-stone-700;
-} */
-
 /* forms */
 .gameContainer select {
   @apply bg-stone-900 px-2 py-1 flex-grow outline outline-1;
@@ -50,62 +25,8 @@
 }
 
 .gameContainer button {
-  @apply bg-stone-900 py-1 px-10 border;
+  @apply bg-stone-900 py-1 px-10 border sm:min-w-max;
 }
-
-
-/* items */
-/* .item {
-  text-shadow: black -1px -1px 1px, black 1px -1px 1px, black -1px 1px 1px, black 1px 1px 1px, black -1px 0 0px;
-  @apply flex-none border w-16 h-16 relative bg-stone-900;
-}
-
-.item * {
-  @apply absolute;
-}
-
-.item img {
-  @apply inset-0 p-1 mx-auto w-full h-full;
-}
-
-.item .magicLevel {
-  @apply top-0 left-0 px-1;
-}
-
-.item .tier {
-  @apply top-0 right-0 px-1;
-}
-
-.smallItem {
-  @apply item;
-  @apply w-6 h-6;
-}
-
-.smallItem img.bg {
-  @apply inset-0;
-}
-
-.smallItem .quantity {
-  @apply bottom-0 left-0 px-px text-2xs;
-} */
-
-/* .marketItem {
-  @apply flex flex-col w-16;
-}
-
-.marketItem .price {
-  @apply flex flex-row bg-stone-500/50 items-center w-16;
-}
-
-.marketItem .price span {
-  @apply flex-grow text-right px-1;
-}
-
-.marketItem .price img {
-  @apply w-3 h-3;
-}
- */
-
 
 
 

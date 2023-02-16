@@ -30,6 +30,8 @@ type Character = {
   gender: Gender;
   equippedItems: EquippedItem[];
   inventoryItems: Item[];
+
+  inventorySlots: number;
 }
 
 export default Character;
