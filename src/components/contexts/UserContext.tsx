@@ -1,9 +1,12 @@
 import Character from "@/models/Character";
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item, { classArmors, classCharms, classWeapons, defaultEquippedItems, getItemType, ItemSubType, ItemType } from "@/models/Item";
+import { ItemAction } from "@/models/ItemAction";
+import MarketItem from "@/models/MarketItem";
 import User from "@/models/User";
 import { createContext, useCallback, useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
+import { UIMarketplaceWindowState, UIWindow, useUI, useWindow } from "./UIContext";
 
 const defaultInventoryItems = [
   { id: uuid(), subType: ItemSubType.Club, stats: Array(1), tier: 4 },
@@ -14,26 +17,27 @@ const defaultInventoryItems = [
   { id: uuid(), subType: ItemSubType.PlateMail, stats: Array(1), tier: 3 }
 ];
 
-
 type UserContextData = {
   user: User;
   createCharacter: (character: Character) => void;
   deleteCharacter: (character: Character) => void;
   selectCharacter: (character: Character | null) => void;
   updateCharacter: (character: Character) => void;
+  listMarketItem: (item: MarketItem) => boolean;
+  transferItem: (item: Item, character: Character) => boolean;
 };
 
 const UserContext = createContext<UserContextData>({} as UserContextData);
 
 export default function UserContextProvider({ children }: React.PropsWithChildren) {
-  const [user, setUser] = useState<User>({ id: 1, characters: [], gold: 0, name: 'DatBear' });
+  const [user, setUser] = useState<User>({ id: 1, characters: [], gold: 1000, name: 'DatBear', marketItems: [] });
 
   const createCharacter = (character: Character) => {
     const char = {
       ...character,
       level: 1,
       equippedItems: defaultEquippedItems[character.class],
-      inventoryItems: [...defaultInventoryItems],
+      inventoryItems: [...defaultInventoryItems.map(x => ({ ...x, id: uuid() }))],
       inventorySlots: 8
     } as Character;
     setUser(user => ({ ...user, characters: user.characters.concat(char) }));
@@ -51,7 +55,27 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     setUser(user => ({ ...user, selectedCharacter: { ...character } }));
   }
 
-  return <UserContext.Provider value={{ user, createCharacter, deleteCharacter, selectCharacter, updateCharacter }}>
+  const listMarketItem = (item: MarketItem) => {
+    if (user.marketItems.length < 16 && item.price > 0 && user.selectedCharacter) {
+      user.marketItems.push(item);
+      user.selectedCharacter.inventoryItems = user.selectedCharacter.inventoryItems.filter(x => x.id !== item.item.id);
+      setUser(x => ({ ...x, marketItems: user.marketItems }));
+      return true;
+    }
+    return false;
+  }
+
+  const transferItem = (item: Item, character: Character) => {
+    if (!item || !character || !user.selectedCharacter) return false;
+    if (character.inventoryItems.length >= character.inventorySlots) return false;
+    if (user.selectedCharacter.inventoryItems.find(x => x.id === item.id) == undefined) return false;
+
+    character.inventoryItems.push(item);
+    user.selectedCharacter.inventoryItems = user.selectedCharacter.inventoryItems.filter(x => x.id !== item.id);
+    return true;
+  }
+
+  return <UserContext.Provider value={{ user, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>
     {children}
   </UserContext.Provider>
 }
@@ -63,6 +87,7 @@ export function useUser() {
 
 export function useCharacter() {
   const { user, updateCharacter } = useUser();
+  const { windowState: marketplaceWindowState, setWindowState: setMarketplaceWindowState } = useWindow<UIMarketplaceWindowState>(UIWindow.Marketplace);
   const character = user.selectedCharacter!
 
   function equipItem(item: Item, slot: EquippedItemSlot) {
@@ -118,10 +143,56 @@ export function useCharacter() {
     return character.inventoryItems.length < character.inventorySlots;
   }, [character]);
 
+  const canDoItemAction = (item: Item, action: ItemAction) => {
+    switch (action) {
+      case ItemAction.Sell:
+        return character.inventoryItems.find(x => x.id === item.id) != undefined;
+    }
+    return true;
+  }
+
+  const doItemAction = (item: Item, action: ItemAction) => {
+    if (!canDoItemAction(item, action)) return;
+    switch (action) {
+      case ItemAction.Sell:
+        if (!marketplaceWindowState) return;
+        marketplaceWindowState.sellItem = item;
+        setMarketplaceWindowState(marketplaceWindowState);
+        break;
+      case ItemAction.Buy:
+        if (!marketplaceWindowState) return;
+        marketplaceWindowState.buyItem = marketplaceWindowState.searchResults.find(x => x.item.id === item.id);
+        console.log("buy", marketplaceWindowState.buyItem);
+        setMarketplaceWindowState(marketplaceWindowState);
+        break;
+      case ItemAction.Transfer:
+        if (!marketplaceWindowState) return;
+        marketplaceWindowState.transferItem = item;
+        setMarketplaceWindowState(marketplaceWindowState);
+        break;
+    }
+  }
+
+  const buyMarketItem = (item: MarketItem) => {
+    if (character == null || character.inventoryItems.length >= character.inventorySlots) return false;
+    if (marketplaceWindowState?.buyItem == null) return false;
+    if (user.gold < item.price) return;
+
+    character.inventoryItems = character.inventoryItems.concat(marketplaceWindowState?.buyItem?.item);
+    updateCharacter(character);
+    marketplaceWindowState.buyItem = undefined;
+    marketplaceWindowState.searchResults = marketplaceWindowState.searchResults.filter(x => x.item.id !== item.item.id);
+    setMarketplaceWindowState(marketplaceWindowState);
+    user.gold -= item.price;
+    return true;
+  }
+
   return {
     character,
     hasSelectedCharacter: user.selectedCharacter !== null,
-    canEquipItem, canUnequipItem,
-    equipItem, unequipItem
+    canEquipItem, equipItem,
+    canUnequipItem, unequipItem,
+    canDoItemAction, doItemAction,
+    buyMarketItem
   };
 }

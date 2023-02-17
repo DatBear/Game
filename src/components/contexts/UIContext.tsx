@@ -1,3 +1,5 @@
+import Item from "@/models/Item";
+import MarketItem from "@/models/MarketItem";
 import { Cooking, Transmuting, Suffusencing, Fishing, Glyphing } from "@/models/Skill";
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import GroupsWindow from "../GroupsWindow";
@@ -23,16 +25,27 @@ export type UIWindowState = {
   isVisible: boolean;
 }
 
+export type UIMarketplaceWindowState = UIWindowState & {
+  sellItem?: Item;
+  buyItem?: MarketItem;
+  transferItem?: Item;
+  searchResults: MarketItem[];
+}
+
+type WindowRecord<T> = Record<UIWindow, T & UIWindowState>;
+
 type UIContextProps = {
-  windowStates: Record<UIWindow, UIWindowState>;
+  windowStates: WindowRecord<any>;
   setWindowState: (window: UIWindow, state: UIWindowState) => void;
 };
 
-let defaultWindowState: Record<UIWindow, UIWindowState> = {
+
+
+let defaultWindowState: WindowRecord<any> = {
   [UIWindow.Inventory]: { isVisible: true },
   [UIWindow.Groups]: { isVisible: false },
   [UIWindow.Shrine]: { isVisible: false },
-  [UIWindow.Marketplace]: { isVisible: false },
+  [UIWindow.Marketplace]: { isVisible: false, searchResults: [] } as UIMarketplaceWindowState,
   [UIWindow.Cooking]: { isVisible: false },
   [UIWindow.Transmuting]: { isVisible: false },
   [UIWindow.Suffusencing]: { isVisible: false },
@@ -47,7 +60,10 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
   const { user } = useUser();
 
   const setWindowState = (window: UIWindow, state: UIWindowState) => {
-    setWindowStates(x => ({ ...x, [window]: state }));
+    setWindowStates(x => ({
+      ...x,
+      [window]: { ...windowStates[window], ...state }
+    }));
   }
 
   const renderWindow = (window: UIWindow, component: ReactNode) => {
@@ -79,17 +95,19 @@ export function useUI() {
   return context!;
 }
 
-export function useWindow(window: UIWindow) {
+export function useWindow<T>(window: UIWindow) {
   const { setWindowState: setWindowsState, windowStates } = useUI();
-  const setWindowState = (state: UIWindowState) => {
+  const setWindowState = (state: UIWindowState & T) => {
     setWindowsState(window, state)
   }
 
   const closeWindow = useCallback(() => {
-    setWindowState({ isVisible: false });
+    setWindowState({ ...windowState, isVisible: false } as UIWindowState & T);
   }, [setWindowState, windowStates]);
 
+
+  const windowState = windowStates ? windowStates[window] as T : null;
   return {
-    setWindowState, closeWindow
+    setWindowState, closeWindow, windowState
   }
 }

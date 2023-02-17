@@ -1,39 +1,117 @@
-import gs from '@/styles/game.module.css'
-import { Tab } from '@headlessui/react'
-import { Fragment, useCallback, useEffect } from 'react';
 import Window from '@/components/Window';
 import Item, { ItemSubType } from "@/models/Item";
 import MarketItem from "@/models/MarketItem";
 import ItemSlot from "./ItemSlot";
-import { useWindow, UIWindow } from "./contexts/UIContext";
+import { useWindow, UIWindow, UIMarketplaceWindowState } from "./contexts/UIContext";
+import { v4 as uuid } from "uuid";
+import { ItemAction } from "@/models/ItemAction";
+import { useEffect, useState } from "react";
+import { useCharacter, useUser } from "./contexts/UserContext";
+import Character from "@/models/Character";
+import clsx from "clsx";
 
 
-let marketItems: MarketItem[] = [
-  { price: 100, item: { subType: ItemSubType.Club, stats: Array(1), tier: 3 } },
-  { price: 110, item: { subType: ItemSubType.PaddedRobe, stats: Array(1), tier: 3 } },
-  { price: 120, item: { subType: ItemSubType.Fire, stats: Array(1), tier: 3 } },
-  { price: 130, item: { subType: ItemSubType.Fire, stats: Array(1), tier: 3 } },
-  { price: 140, item: { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 12 } },
-  { price: 150, item: { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 1 } },
-  { price: 160, item: { subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 20 } },
+const marketItems: MarketItem[] = [
+  { price: 100, item: { id: uuid(), subType: ItemSubType.Club, stats: Array(1), tier: 3 } },
+  { price: 110, item: { id: uuid(), subType: ItemSubType.PaddedRobe, stats: Array(1), tier: 3 } },
+  { price: 120, item: { id: uuid(), subType: ItemSubType.Fire, stats: Array(1), tier: 3 } },
+  { price: 130, item: { id: uuid(), subType: ItemSubType.Fire, stats: Array(1), tier: 3 } },
+  { price: 140, item: { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 12 } },
+  { price: 150, item: { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 1 } },
+  { price: 160, item: { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 20 } },
 ];
 
-let buyItem: MarketItem = marketItems[0];
-let sellItem: Item = marketItems[1].item;
+//let buyItem: MarketItem = marketItems[0];
+//let sellItem: Item = marketItems[1].item;
 let transferItem: Item = marketItems[2].item;
 
-function MarketItemSlot({ marketItem }: { marketItem: MarketItem }) {
+function MarketItemSlot({ marketItem, action }: { marketItem?: MarketItem, action?: ItemAction }) {
   return (<div className="flex flex-col w-16">
-    <ItemSlot item={marketItem.item} />
-    <div className="flex flex-row bg-stone-500/50 items-center w-16">
+    <ItemSlot item={marketItem?.item} action={action} />
+    {marketItem && <div className="flex flex-row bg-stone-500/50 items-center w-16">
       <span className="flex-grow text-right px-1">{marketItem.price}</span>
       <img src="svg/iconGold.svg" />
-    </div>
+    </div>}
   </div>)
 }
 
+function CharacterSlot({ character, isSelected, onClick }: { character: Character, isSelected: boolean, onClick: () => void }) {
+  const classes = clsx("flex flex-row border p-1", isSelected ? "bg-stone-700" : "bg-stone-800");
+  return <div className={classes} onClick={_ => onClick()}>
+    <div>{character.name} (Lv. {character.level} {character.class})</div>
+  </div>
+}
+
+type BuyTabState = {
+
+}
+
+type SellTabState = {
+  cost: number;
+  fee: number;
+  goldPassword: string;
+}
+
+type TransferTabState = {
+  selectedCharacter?: Character;
+}
+
 export default function MarketplaceWindow() {
-  const { closeWindow } = useWindow(UIWindow.Marketplace);
+  const { user, listMarketItem, transferItem } = useUser();
+  const { character, buyMarketItem } = useCharacter();
+  const { closeWindow, windowState, setWindowState } = useWindow<UIMarketplaceWindowState>(UIWindow.Marketplace);
+  const [buyTabState, setBuyTabState] = useState({ searchResults: windowState?.searchResults } as BuyTabState);
+  const [sellTabState, setSellTabState] = useState({} as SellTabState);
+  const [transferTabState, setTransferTabState] = useState({} as TransferTabState);
+
+
+  useEffect(() => {
+    //todo remove this effect
+    setWindowState({ ...windowState, isVisible: windowState?.isVisible ?? false, searchResults: marketItems });
+  }, []);
+
+  const search = () => {
+
+  }
+
+  const buyItem = () => {
+    if (!windowState?.buyItem) return;
+    var item = windowState.buyItem;
+    if (buyMarketItem(item)) {
+      //?
+    }
+  }
+
+  const updateCost = (cost: string) => {
+    const costFloat = parseFloat(cost);
+    const fee = costFloat < 20 ? 0 : costFloat * 5 / 100
+    setSellTabState(s => ({ ...s, cost: costFloat, fee }));
+  }
+
+  const sellItem = () => {
+    if (!windowState?.sellItem) return;
+    //todo check gold password, subtract fee
+    const marketItem: MarketItem = {
+      item: windowState?.sellItem,
+      price: sellTabState.cost
+    };
+    if (listMarketItem(marketItem)) {
+      setSellTabState({} as SellTabState);
+      setWindowState({ ...windowState, sellItem: undefined })
+    }
+  }
+
+  const selectCharacter = (char: Character) => {
+    setTransferTabState({ ...transferTabState, selectedCharacter: char });
+  }
+
+  const transfer = () => {
+    if (!windowState?.transferItem) return;
+    if (!transferTabState.selectedCharacter) return;
+    if (transferItem(windowState.transferItem, transferTabState.selectedCharacter)) {
+      setWindowState({ ...windowState, transferItem: undefined });
+    }
+  }
 
   return <Window tabbed close={() => closeWindow()}>
     <Window.Title>
@@ -119,22 +197,23 @@ export default function MarketplaceWindow() {
                 <input type="checkbox" defaultChecked /> Only show items I can use
               </label>
             </div>
-            <button className="mx-auto">Search</button>
+            <button className="mx-auto" onClick={_ => search()}>Search</button>
           </form>
 
           <div className="flex flex-col flex-grow text-sm gap-y-4 basis-full sm:basis-8/12 w-min">
             <div className="flex-grow grid grid-cols-5 gap-x-4 gap-y-3 overflow-y-auto sm:h-1 px-3 place-content-start">
-              {marketItems.map((x, idx) => {
-                return <MarketItemSlot key={idx} marketItem={x} />
+              {windowState?.searchResults.length === 0 && <span className="w-max p-1">No items found.</span>}
+              {windowState?.searchResults.map((x, idx) => {
+                return <MarketItemSlot key={x.item.id ?? idx} marketItem={x} action={ItemAction.Buy} />
               })}
             </div>
             <div className="flex flex-row items-center justify-end">
               <div className="px-4">
-                <MarketItemSlot marketItem={buyItem} />
+                <MarketItemSlot marketItem={windowState?.buyItem} action={ItemAction.Buy} />
               </div>
               <div className="flex flex-col gap-y-4">
                 <input placeholder="Gold Password" type="password" />
-                <button>Buy this item</button>
+                <button onClick={_ => buyItem()}>Buy this item</button>
               </div>
             </div>
           </div>
@@ -151,24 +230,29 @@ export default function MarketplaceWindow() {
             </ItemSlot>
           </div>
           <div className="basis-4/5 flex flex-col gap-y-4">
-            <div className="flex-grow border p-4">No items found.</div>
+            <div className="flex-grow border p-1">
+              {user.marketItems.length > 0 && <div className="grid grid-cols-6">
+                {user.marketItems.map(x => <MarketItemSlot key={x.item.id} marketItem={x} />)}
+              </div>}
+              {user.marketItems.length === 0 && <span className="p-3">No items found.</span>}
+            </div>
             <div className="flex flex-row items-center justify-end">
               <div className="px-4">
-                <ItemSlot item={sellItem} />
+                <ItemSlot item={windowState?.sellItem} action={ItemAction.Sell} />
               </div>
               <div className="flex flex-col gap-4">
                 <label className="flex flex-row">
                   <span className="w-1/4">Cost:</span>
-                  <div className="w-3/5"><input /></div>
+                  <div className="w-3/5"><input value={(isNaN(sellTabState.cost) ? '' : sellTabState.cost) ?? ''} onChange={e => updateCost(e.target.value)} /></div>
                 </label>
                 <label className="flex flex-row">
                   <span className="w-1/4">Fee:</span>
-                  <div className="w-3/5"><input disabled={true} defaultValue="100" /></div>
+                  <div className="w-3/5"><input disabled={true} value={(isNaN(sellTabState.fee) ? 0 : sellTabState.fee) ?? 0} /></div>
                 </label>
               </div>
               <div className="flex flex-col gap-y-4">
-                <input placeholder="Gold Password" type="password" />
-                <button>Sell this item</button>
+                <input value={sellTabState.goldPassword ?? ''} onChange={e => setSellTabState({ ...sellTabState, goldPassword: e.target.value })} placeholder="Gold Password" type="password" />
+                <button onClick={_ => sellItem()}>Sell this item</button>
               </div>
             </div>
           </div>
@@ -182,13 +266,16 @@ export default function MarketplaceWindow() {
             </ItemSlot>
           </div>
           <div className="basis-4/5 flex flex-col gap-y-4">
-            <div className="flex-grow border p-4">No characters found.</div>
+            <div className="flex-grow border flex flex-col p-2 gap-y-2">
+              {user.characters.length === 1 && <span className="p-3">No characters found.</span>}
+              {user.characters.filter(x => x.id !== character.id).map(x => <CharacterSlot key={x.id} character={x} isSelected={transferTabState.selectedCharacter?.id == x.id} onClick={() => selectCharacter(x)} />)}
+            </div>
             <div className="flex flex-row items-center justify-end">
               <div className="px-4">
-                <ItemSlot item={transferItem} />
+                <ItemSlot item={windowState?.transferItem} action={ItemAction.Transfer} />
               </div>
               <div>
-                <button >Transfer Item</button>
+                <button onClick={() => transfer()}>Transfer Item</button>
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { useState } from "react";
 import CharacterImage from "../CharacterImage";
 import { useUser } from "../contexts/UserContext";
 import ItemSlot from "../ItemSlot";
+import { v4 as uuid } from "uuid";
 
 export default function CharacterSelect() {
   const { user } = useUser();
@@ -72,7 +73,7 @@ function CharacterCreate({ showList }: { showList: () => void }) {
 
   const create = () => {
     if (!character.name || character.name == '') return;
-    createCharacter(character as Character);
+    createCharacter({ ...character, id: uuid() } as Character);
     showList();
   }
 
@@ -108,11 +109,11 @@ function CharacterCreate({ showList }: { showList: () => void }) {
       <div className="flex flex-col">
         <div className="w-max">Usable Weapons:</div>
         <div className="grid grid-cols-4 gap-1 w-max">
-          {weapons.map(x => <ItemSlot key={x.toString()} item={{ stats: [], subType: x, tier: 0 }} noDrag />)}
+          {weapons.map(x => <ItemSlot key={x.toString()} item={{ id: uuid(), stats: [], subType: x, tier: 0 }} noDrag />)}
         </div>
         <div className="w-max">Usable Armors:</div>
         <div className="grid grid-cols-4 gap-1 w-max">
-          {armors.map(x => <ItemSlot key={x.toString()} item={{ stats: [], subType: x, tier: 0 }} noDrag />)}
+          {armors.map(x => <ItemSlot key={x.toString()} item={{ id: uuid(), stats: [], subType: x, tier: 0 }} noDrag />)}
         </div>
       </div>
     </div>

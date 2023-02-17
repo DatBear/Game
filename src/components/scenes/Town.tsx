@@ -3,7 +3,7 @@ import { UIWindow, useUI, useWindow } from "../contexts/UIContext";
 import { useCharacter, useUser } from "../contexts/UserContext";
 
 export default function Town() {
-  const { user } = useUser();
+  const { user, selectCharacter } = useUser();
   const { character } = useCharacter();
   const { setWindowState } = useUI();
 
@@ -11,11 +11,16 @@ export default function Town() {
     setWindowState(window, { isVisible: true });
   }
 
+  const goToCharacterSelect = () => {
+    selectCharacter(null);
+  }
+
   return <>
     {user.selectedCharacter && <div className="m-10 flex flex-col gap-5">
       <div className="flex flex-row gap-5">
         <button onClick={_ => showWindow(UIWindow.Inventory)}>Inventory</button>
         <button onClick={_ => showWindow(UIWindow.Groups)}>Groups</button>
+        <button onClick={_ => goToCharacterSelect()}>Character Select</button>
       </div>
 
       <div>

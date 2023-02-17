@@ -1,5 +1,6 @@
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item, { itemIcons, itemTiers, itemTypes, ItemSubType, ItemType, getItemType, canEquipItem } from "@/models/Item";
+import { ItemAction } from "@/models/ItemAction";
 import clsx from "clsx";
 import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
@@ -8,10 +9,12 @@ import { useCharacter } from "./contexts/UserContext";
 const type = "Item";
 
 
+
 type ItemProps = {
   item?: Item;
   small?: boolean;
   slot?: EquippedItemSlot;
+  action?: ItemAction;
   acceptTypes?: ItemType[];
   acceptSubTypes?: ItemSubType[];
   acceptMaxTier?: number;
@@ -24,9 +27,14 @@ type DragObject = {
   slot?: EquippedItemSlot;
 };
 
-export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, slot, noDrag, children, className, ...props }: ItemProps) {
+export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, noDrag, children, className, ...props }: ItemProps) {
   const ref = useRef(null);
-  const { character, hasSelectedCharacter, canEquipItem, equipItem, canUnequipItem, unequipItem } = useCharacter();
+  const { character, hasSelectedCharacter,
+    canEquipItem, equipItem,
+    canUnequipItem, unequipItem,
+    canDoItemAction, doItemAction
+  } = useCharacter();
+
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: type,
     canDrop(dragging, monitor) {
@@ -36,6 +44,9 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
       }
       if (slot == null && draggedSlot != null && draggedItem != null) {
         return canUnequipItem();
+      }
+      if (action != null && draggedItem != null) {
+        return canDoItemAction(draggedItem, action);
       }
 
       let canDrop = draggedItem != null;
@@ -56,11 +67,16 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     },
     drop(dragging, monitor) {
       const { item: draggedItem, slot: draggedSlot } = dragging as DragObject;
+      //console.log('drop: item', draggedItem, 'slot', draggedSlot);
+
       if (slot != null && draggedSlot == null && draggedItem != null) {
-        equipItem(draggedItem, slot);
+        return equipItem(draggedItem, slot);
       }
-      if (slot == null && draggedSlot != null && draggedItem != null) {
-        unequipItem(draggedSlot);
+      if (slot == null && draggedSlot != null && draggedItem != null && action == null) {
+        return unequipItem(draggedSlot);
+      }
+      if (action != null && draggedItem != null) {
+        return doItemAction(draggedItem, action);
       }
     },
     collect(monitor) {
@@ -93,7 +109,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
   let dragClass = isDragging ? '!border-green-500/25' : '';
   let dropClass = '';
   if (isOver) {
-    if (acceptTypes != null || acceptSubTypes != null || acceptMaxTier != null) {
+    if (acceptTypes != null || acceptSubTypes != null || acceptMaxTier != null || slot != null || action != null) {
       dropClass = canDrop ? '!bg-green-500/25' : '!bg-red-500/25';
     }
   }

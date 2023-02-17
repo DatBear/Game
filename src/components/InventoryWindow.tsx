@@ -13,7 +13,6 @@ let items: Item[] = [
   { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 20 },
 ]
 
-let equipmentSlots = 10;
 let itemSlots = 16;
 
 function InventoryWindow() {
@@ -35,7 +34,7 @@ function InventoryWindow() {
         <div className="flex flex-row gap-7">
           {equippedSlots.map((s, idx) => {
             let slot = character?.equippedItems.find(x => x.slot == s);
-            return <div key={idx} className="flex flex-col items-center">
+            return <div key={slot?.item.id ?? idx} className="flex flex-col items-center">
               <span className="block text-center w-max">{s}</span>
               <ItemSlot item={slot?.item} slot={s} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + character.level / 5)} />
             </div>
@@ -43,9 +42,9 @@ function InventoryWindow() {
         </div>
       </div>
       <div>
-        <span>Equipment ({character.inventoryItems.length}/{equipmentSlots})</span>
+        <span>Equipment ({character.inventoryItems.length}/{character.inventorySlots})</span>
         <div className="grid grid-cols-5 gap-x-2 gap-y-3">
-          {character.inventoryItems.concat([...Array(equipmentSlots - character.inventoryItems.length)]).map((x, idx) => {
+          {character.inventoryItems.concat([...Array(character.inventorySlots - character.inventoryItems.length)]).map((x, idx) => {
             return <ItemSlot key={x?.id ?? idx} item={x} />
           })}
         </div>
