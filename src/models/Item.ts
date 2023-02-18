@@ -1,6 +1,7 @@
 import Character, { CharacterClass } from "./Character";
 import EquippedItem, { EquippedItemSlot } from "./EquippedItem";
 import { v4 as uuid } from 'uuid';
+import { CharacterStats, ItemStats, Stats } from "./Stats";
 
 export enum ItemType {
   Weapon,
@@ -54,8 +55,10 @@ type Item = {
   tier: number;
   quantity?: number;
   subType: ItemSubType;
-  stats: any[];//todo type
+  stats: Record<Stats, number>;
 }
+
+
 
 let itemTypes: Record<ItemType, ItemSubType[]> = {
   [ItemType.Weapon]: [ItemSubType.Sword, ItemSubType.Club, ItemSubType.Axe, ItemSubType.Dagger, ItemSubType.Staff, ItemSubType.Longsword, ItemSubType.Warhammer, ItemSubType.Battleaxe, ItemSubType.Spear, ItemSubType.Polearm],
@@ -124,6 +127,22 @@ let itemTiers: Record<number, string> = {
   [14]: 'XIV'
 }
 
+let magicPrefixes: Record<number, string> = {
+  [0]: 'Normal',
+  [1]: 'Magical',
+  [2]: 'Rare',
+  [3]: 'Mystical',
+  [4]: 'Angelic',
+  [5]: 'Mythical',
+  [6]: 'Arcane',
+  [7]: 'Legendary',
+  [8]: 'Godly',
+  [9]: 'Epic',
+  [10]: 'Relic',
+  [11]: 'Artifact',
+  [12]: 'Unique'
+}
+
 let classWeapons: Record<CharacterClass, ItemSubType[]> = {
   [CharacterClass.Fighter]: [ItemSubType.Sword, ItemSubType.Club, ItemSubType.Axe, ItemSubType.Longsword, ItemSubType.Polearm, ItemSubType.Spear],
   [CharacterClass.Barbarian]: [ItemSubType.Sword, ItemSubType.Club, ItemSubType.Axe, ItemSubType.Warhammer, ItemSubType.Battleaxe, ItemSubType.Polearm],
@@ -171,10 +190,67 @@ let classCharms: Record<CharacterClass, ItemSubType[]> = {
   [CharacterClass.Alchemist]: allCharms
 }
 
+let defaultItemStats: Record<ItemStats, number> = {
+  [ItemStats.WarmLights]: 0,
+  [ItemStats.EvilPresences]: 0,
+  [ItemStats.TreasureChests]: 0,
+  [ItemStats.Rooms]: 0,
+  [ItemStats.WarmLightEffectiveness]: 0,
+  [ItemStats.MonsterDifficulty]: 0,
+  [ItemStats.ExperienceGained]: 0,
+  [ItemStats.ItemDrops]: 0,
+  [ItemStats.ItemQuality]: 0,
+  [ItemStats.Swarm]: 0,
+  [ItemStats.GuildPoints]: 0,
+  [ItemStats.LevelUp]: 0,
+  [ItemStats.LevelCap]: 0
+}
+
+let defaultStats: Record<Stats, number> = {
+  [CharacterStats.Strength]: 0,
+  [CharacterStats.Dexterity]: 0,
+  [CharacterStats.Vitality]: 0,
+  [CharacterStats.Intelligence]: 0,
+  [CharacterStats.MaxLife]: 0,
+  [CharacterStats.MaxMana]: 0,
+  [CharacterStats.ExperienceGained]: 0,
+  [CharacterStats.MagicLuck]: 0,
+  [CharacterStats.LifeRegen]: 0,
+  [CharacterStats.ManaRegen]: 0,
+  [CharacterStats.ExtraEquipmentSlots]: 0,
+  [CharacterStats.CriticalStrike]: 0,
+  [CharacterStats.LifePerAttack]: 0,
+  [CharacterStats.ManaPerAttack]: 0,
+  [CharacterStats.LifePerKill]: 0,
+  [CharacterStats.ManaPerKill]: 0,
+  [CharacterStats.LifeSteal]: 0,
+  [CharacterStats.DamageReturn]: 0,
+  [CharacterStats.MindNumb]: 0,
+  [CharacterStats.ArmorPierce]: 0,
+  [CharacterStats.Parry]: 0,
+  [CharacterStats.CriticalFlux]: 0,
+  [CharacterStats.PhysicalDamageReduction]: 0,
+  [CharacterStats.MagicalDamageReduction]: 0,
+  [CharacterStats.ManaSyphon]: 0,
+  [CharacterStats.QuickDraw]: 0,
+  [CharacterStats.ManaConsumption]: 0,
+  [CharacterStats.IceMastery]: 0,
+  [CharacterStats.FireMastery]: 0,
+  [CharacterStats.LightningMastery]: 0,
+  [CharacterStats.EarthMastery]: 0,
+  [CharacterStats.WindMastery]: 0,
+  [CharacterStats.HealMastery]: 0,
+  [CharacterStats.ManaSkin]: 0,
+  [CharacterStats.PowerShot]: 0,
+  [CharacterStats.GlancingBlow]: 0,
+  [CharacterStats.Jubilance]: 0,
+  ...defaultItemStats
+}
+
 let defaultItem = (subType: ItemSubType) => {
   return {
     id: uuid(),
-    stats: [],
+    stats: { ...defaultStats },
     subType: subType,
     tier: 1,
   } as Item;
@@ -200,5 +276,5 @@ let defaultEquippedItems: Record<CharacterClass, EquippedItem[]> = {
   [CharacterClass.Warlock]: [], [CharacterClass.Headhunter]: [], [CharacterClass.Alchemist]: []
 }
 
-export { itemTypes, getItemType, itemIcons, itemTiers, classWeapons, classArmors, classCharms, defaultEquippedItems }
+export { itemTypes, getItemType, itemIcons, itemTiers, classWeapons, classArmors, classCharms, defaultEquippedItems, defaultStats }
 export default Item;

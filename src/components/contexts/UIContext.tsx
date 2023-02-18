@@ -32,6 +32,10 @@ export type UIMarketplaceWindowState = UIWindowState & {
   searchResults: MarketItem[];
 }
 
+export type UIShrineWindowState = UIWindowState & {
+  shrineItem?: Item;
+}
+
 type WindowRecord<T> = Record<UIWindow, T & UIWindowState>;
 
 type UIContextProps = {
@@ -44,7 +48,7 @@ type UIContextProps = {
 let defaultWindowState: WindowRecord<any> = {
   [UIWindow.Inventory]: { isVisible: true },
   [UIWindow.Groups]: { isVisible: false },
-  [UIWindow.Shrine]: { isVisible: false },
+  [UIWindow.Shrine]: { isVisible: false } as UIShrineWindowState,
   [UIWindow.Marketplace]: { isVisible: false, searchResults: [] } as UIMarketplaceWindowState,
   [UIWindow.Cooking]: { isVisible: false },
   [UIWindow.Transmuting]: { isVisible: false },

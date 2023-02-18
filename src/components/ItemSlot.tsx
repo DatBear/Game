@@ -114,7 +114,6 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     }
   }
 
-  let previewClass = clsx("!w-14 !h-14", isDragging ? 'inline' : 'hidden')
   return (<div ref={ref} className={clsx("item", className, sizeClass, dragClass, dropClass, "flex-none border relative bg-stone-900")} {...props}>
     <>
       {children}

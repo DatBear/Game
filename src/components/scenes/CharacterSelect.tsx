@@ -1,11 +1,18 @@
-import Character, { CharacterClass, Gender } from "@/models/Character";
-import { classArmors, classWeapons } from "@/models/Item";
+import Character, { CharacterClass, defaultCharacterStats, Gender } from "@/models/Character";
+import { classArmors, classWeapons, defaultStats } from "@/models/Item";
 import { clsx } from "clsx";
 import { useState } from "react";
 import CharacterImage from "../CharacterImage";
 import { useUser } from "../contexts/UserContext";
 import ItemSlot from "../ItemSlot";
 import { v4 as uuid } from "uuid";
+
+const classes = Object.keys(CharacterClass).filter((_, idx) => idx < 5);
+const genders = Object.keys(Gender);
+const defaultCharacter: Partial<Character> = {
+  class: classes[0] as CharacterClass,
+  gender: genders[0] as Gender
+}
 
 export default function CharacterSelect() {
   const { user } = useUser();
@@ -27,7 +34,7 @@ function CharacterList({ characters, showCreate }: { characters: Character[], sh
   return (<div className="h-full flex flex-row">
     <div className="flex flex-col bg-stone-800 w-min gap-2 p-1 h-full">
       {characters.map(x => {
-        return <div key={x.name} onClick={_ => setSelectedCharacter(x)} className="bg-stone-600 flex flex-row gap-1">
+        return <div key={x.id} onClick={_ => setSelectedCharacter(x)} className="bg-stone-600 flex flex-row gap-1">
           <div className="overflow-hidden">
             <div className="w-20 h-12 top-10 inline-block">
               <div className="w-24 h-48 relative" style={{ left: '-10%', top: '10%' }}>
@@ -61,12 +68,13 @@ function CharacterList({ characters, showCreate }: { characters: Character[], sh
   </div>);
 }
 
+
+
 function CharacterCreate({ showList }: { showList: () => void }) {
   const { user, createCharacter } = useUser();
-  const classes = Object.keys(CharacterClass).filter((_, idx) => idx < 5);
-  const genders = Object.keys(Gender);
 
-  const [character, setCharacter] = useState<Partial<Character>>({ class: classes[0] as CharacterClass, gender: genders[0] as Gender, level: 1 });
+
+  const [character, setCharacter] = useState<Partial<Character>>(defaultCharacter);
 
   const armors = classArmors[character.class as CharacterClass];
   const weapons = classWeapons[character.class as CharacterClass];
@@ -109,11 +117,11 @@ function CharacterCreate({ showList }: { showList: () => void }) {
       <div className="flex flex-col">
         <div className="w-max">Usable Weapons:</div>
         <div className="grid grid-cols-4 gap-1 w-max">
-          {weapons.map(x => <ItemSlot key={x.toString()} item={{ id: uuid(), stats: [], subType: x, tier: 0 }} noDrag />)}
+          {weapons.map(x => <ItemSlot key={x.toString()} item={{ id: uuid(), stats: defaultStats, subType: x, tier: 0 }} noDrag />)}
         </div>
         <div className="w-max">Usable Armors:</div>
         <div className="grid grid-cols-4 gap-1 w-max">
-          {armors.map(x => <ItemSlot key={x.toString()} item={{ id: uuid(), stats: [], subType: x, tier: 0 }} noDrag />)}
+          {armors.map(x => <ItemSlot key={x.toString()} item={{ id: uuid(), stats: defaultStats, subType: x, tier: 0 }} noDrag />)}
         </div>
       </div>
     </div>

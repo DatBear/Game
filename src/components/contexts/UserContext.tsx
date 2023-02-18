@@ -1,21 +1,32 @@
-import Character from "@/models/Character";
+import Character, { classStats, defaultCharacterStats } from "@/models/Character";
 import { EquippedItemSlot } from "@/models/EquippedItem";
-import Item, { classArmors, classCharms, classWeapons, defaultEquippedItems, getItemType, ItemSubType, ItemType } from "@/models/Item";
+import Item, { classArmors, classCharms, classWeapons, defaultEquippedItems, defaultStats, getItemType, ItemSubType, ItemType } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
 import MarketItem from "@/models/MarketItem";
+import { CharacterStats } from "@/models/Stats";
 import User from "@/models/User";
 import { createContext, useCallback, useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { UIMarketplaceWindowState, UIWindow, useUI, useWindow } from "./UIContext";
+import { UIMarketplaceWindowState, UIShrineWindowState, UIWindow, useUI, useWindow } from "./UIContext";
 
 const defaultInventoryItems = [
-  { id: uuid(), subType: ItemSubType.Club, stats: Array(1), tier: 4 },
-  { id: uuid(), subType: ItemSubType.Club, stats: Array(1), tier: 3 },
-  { id: uuid(), subType: ItemSubType.PaddedRobe, stats: Array(1), tier: 3 },
-  { id: uuid(), subType: ItemSubType.Fire, stats: Array(1), tier: 3 },
-  { id: uuid(), subType: ItemSubType.Fire, stats: Array(2), tier: 3 },
-  { id: uuid(), subType: ItemSubType.PlateMail, stats: Array(1), tier: 3 }
+  { id: uuid(), subType: ItemSubType.Club, stats: defaultStats, tier: 4 },
+  { id: uuid(), subType: ItemSubType.Club, stats: defaultStats, tier: 3 },
+  { id: uuid(), subType: ItemSubType.PaddedRobe, stats: defaultStats, tier: 3 },
+  { id: uuid(), subType: ItemSubType.Fire, stats: defaultStats, tier: 3 },
+  { id: uuid(), subType: ItemSubType.Fire, stats: defaultStats, tier: 3 },
+  { id: uuid(), subType: ItemSubType.PlateMail, stats: defaultStats, tier: 3 }
 ];
+
+const defaultPartialCharacter: Partial<Character> = {
+  level: 1,
+  stats: defaultCharacterStats,
+  life: defaultCharacterStats[CharacterStats.MaxLife],
+  mana: defaultCharacterStats[CharacterStats.MaxMana],
+  items: [],
+  experience: 0,
+  equipmentSlots: 8
+}
 
 type UserContextData = {
   user: User;
@@ -35,10 +46,10 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
   const createCharacter = (character: Character) => {
     const char = {
       ...character,
-      level: 1,
+      ...defaultPartialCharacter,
       equippedItems: defaultEquippedItems[character.class],
-      inventoryItems: [...defaultInventoryItems.map(x => ({ ...x, id: uuid() }))],
-      inventorySlots: 8
+      equipment: [...defaultInventoryItems.map(x => ({ ...x, id: uuid() }))],
+      stats: { ...defaultCharacterStats, ...classStats[character.class] }
     } as Character;
     setUser(user => ({ ...user, characters: user.characters.concat(char) }));
   }
@@ -52,13 +63,17 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
   }
 
   const updateCharacter = (character: Character) => {
-    setUser(user => ({ ...user, selectedCharacter: { ...character } }));
+    setUser(user => ({
+      ...user,
+      selectedCharacter: { ...character },
+      characters: user.characters.splice(user.characters.findIndex(x => x.id === character.id), 1, character)
+    }));
   }
 
   const listMarketItem = (item: MarketItem) => {
     if (user.marketItems.length < 16 && item.price > 0 && user.selectedCharacter) {
       user.marketItems.push(item);
-      user.selectedCharacter.inventoryItems = user.selectedCharacter.inventoryItems.filter(x => x.id !== item.item.id);
+      user.selectedCharacter.equipment = user.selectedCharacter.equipment.filter(x => x.id !== item.item.id);
       setUser(x => ({ ...x, marketItems: user.marketItems }));
       return true;
     }
@@ -67,11 +82,11 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
 
   const transferItem = (item: Item, character: Character) => {
     if (!item || !character || !user.selectedCharacter) return false;
-    if (character.inventoryItems.length >= character.inventorySlots) return false;
-    if (user.selectedCharacter.inventoryItems.find(x => x.id === item.id) == undefined) return false;
+    if (character.equipment.length >= character.equipmentSlots) return false;
+    if (user.selectedCharacter.equipment.find(x => x.id === item.id) == undefined) return false;
 
-    character.inventoryItems.push(item);
-    user.selectedCharacter.inventoryItems = user.selectedCharacter.inventoryItems.filter(x => x.id !== item.id);
+    character.equipment.push(item);
+    user.selectedCharacter.equipment = user.selectedCharacter.equipment.filter(x => x.id !== item.id);
     return true;
   }
 
@@ -88,6 +103,7 @@ export function useUser() {
 export function useCharacter() {
   const { user, updateCharacter } = useUser();
   const { windowState: marketplaceWindowState, setWindowState: setMarketplaceWindowState } = useWindow<UIMarketplaceWindowState>(UIWindow.Marketplace);
+  const { windowState: shrineWindowState, setWindowState: setShrineWindowState } = useWindow<UIShrineWindowState>(UIWindow.Shrine);
   const character = user.selectedCharacter!
 
   function equipItem(item: Item, slot: EquippedItemSlot) {
@@ -97,15 +113,15 @@ export function useCharacter() {
     if (currentItem != null) {
       const oldItem = { ...currentItem.item };
       currentItem.item = item;
-      let idx = character.inventoryItems.findIndex(x => x?.id === item.id);
-      character.inventoryItems.splice(idx, 1, oldItem);
+      let idx = character.equipment.findIndex(x => x?.id === item.id);
+      character.equipment.splice(idx, 1, oldItem);
     } else {
       character.equippedItems.push({
         item, slot
       });
     }
 
-    character.inventoryItems = character.inventoryItems.filter(x => x.id !== item.id);
+    character.equipment = character.equipment.filter(x => x.id !== item.id);
     updateCharacter(character);
   }
 
@@ -113,14 +129,14 @@ export function useCharacter() {
     if (!canUnequipItem()) return;
     var currentItem = character.equippedItems.find(x => x.slot === slot);
     if (currentItem) {
-      character.inventoryItems.push(currentItem.item);
+      character.equipment.push(currentItem.item);
       character.equippedItems = character.equippedItems.filter(x => x.slot !== currentItem!.slot);
       updateCharacter(character);
     }
   }
 
   const canEquipItem = useCallback((item: Item, slot: EquippedItemSlot) => {
-    if (item == null || character.inventoryItems.find(x => x?.id === item.id) == undefined) return false;
+    if (item == null || character.equipment.find(x => x?.id === item.id) == undefined) return false;
     let canEquip = true;
     let maxTier = Math.floor(3 + character.level / 5);
     let subTypes = slot == EquippedItemSlot.Armor ? classArmors[character.class] : slot == EquippedItemSlot.Weapon ? classWeapons[character.class] : classCharms[character.class];
@@ -140,13 +156,13 @@ export function useCharacter() {
   }, [character]);
 
   const canUnequipItem = useCallback(() => {
-    return character.inventoryItems.length < character.inventorySlots;
+    return character.equipment.length < character.equipmentSlots;
   }, [character]);
 
   const canDoItemAction = (item: Item, action: ItemAction) => {
     switch (action) {
       case ItemAction.Sell:
-        return character.inventoryItems.find(x => x.id === item.id) != undefined;
+        return character.equipment.find(x => x.id === item.id) != undefined;
     }
     return true;
   }
@@ -170,20 +186,36 @@ export function useCharacter() {
         marketplaceWindowState.transferItem = item;
         setMarketplaceWindowState(marketplaceWindowState);
         break;
+      case ItemAction.Shrine:
+        if (!shrineWindowState) return;
+        if (!character.equipment.find(x => x.id === item.id)) return;
+        shrineWindowState.shrineItem = item;
+        setShrineWindowState(shrineWindowState);
+        break;
     }
   }
 
   const buyMarketItem = (item: MarketItem) => {
-    if (character == null || character.inventoryItems.length >= character.inventorySlots) return false;
+    if (character == null || character.equipment.length >= character.equipmentSlots) return false;
     if (marketplaceWindowState?.buyItem == null) return false;
     if (user.gold < item.price) return;
 
-    character.inventoryItems = character.inventoryItems.concat(marketplaceWindowState?.buyItem?.item);
+    character.equipment = character.equipment.concat(marketplaceWindowState?.buyItem?.item);
     updateCharacter(character);
     marketplaceWindowState.buyItem = undefined;
     marketplaceWindowState.searchResults = marketplaceWindowState.searchResults.filter(x => x.item.id !== item.item.id);
     setMarketplaceWindowState(marketplaceWindowState);
     user.gold -= item.price;
+    return true;
+  }
+
+  const shrineItem = (item: Item) => {
+    const invItem = character.equipment.find(x => x.id === item.id);
+    if (!invItem) return false;
+    character.equipment = character.equipment.filter(x => x.id !== item.id);
+    character.life = Math.min(character.stats[CharacterStats.MaxLife], character.life - 10);//todo heal based on item
+    character.mana = Math.min(character.stats[CharacterStats.MaxMana], character.mana - 20);
+    updateCharacter(character);
     return true;
   }
 
@@ -193,6 +225,7 @@ export function useCharacter() {
     canEquipItem, equipItem,
     canUnequipItem, unequipItem,
     canDoItemAction, doItemAction,
-    buyMarketItem
+    buyMarketItem,
+    shrineItem
   };
 }

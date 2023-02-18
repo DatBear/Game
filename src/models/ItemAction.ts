@@ -7,6 +7,7 @@ export enum ItemAction {
   SetSkill,
   SetSkill2,
   Combine,
+  Shrine,
   // SendToVault,
   // SendToPlayer,
   // TakeFromVault
