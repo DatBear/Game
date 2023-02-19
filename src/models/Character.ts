@@ -46,6 +46,7 @@ type Character = {
 
 
 let defaultCharacterStats: Record<CharacterStats, number> = {
+  [CharacterStats.EnhancedEffect]: 0,
   [CharacterStats.Strength]: 0,
   [CharacterStats.Dexterity]: 0,
   [CharacterStats.Vitality]: 0,

@@ -30,7 +30,7 @@ export default function Window({ children, className, tabbed, close, ...props }:
       return;
     }
     setShow(false);
-  }, [setShow]);
+  }, [setShow, close]);
 
   const onDragEnd = (coords: XYCoord | null) => {
     if (windowRef.current !== null && coords !== null) {
@@ -54,32 +54,36 @@ export default function Window({ children, className, tabbed, close, ...props }:
   </WindowDataContextProvider>
 };
 
-Window.TabList = function ({ children }: React.PropsWithChildren) {
-  return <div className="flex flex-grow place-content-center px-3">
+const WindowTabList = function ({ children }: React.PropsWithChildren) {
+  return (<div className="flex flex-grow place-content-center px-3">
     <Tab.List className="flex flex-row gap-x-2 sm:w-max">
       {children}
     </Tab.List>
-  </div>
+  </div>)
 }
+Window.TabList = WindowTabList;
 
-Window.Tab = function ({ children, className, ...props }: React.PropsWithChildren & Partial<React.HTMLAttributes<HTMLButtonElement>>) {
+const WindowTab = function ({ children, className, ...props }: React.PropsWithChildren & Partial<React.HTMLAttributes<HTMLButtonElement>>) {
   return <Tab className={clsx(className, "ui-selected:bg-stone-700 ui-not-selected:bg-stone-800 outline outline-1 px-2 py-1")} {...props}>{children}</Tab>
 }
+Window.Tab = WindowTab;
 
-Window.TabPanels = function ({ children }: React.PropsWithChildren) {
+const WindowTabPanels = function ({ children }: React.PropsWithChildren) {
   return <Tab.Panels>{children}</Tab.Panels>
 }
+Window.TabPanels = WindowTabPanels;
 
-Window.TabPanel = function ({ children }: React.PropsWithChildren) {
+const WindowTabPanel = function ({ children }: React.PropsWithChildren) {
   return <Tab.Panel>{children}</Tab.Panel>
 }
+Window.TabPanel = WindowTabPanel;
 
 type WindowTitleProps = {
   closeButton?: boolean;
   dragHandle?: boolean;
 } & Partial<React.HTMLAttributes<HTMLDivElement>>;
 
-Window.Title = function ({ closeButton, dragHandle, children, className, ...props }: WindowTitleProps) {
+const Title = function ({ closeButton, dragHandle, children, className, ...props }: WindowTitleProps) {
   const { tabbed } = useWindowData('Title');
 
   let childrenOrTabbedChildren = (function () {
@@ -92,13 +96,14 @@ Window.Title = function ({ closeButton, dragHandle, children, className, ...prop
     {(closeButton ?? true) && <CloseButton />}
   </div>
 }
+Window.Title = Title;
 
-let CloseButton = function () {
+const CloseButton = function () {
   const { closeWindow } = useWindowData('CloseButton');
-  return (<div onClick={() => closeWindow()} className="flex-none w-4 h-4 cursor-pointer"><img src="svg/iconClose.svg" /></div>);
+  return (<div onClick={() => closeWindow()} className="flex-none w-4 h-4 cursor-pointer"><img src="svg/iconClose.svg" alt="close" /></div>);
 };
 
-let DragHandle = function () {
+const DragHandle = function () {
   const dragRef = useRef(null);
   const { windowRef, onDragEnd } = useWindowData('DragHandle');
 
@@ -113,5 +118,5 @@ let DragHandle = function () {
   preview(windowRef);
   drag(dragRef);
 
-  return (<div ref={dragRef} className="flex-none w-4 h-4 cursor-grab"><img src="svg/dragHandle.svg" /></div>)
+  return (<div ref={dragRef} className="flex-none w-4 h-4 cursor-grab"><img src="svg/dragHandle.svg" alt="drag handle" /></div>)
 }

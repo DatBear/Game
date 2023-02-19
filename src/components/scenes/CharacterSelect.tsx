@@ -1,5 +1,5 @@
 import Character, { CharacterClass, defaultCharacterStats, Gender } from "@/models/Character";
-import { classArmors, classWeapons, defaultStats } from "@/models/Item";
+import { classArmors, classWeapons } from "@/models/Item";
 import { clsx } from "clsx";
 import { useState } from "react";
 import CharacterImage from "../CharacterImage";

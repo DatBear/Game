@@ -6,12 +6,12 @@ import Window from "./Window";
 
 function StatsWindow() {
   const { closeWindow } = useWindow(UIWindow.Stats);
-  const { character, useStatPoint } = useCharacter();
+  const { character, addStatPoint } = useCharacter();
 
   const labelClasses = clsx("text-right");
 
-  const addStatPoint = (stat: CharacterStats) => {
-    useStatPoint(stat);
+  const spendStatPoint = (stat: CharacterStats) => {
+    addStatPoint(stat);
   }
 
   const canAddStat = character.statPoints > 0;
@@ -29,22 +29,22 @@ function StatsWindow() {
           <label className={labelClasses}>Strength:</label>
           <span className="flex flex-row items-center justify-between">
             {character.stats[CharacterStats.Strength]}
-            {canAddStat && <div onClick={_ => addStatPoint(CharacterStats.Strength)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div>}
+            {canAddStat && <div onClick={_ => spendStatPoint(CharacterStats.Strength)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
           </span>
           <label className={labelClasses}>Dexterity:</label>
           <span className="flex flex-row items-center justify-between">
             {character.stats[CharacterStats.Dexterity]}
-            {canAddStat && <div onClick={_ => addStatPoint(CharacterStats.Dexterity)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div>}
+            {canAddStat && <div onClick={_ => spendStatPoint(CharacterStats.Dexterity)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
           </span>
           <label className={labelClasses}>Intelligence:</label>
           <span className="flex flex-row items-center justify-between">
             {character.stats[CharacterStats.Intelligence]}
-            {canAddStat && <div onClick={_ => addStatPoint(CharacterStats.Intelligence)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div>}
+            {canAddStat && <div onClick={_ => spendStatPoint(CharacterStats.Intelligence)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
           </span>
           <label className={labelClasses}>Vitality:</label>
           <span className="flex flex-row items-center justify-between">
             {character.stats[CharacterStats.Vitality]}
-            {canAddStat && <div onClick={_ => addStatPoint(CharacterStats.Vitality)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div>}
+            {canAddStat && <div onClick={_ => spendStatPoint(CharacterStats.Vitality)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
           </span>
           <label className={labelClasses}>Stat Points:</label>
           <span>{character.statPoints}</span>

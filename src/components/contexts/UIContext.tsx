@@ -109,16 +109,16 @@ export function useUI() {
 
 export function useWindow<T>(window: UIWindow) {
   const { setWindowState: setWindowsState, windowStates } = useUI();
-  const setWindowState = (state: UIWindowState & T) => {
+  const windowState = windowStates ? windowStates[window] as T : null;
+
+  const setWindowState = useCallback((state: UIWindowState & T) => {
     setWindowsState(window, state)
-  }
+  }, [setWindowsState, window]);
 
   const closeWindow = useCallback(() => {
     setWindowState({ ...windowState, isVisible: false } as UIWindowState & T);
-  }, [setWindowState, windowStates]);
+  }, [setWindowState, windowState]);
 
-
-  const windowState = windowStates ? windowStates[window] as T : null;
   return {
     setWindowState, closeWindow, windowState
   }

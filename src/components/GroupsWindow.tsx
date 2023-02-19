@@ -57,7 +57,7 @@ export default function GroupsWindow() {
           <hr className="py-3" />
           <div className="flex flex-row gap-x-5 place-content-center">
             <div className="flex flex-row gap-x-2">
-              <img src="svg/iconRefresh.svg" />
+              <img src="svg/iconRefresh.svg" alt="refresh" />
               <label className="flex flex-row place-content-center items-center">
                 <input type="checkbox" /><span className="px-1">All</span>
               </label>

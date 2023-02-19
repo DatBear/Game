@@ -136,7 +136,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, equippableClass, "flex-none border relative bg-stone-900", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} {...props}>
       {children}
       {item && !isDragging && <>
-        <img src={iconPath} className="absolute inset-0 p-1 mx-auto w-full h-full" />
+        <img src={iconPath} className="absolute inset-0 p-1 mx-auto w-full h-full" alt={itemNames[item.subType]} />
         {!small && <>
           {Object.keys(item.stats).length > 0 && <span className="absolute top-0 left-0 px-1">+{Object.keys(item.stats).length}</span>}
           {item.tier > 0 && <span className="absolute top-0 right-0 px-1">{itemTiers[item.tier]}</span>}
@@ -144,11 +144,11 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
         {item.quantity && <span className={clsx(small && "text-2xs", "absolute bottom-0 left-0 px-px")}>{item.quantity}</span>}
       </>}
     </div>
-    {item && item.tier > 0 && !isDragging && <Tooltip anchorSelect={`#${id}`} className="absolute item-tooltip" positionStrategy="absolute" noArrow>
+    {item && item.tier > 0 && !isDragging && <Tooltip anchorSelect={`#${id}`} className="absolute item-tooltip" positionStrategy="absolute" style={{ zIndex: 1 }}>
       <div className="flex flex-row">
-        <div className="flex flex-col p-2 bg-stone-900 text-white relative border border-cyan-300" style={{ zIndex: 1 }}>
+        <div className="flex flex-col p-2 bg-stone-900 text-white relative border border-cyan-300">
           <div className="absolute flex justify-center items-center w-full h-full">
-            <img src={iconPath} className="w-3/5 h-3/5 opacity-50" />
+            <img src={iconPath} className="w-3/5 h-3/5 opacity-50" alt="" />
           </div>
 
           <div className="relative flex flex-col">

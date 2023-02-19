@@ -173,7 +173,7 @@ let itemNames: Record<ItemSubType, string> = {
   [ItemSubType.Potion]: "Potion",
   [ItemSubType.Totem]: "Totem",
   [ItemSubType.Map]: "Map",
-  [ItemSubType.FishingRod]: "FishingRod",
+  [ItemSubType.FishingRod]: "Fishing Rod",
   [ItemSubType.Essence]: "Essence",
 }
 
@@ -183,7 +183,7 @@ let classWeapons: Record<CharacterClass, ItemSubType[]> = {
   [CharacterClass.Rogue]: [ItemSubType.Sword, ItemSubType.Club, ItemSubType.Axe, ItemSubType.Dagger, ItemSubType.Staff, ItemSubType.Spear],
   [CharacterClass.Magician]: [ItemSubType.Staff, ItemSubType.Dagger],
   [CharacterClass.Guardian]: [ItemSubType.Club, ItemSubType.Longsword, ItemSubType.Warhammer, ItemSubType.Battleaxe, ItemSubType.Spear, ItemSubType.Polearm],
-  [CharacterClass.Samurai]: [ItemSubType.Sword, ItemSubType.Dagger, ItemSubType.Longsword],//todo fill out
+  [CharacterClass.Samurai]: [ItemSubType.Sword, ItemSubType.Dagger, ItemSubType.Longsword],
   [CharacterClass.Paladin]: [ItemSubType.Sword, ItemSubType.Club, ItemSubType.Axe, ItemSubType.Longsword, ItemSubType.Warhammer, ItemSubType.Battleaxe, ItemSubType.Polearm],
   [CharacterClass.Monk]: [ItemSubType.Dagger, ItemSubType.Staff, ItemSubType.Spear],
   [CharacterClass.Ninja]: [ItemSubType.Sword, ItemSubType.Dagger, ItemSubType.Spear],

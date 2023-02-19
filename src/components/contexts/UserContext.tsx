@@ -276,6 +276,6 @@ export function useCharacter() {
     canDoItemAction, doItemAction,
     buyMarketItem,
     shrineItem,
-    useStatPoint
+    addStatPoint: useStatPoint
   };
 }

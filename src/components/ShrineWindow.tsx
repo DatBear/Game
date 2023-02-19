@@ -25,7 +25,7 @@ export default function ShrineWindow() {
         <ProgressBar current={character.life} max={character.stats[CharacterStats.MaxLife]} color="red" />
         <ProgressBar current={character.mana} max={character.stats[CharacterStats.MaxMana]} color="blue" />
       </div>
-      <img className="h-96 self-center bottom-1 absolute" src="svg/iconStatue.svg" />
+      <img className="h-96 self-center bottom-1 absolute" src="svg/iconStatue.svg" alt="" />
       <div className="flex-grow flex flex-col gap-y-3 items-center place-content-end h-96 relative">
         <div className="text-center">Drag and drop the Item you wish to sacrifice to the box below.</div>
         <ItemSlot action={ItemAction.Shrine} item={windowState?.shrineItem} />

@@ -22,16 +22,12 @@ const marketItems: MarketItem[] = [
   { price: 160, item: { id: uuid(), subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 130, [CharacterStats.MaxMana]: 100 }, tier: 3, quantity: 20 } },
 ];
 
-//let buyItem: MarketItem = marketItems[0];
-//let sellItem: Item = marketItems[1].item;
-let transferItem: Item = marketItems[2].item;
-
 function MarketItemSlot({ marketItem, action }: { marketItem?: MarketItem, action?: ItemAction }) {
   return (<div className="flex flex-col w-16">
     <ItemSlot item={marketItem?.item} action={action} />
     {marketItem && <div className="flex flex-row bg-stone-500/50 items-center w-16">
       <span className="flex-grow text-right px-1">{marketItem.price}</span>
-      <img src="svg/iconGold.svg" />
+      <img src="svg/iconGold.svg" alt="gold" />
     </div>}
   </div>)
 }
@@ -67,7 +63,6 @@ export default function MarketplaceWindow() {
 
 
   useEffect(() => {
-    //todo remove this effect
     setWindowState({ ...windowState, isVisible: windowState?.isVisible ?? false, searchResults: marketItems });
   }, []);
 
@@ -79,7 +74,7 @@ export default function MarketplaceWindow() {
     if (!windowState?.buyItem) return;
     var item = windowState.buyItem;
     if (buyMarketItem(item)) {
-      //?
+      //sound?
     }
   }
 
