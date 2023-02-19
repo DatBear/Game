@@ -42,5 +42,21 @@ let Fishing: Skill = {
   inputsRequired: ['Level']
 }
 
-export { Cooking, Suffusencing, Glyphing, Transmuting, Fishing };
+export enum SkillType {
+  Fishing,
+  Cooking,
+  Suffusencing,
+  Glyphing,
+  Transmuting
+};
+
+let allSkills: Record<SkillType, Skill> = {
+  [SkillType.Fishing]: Fishing,
+  [SkillType.Cooking]: Cooking,
+  [SkillType.Suffusencing]: Suffusencing,
+  [SkillType.Glyphing]: Glyphing,
+  [SkillType.Transmuting]: Transmuting
+}
+
+export { allSkills, Cooking, Suffusencing, Glyphing, Transmuting, Fishing };
 export default Skill;

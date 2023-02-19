@@ -1,6 +1,6 @@
 import Item from "@/models/Item";
 import MarketItem from "@/models/MarketItem";
-import { Cooking, Transmuting, Suffusencing, Fishing, Glyphing } from "@/models/Skill";
+import { Cooking, Transmuting, Suffusencing, Fishing, Glyphing, SkillType } from "@/models/Skill";
 import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import GroupsWindow from "../GroupsWindow";
 import InventoryWindow from "../InventoryWindow";
@@ -38,6 +38,10 @@ export type UIShrineWindowState = UIWindowState & {
   shrineItem?: Item;
 }
 
+export type UISkillWindowState = UIWindowState & {
+  items: Item[];
+}
+
 type WindowRecord<T> = Record<UIWindow, T & UIWindowState>;
 
 type UIContextProps = {
@@ -52,11 +56,11 @@ let defaultWindowState: WindowRecord<any> = {
   [UIWindow.Groups]: { isVisible: false },
   [UIWindow.Shrine]: { isVisible: false } as UIShrineWindowState,
   [UIWindow.Marketplace]: { isVisible: false, searchResults: [] } as UIMarketplaceWindowState,
-  [UIWindow.Cooking]: { isVisible: false },
-  [UIWindow.Transmuting]: { isVisible: false },
-  [UIWindow.Suffusencing]: { isVisible: false },
-  [UIWindow.Fishing]: { isVisible: false },
-  [UIWindow.Glyphing]: { isVisible: false },
+  [UIWindow.Fishing]: { isVisible: false, items: Array(1) } as UISkillWindowState,
+  [UIWindow.Cooking]: { isVisible: false, items: Array(1) } as UISkillWindowState,
+  [UIWindow.Transmuting]: { isVisible: false, items: Array(2) } as UISkillWindowState,
+  [UIWindow.Suffusencing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
+  [UIWindow.Glyphing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
   [UIWindow.Stats]: { isVisible: true },
 }
 
@@ -86,11 +90,11 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
           {renderWindow(UIWindow.Groups, <GroupsWindow />)}
           {renderWindow(UIWindow.Shrine, <ShrineWindow />)}
           {renderWindow(UIWindow.Marketplace, <MarketplaceWindow />)}
-          {renderWindow(UIWindow.Cooking, <SkillingWindow skill={Cooking} window={UIWindow.Cooking} />)}
-          {renderWindow(UIWindow.Fishing, <SkillingWindow skill={Fishing} window={UIWindow.Fishing} />)}
-          {renderWindow(UIWindow.Transmuting, <SkillingWindow skill={Transmuting} window={UIWindow.Transmuting} />)}
-          {renderWindow(UIWindow.Glyphing, <SkillingWindow skill={Glyphing} window={UIWindow.Glyphing} />)}
-          {renderWindow(UIWindow.Suffusencing, <SkillingWindow skill={Suffusencing} window={UIWindow.Suffusencing} />)}
+          {renderWindow(UIWindow.Cooking, <SkillingWindow skillType={SkillType.Cooking} window={UIWindow.Cooking} />)}
+          {renderWindow(UIWindow.Fishing, <SkillingWindow skillType={SkillType.Fishing} window={UIWindow.Fishing} />)}
+          {renderWindow(UIWindow.Transmuting, <SkillingWindow skillType={SkillType.Transmuting} window={UIWindow.Transmuting} />)}
+          {renderWindow(UIWindow.Glyphing, <SkillingWindow skillType={SkillType.Glyphing} window={UIWindow.Glyphing} />)}
+          {renderWindow(UIWindow.Suffusencing, <SkillingWindow skillType={SkillType.Suffusencing} window={UIWindow.Suffusencing} />)}
           {renderWindow(UIWindow.Stats, <StatsWindow />)}
         </div>
       </div>

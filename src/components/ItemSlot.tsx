@@ -1,6 +1,7 @@
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item, { itemIcons, itemTiers, ItemSubType, ItemType, getItemType } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
+import { SkillType } from "@/models/Skill";
 import clsx from "clsx";
 import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
@@ -15,6 +16,7 @@ type ItemProps = {
   small?: boolean;
   slot?: EquippedItemSlot;
   action?: ItemAction;
+  skill?: SkillType;
   acceptTypes?: ItemType[];
   acceptSubTypes?: ItemSubType[];
   acceptMaxTier?: number;
@@ -27,7 +29,7 @@ type DragObject = {
   slot?: EquippedItemSlot;
 };
 
-export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, noDrag, children, className, ...props }: ItemProps) {
+export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, skill, noDrag, children, className, ...props }: ItemProps) {
   const ref = useRef(null);
   const { character, hasSelectedCharacter,
     canEquipItem, equipItem,
@@ -47,7 +49,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
       }
       if (action != null && draggedItem != null) {
         //console.log('action', canDoItemAction(draggedItem, action));
-        return canDoItemAction(draggedItem, action);
+        return canDoItemAction(draggedItem, action, skill);
       }
 
       let canDrop = draggedItem != null;
@@ -76,7 +78,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
         return unequipItem(draggedSlot);
       }
       if (action != null && draggedItem != null) {
-        return doItemAction(draggedItem, action);
+        return doItemAction(draggedItem, action, skill);
       }
     },
     collect(monitor) {
@@ -114,7 +116,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     }
   }
 
-  return (<div ref={ref} className={clsx("item", className, sizeClass, dragClass, dropClass, "flex-none border relative bg-stone-900")} {...props}>
+  return (<div ref={ref} className={clsx("item", className, sizeClass, dragClass, dropClass, "flex-none border relative bg-stone-900", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} {...props}>
     <>
       {children}
       {item && !isDragging && <>

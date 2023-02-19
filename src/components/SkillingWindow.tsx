@@ -1,25 +1,27 @@
-import gs from "@/styles/game.module.css";
-import Skill from "@/models/Skill";
+import Skill, { allSkills, SkillType } from "@/models/Skill";
 import Window from "./Window";
 import ItemSlot from "./ItemSlot";
-import { UIWindow, useWindow } from "./contexts/UIContext";
+import { UISkillWindowState, UIWindow, useWindow } from "./contexts/UIContext";
 import { useCallback } from "react";
+import { ItemAction } from "@/models/ItemAction";
 
 type SkillingWindowProps = {
-  skill: Skill;
+  skillType: SkillType;
   window: UIWindow;
 };
 
-export default function SkillingWindow({ skill, window }: SkillingWindowProps) {
-  let minSkillUpTier = skill.name !== 'Fishing' ? 'Tier I' : '';//todo implement
-  const { closeWindow } = useWindow(window);
+export default function SkillingWindow({ skillType, window }: SkillingWindowProps) {
+  const skill = allSkills[skillType];
+  let minSkillUpTier = skillType !== SkillType.Fishing ? 'Tier I' : '';//todo implement
+  const { closeWindow, windowState, setWindowState } = useWindow<UISkillWindowState>(window);
 
+  console.log('items', windowState?.items);
   return <Window className="!w-96" close={() => closeWindow()}>
     <Window.Title>{skill.name}</Window.Title>
     <div className="flex flex-col gap-y-3 items-center">
       <div className="text-center">{skill.directions}</div>
       <div className="flex flex-row gap-x-3 items-center">
-        {[...Array(skill.itemsRequired)].map((_, idx) => <ItemSlot key={idx} />)}
+        {[...Array(windowState?.items?.length ?? 0)].map((_, idx) => <ItemSlot key={idx} item={windowState?.items[idx]} action={idx == 0 ? ItemAction.SetSkill : ItemAction.SetSkill2} skill={skillType} />)}
       </div>
       {minSkillUpTier !== '' && <span>Minimum To Skill Up: {minSkillUpTier}</span>}
       {(skill.inputsRequired?.length ?? 0) > 0 && skill.inputsRequired?.map(x => {

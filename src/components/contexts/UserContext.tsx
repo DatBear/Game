@@ -3,27 +3,34 @@ import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item, { classArmors, classCharms, classWeapons, defaultEquippedItems, ItemSubType } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
 import MarketItem from "@/models/MarketItem";
+import { SkillType } from "@/models/Skill";
 import { CharacterStats } from "@/models/Stats";
 import User from "@/models/User";
 import { createContext, useCallback, useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { UIMarketplaceWindowState, UIShrineWindowState, UIWindow, useUI, useWindow } from "./UIContext";
+import { UIMarketplaceWindowState, UIShrineWindowState, UISkillWindowState, UIWindow, useUI, useWindow } from "./UIContext";
 
-const defaultInventoryItems = [
-  { id: uuid(), subType: ItemSubType.Club, stats: { [CharacterStats.Strength]: 1 }, tier: 4 },
-  { id: uuid(), subType: ItemSubType.Club, stats: { [CharacterStats.Dexterity]: 3 }, tier: 3 },
-  { id: uuid(), subType: ItemSubType.PaddedRobe, stats: { [CharacterStats.Intelligence]: 1, [CharacterStats.FireMastery]: 1 }, tier: 3 },
-  { id: uuid(), subType: ItemSubType.Fire, stats: { [CharacterStats.EnhancedEffect]: 20 }, tier: 3 },
-  { id: uuid(), subType: ItemSubType.Fire, stats: {}, tier: 2 },
-  { id: uuid(), subType: ItemSubType.PlateMail, stats: { [CharacterStats.MaxLife]: 60 }, tier: 1 }
+const defaultEquipment = [
+  { subType: ItemSubType.Club, stats: { [CharacterStats.Strength]: 1 }, tier: 4 },
+  { subType: ItemSubType.Club, stats: { [CharacterStats.Dexterity]: 3 }, tier: 3 },
+  { subType: ItemSubType.PaddedRobe, stats: { [CharacterStats.Intelligence]: 1, [CharacterStats.FireMastery]: 1 }, tier: 3 },
+  { subType: ItemSubType.Fire, stats: { [CharacterStats.EnhancedEffect]: 20 }, tier: 3 },
+  { subType: ItemSubType.Fire, stats: {}, tier: 2 },
+  { subType: ItemSubType.PlateMail, stats: { [CharacterStats.MaxLife]: 60 }, tier: 1 },
 ];
+
+const defaultItems = [
+  { subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 100 }, tier: 3, quantity: 12 },
+  { subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 100 }, tier: 3, quantity: 1 },
+  { subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 100 }, tier: 3, quantity: 20 },
+  { subType: ItemSubType.FishingRod, stats: { [CharacterStats.EnhancedEffect]: 10 }, tier: 1 },
+]
 
 const defaultPartialCharacter: Partial<Character> = {
   level: 1,
   stats: defaultCharacterStats,
   life: defaultCharacterStats[CharacterStats.MaxLife],
   mana: defaultCharacterStats[CharacterStats.MaxMana],
-  items: [],
   experience: 0,
   equipmentSlots: 8,
   statPoints: 10,//todo add on mq
@@ -52,7 +59,8 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
       ...character,
       ...defaultPartialCharacter,
       equippedItems: defaultEquippedItems[character.class],
-      equipment: [...defaultInventoryItems.map(x => ({ ...x, id: uuid() }))],
+      equipment: [...defaultEquipment.map(x => ({ ...x, id: uuid() }))],
+      items: [...defaultItems.map(x => ({ ...x, id: uuid() }))],
       stats: { ...defaultCharacterStats, ...classStats[character.class] }
     } as Character;
     setUser(user => ({ ...user, characters: user.characters.concat(char) }));
@@ -108,6 +116,14 @@ export function useCharacter() {
   const { user, updateCharacter } = useUser();
   const { windowState: marketplaceWindowState, setWindowState: setMarketplaceWindowState } = useWindow<UIMarketplaceWindowState>(UIWindow.Marketplace);
   const { windowState: shrineWindowState, setWindowState: setShrineWindowState } = useWindow<UIShrineWindowState>(UIWindow.Shrine);
+  const skillWindows: Record<SkillType, ReturnType<typeof useWindow<UISkillWindowState>>> = {
+    [SkillType.Fishing]: useWindow<UISkillWindowState>(UIWindow.Fishing),
+    [SkillType.Cooking]: useWindow<UISkillWindowState>(UIWindow.Cooking),
+    [SkillType.Suffusencing]: useWindow<UISkillWindowState>(UIWindow.Suffusencing),
+    [SkillType.Glyphing]: useWindow<UISkillWindowState>(UIWindow.Glyphing),
+    [SkillType.Transmuting]: useWindow<UISkillWindowState>(UIWindow.Transmuting)
+  }
+  const { windowState: fishingWindowState, setWindowState: setFishingWindowState } = useWindow<UISkillWindowState>(UIWindow.Fishing);
   const character = user.selectedCharacter!
 
   function equipItem(item: Item, slot: EquippedItemSlot) {
@@ -163,22 +179,33 @@ export function useCharacter() {
     return character.equipment.length < character.equipmentSlots;
   }, [character]);
 
-  const canDoItemAction = (item: Item, action: ItemAction): boolean => {
+  const canDoItemAction = (item: Item, action: ItemAction, skill?: SkillType): boolean => {
     switch (action) {
       case ItemAction.Sell:
-        return character.equipment.find(x => x.id === item.id) != undefined;
+        return character.equipment.find(x => x.id === item.id) !== undefined;
       case ItemAction.Buy:
         return marketplaceWindowState?.searchResults.find(x => x.item.id === item.id) !== undefined;
       case ItemAction.Transfer:
-        return character.equipment.find(x => x.id === item.id) != undefined;
+        return character.equipment.find(x => x.id === item.id) !== undefined;
       case ItemAction.Shrine:
-        return character.equipment.find(x => x.id === item.id) != undefined && Object.keys(item.stats).length > 0;
+        return character.equipment.find(x => x.id === item.id) !== undefined && Object.keys(item.stats).length > 0;
+      case ItemAction.SetSkill:
+        if (skill === undefined) return false;
+        switch (skill) {
+          case SkillType.Fishing:
+            console.log('fishing', character.items.find(x => x.id === item.id) !== undefined && item.subType == ItemSubType.FishingRod);
+            return character.items.find(x => x.id === item.id) !== undefined && item.subType == ItemSubType.FishingRod;
+          case SkillType.Cooking:
+            return character.items.find(x => x.id === item.id) !== undefined && item.subType === ItemSubType.Fish;
+          //todo glyphing, transmuting, suffusencing
+        }
+        break;
     }
     return true;
   }
 
-  const doItemAction = (item: Item, action: ItemAction) => {
-    if (!canDoItemAction(item, action)) return;
+  const doItemAction = (item: Item, action: ItemAction, skill?: SkillType) => {
+    if (!canDoItemAction(item, action, skill)) return;
     switch (action) {
       case ItemAction.Sell:
         if (!marketplaceWindowState) return;
@@ -201,6 +228,12 @@ export function useCharacter() {
         if (!character.equipment.find(x => x.id === item.id)) return;
         shrineWindowState.shrineItem = item;
         setShrineWindowState(shrineWindowState);
+        break;
+      case ItemAction.SetSkill:
+      case ItemAction.SetSkill2:
+        if (skill === undefined || !skillWindows[skill] || !skillWindows[skill].windowState) return;
+        skillWindows[skill].windowState!.items[action == ItemAction.SetSkill ? 0 : 1] = item;
+        skillWindows[skill].setWindowState(skillWindows[skill].windowState!);
         break;
     }
   }

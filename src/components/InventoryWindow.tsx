@@ -1,17 +1,9 @@
 import { EquippedItemSlot } from "@/models/EquippedItem";
-import Item, { classArmors, classCharms, classWeapons, ItemSubType, ItemType } from "@/models/Item";
-import { useCallback } from "react";
-import { v4 as uuid } from "uuid";
+import Item, { classArmors, classCharms, classWeapons, ItemSubType } from "@/models/Item";
 import { UIWindow, useWindow } from "./contexts/UIContext";
 import { useCharacter, useUser } from "./contexts/UserContext";
 import ItemSlot from "./ItemSlot";
 import Window from "./Window";
-
-let items: Item[] = [
-  { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 12 },
-  { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 1 },
-  { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 20 },
-]
 
 let itemSlots = 16;
 
@@ -53,7 +45,7 @@ function InventoryWindow() {
         <span>Items</span>
         <div className="flex flex-wrap place-content-center gap-x-2 gap-y-3">
           <div className="grid grid-cols-8 gap-x-2 gap-y-2">
-            {items.concat([...Array(itemSlots - items.length)]).map((x, idx) => {
+            {character.items.concat([...Array(16 - character.items.length)]).map((x, idx) => {
               return <ItemSlot key={idx} item={x} small />
             })}
           </div>
