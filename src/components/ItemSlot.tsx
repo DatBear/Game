@@ -9,6 +9,7 @@ import { useCharacter } from "./contexts/UserContext";
 import { Tooltip } from "react-tooltip"
 import { CharacterStats, itemSpecificStatNames, statNames } from "@/models/Stats";
 import calculatedItemStats from "@/models/CalculatedItemStat";
+import { recordKeys } from "@/utils/RecordUtils";
 
 const dragType = "Item";
 
@@ -30,7 +31,17 @@ type DragObject = {
   slot?: EquippedItemSlot;
 };
 
+const typeSlots: Partial<Record<ItemType, EquippedItemSlot>> = {
+  [ItemType.Weapon]: EquippedItemSlot.Weapon,
+  [ItemType.Armor]: EquippedItemSlot.Armor,
+  [ItemType.Charm]: EquippedItemSlot.Charm,
+}
+
 export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, skill, noDrag, noTooltip, children, className, ...props }: ItemProps) {
+  const prefix = itemMagicPrefixes[Object.keys(item?.stats ?? 0).length];
+  const type = item && getItemType(item.subType);
+  const iconPath = !item ? '' : `svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`;
+
   const ref = useRef(null);
   const id = useId().replaceAll(':', '');
   const { character, hasSelectedCharacter,
@@ -108,6 +119,11 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
   }
 
   let sizeClass = small ? "w-6 h-6" : "w-16 h-16";
+  let equippableClass = item && type !== undefined && character && !slot && !isDragging
+    && [ItemType.Weapon, ItemType.Armor, ItemType.Charm].indexOf(type) > -1
+    && !canEquipItem(item, typeSlots[getItemType(item.subType)]!)
+    ? "bg-red-600/20"
+    : "";
   let dragClass = isDragging ? '!border-green-500/25' : '';
   let dropClass = '';
   if (isOver) {
@@ -116,12 +132,8 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     }
   }
 
-  const prefix = itemMagicPrefixes[Object.keys(item?.stats ?? 0).length];
-  const type = item && getItemType(item.subType);
-  const iconPath = !item ? '' : `svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`;
-
   return (<>
-    <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, "flex-none border relative bg-stone-900", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} {...props}>
+    <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, equippableClass, "flex-none border relative bg-stone-900", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} {...props}>
       {children}
       {item && !isDragging && <>
         <img src={iconPath} className="absolute inset-0 p-1 mx-auto w-full h-full" />
@@ -141,11 +153,11 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
 
           <div className="relative flex flex-col">
             <div className="w-max"><b>{prefix} {itemNames[item.subType]} {itemTiers[item.tier]}</b></div>
-            {calculatedItemStats.filter(x => x.hasStat(item, character)).map(x => <div key={x.name}>{x.name}: {x.value(item, character)}</div>)}
-            {Object.keys(item.stats).map((k, idx) => {
+            {calculatedItemStats.filter(x => x.hasStat(item, character)).map(x => <div key={x.name} className={x.class && x.class(item, character)}>{x.name}: {x.value(item, character)}</div>)}
+            {recordKeys(item.stats).map(k => {
               const statNamesRecord = type === ItemType.Item ? itemSpecificStatNames : statNames;
-              const statName = statNamesRecord[parseInt(k) as CharacterStats];
-              const value = item.stats[parseInt(k) as CharacterStats]?.toString() ?? '';
+              const statName = statNamesRecord[k];
+              const value = item.stats[k as CharacterStats]?.toString() ?? '';
               const isReplace = statName.indexOf('{x}') > -1;
               const replaced = `${isReplace ? '' : '+'}${isReplace ? '' : value}${(statName.startsWith('%') ? '' : ' ')}${statName.replaceAll('{x}', value)}`
               return <div key={k}>{replaced}</div>

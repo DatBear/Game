@@ -183,28 +183,29 @@ let classWeapons: Record<CharacterClass, ItemSubType[]> = {
   [CharacterClass.Rogue]: [ItemSubType.Sword, ItemSubType.Club, ItemSubType.Axe, ItemSubType.Dagger, ItemSubType.Staff, ItemSubType.Spear],
   [CharacterClass.Magician]: [ItemSubType.Staff, ItemSubType.Dagger],
   [CharacterClass.Guardian]: [ItemSubType.Club, ItemSubType.Longsword, ItemSubType.Warhammer, ItemSubType.Battleaxe, ItemSubType.Spear, ItemSubType.Polearm],
-  [CharacterClass.Samurai]: [],//todo fill out
-  [CharacterClass.Paladin]: [],
-  [CharacterClass.Monk]: [],
-  [CharacterClass.Ninja]: [],
-  [CharacterClass.Warlock]: [],
-  [CharacterClass.Headhunter]: [],
+  [CharacterClass.Samurai]: [ItemSubType.Sword, ItemSubType.Dagger, ItemSubType.Longsword],//todo fill out
+  [CharacterClass.Paladin]: [ItemSubType.Sword, ItemSubType.Club, ItemSubType.Axe, ItemSubType.Longsword, ItemSubType.Warhammer, ItemSubType.Battleaxe, ItemSubType.Polearm],
+  [CharacterClass.Monk]: [ItemSubType.Dagger, ItemSubType.Staff, ItemSubType.Spear],
+  [CharacterClass.Ninja]: [ItemSubType.Sword, ItemSubType.Dagger, ItemSubType.Spear],
+  [CharacterClass.Warlock]: [ItemSubType.Staff],
+  [CharacterClass.Headhunter]: [ItemSubType.Axe, ItemSubType.Battleaxe],
   [CharacterClass.Alchemist]: []
 }
 
+let allArmors = [...itemTypes[ItemType.Armor]];
 let classArmors: Record<CharacterClass, ItemSubType[]> = {
-  [CharacterClass.Fighter]: [ItemSubType.Robe, ItemSubType.PaddedRobe, ItemSubType.LeatherArmor, ItemSubType.ScaleArmor, ItemSubType.ChainMail, ItemSubType.PlateMail],
-  [CharacterClass.Barbarian]: [ItemSubType.Robe, ItemSubType.PaddedRobe, ItemSubType.LeatherArmor, ItemSubType.ScaleArmor, ItemSubType.ChainMail, ItemSubType.PlateMail],
+  [CharacterClass.Fighter]: allArmors,
+  [CharacterClass.Barbarian]: allArmors,
   [CharacterClass.Rogue]: [ItemSubType.Robe, ItemSubType.PaddedRobe, ItemSubType.LeatherArmor, ItemSubType.ScaleArmor],
   [CharacterClass.Magician]: [ItemSubType.Robe, ItemSubType.PaddedRobe],
   [CharacterClass.Guardian]: [ItemSubType.ChainMail, ItemSubType.PlateMail],
-  [CharacterClass.Samurai]: [],//todo fill out
-  [CharacterClass.Paladin]: [],
-  [CharacterClass.Monk]: [],
-  [CharacterClass.Ninja]: [],
-  [CharacterClass.Warlock]: [],
-  [CharacterClass.Headhunter]: [],
-  [CharacterClass.Alchemist]: []
+  [CharacterClass.Samurai]: allArmors,
+  [CharacterClass.Paladin]: allArmors,
+  [CharacterClass.Monk]: [ItemSubType.Robe, ItemSubType.PaddedRobe],
+  [CharacterClass.Ninja]: [ItemSubType.Robe, ItemSubType.PaddedRobe],
+  [CharacterClass.Warlock]: [ItemSubType.Robe, ItemSubType.PaddedRobe],
+  [CharacterClass.Headhunter]: [ItemSubType.Robe, ItemSubType.PaddedRobe, ItemSubType.LeatherArmor, ItemSubType.ScaleArmor],
+  [CharacterClass.Alchemist]: [ItemSubType.Robe, ItemSubType.PaddedRobe]
 };
 
 

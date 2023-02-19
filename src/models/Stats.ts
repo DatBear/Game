@@ -59,7 +59,7 @@ export enum ItemStats {
   LevelCap,
 }
 
-const statNames: Record<CharacterStats, string> = {
+const statNames: Record<Stats, string> = {
   [CharacterStats.EnhancedEffect]: "% Enhanced Effect",
   [CharacterStats.Strength]: "Strength",
   [CharacterStats.Dexterity]: "Dexterity",
@@ -98,13 +98,27 @@ const statNames: Record<CharacterStats, string> = {
   [CharacterStats.PowerShot]: "% Power Shot",
   [CharacterStats.GlancingBlow]: "% Glancing Blow",
   [CharacterStats.Jubilance]: "Jubilance",
+  [ItemStats.WarmLights]: "Warm Lights",
+  [ItemStats.EvilPresences]: "Evil Presences",
+  [ItemStats.TreasureChests]: "Treasure Chests",
+  [ItemStats.Rooms]: "Rooms",
+  [ItemStats.WarmLightEffectiveness]: "% Warm Light Effectiveness",
+  [ItemStats.MonsterDifficulty]: "% Monster Difficulty",
+  [ItemStats.ExperienceGained]: "% Experience Gained",
+  [ItemStats.ItemDrops]: "% Item Drops",
+  [ItemStats.ItemQuality]: "% Item Quality",
+  [ItemStats.Swarm]: "% Swarm",
+  [ItemStats.GuildPoints]: "% Guild Points",
+  [ItemStats.LevelUp]: "% Level Up",
+  [ItemStats.LevelCap]: "Level Cap"
 }
 
 
-const itemSpecificStatNames: Record<CharacterStats, string> = {
+const itemSpecificStatNames: Record<Stats, string> = {
   ...statNames,
   [CharacterStats.MaxLife]: "Heals {x} Life",
   [CharacterStats.MaxMana]: "Recovers {x} Mana",
+  [CharacterStats.ExperienceGained]: "% Cooked"
 }
 
 

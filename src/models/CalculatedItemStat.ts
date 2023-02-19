@@ -3,6 +3,7 @@ import Item, { getItemType, ItemSubType, ItemType } from "./Item";
 
 type CalculatedItemStat = {
   name: string;
+  class?: (item: Item, character: Character) => string;
   hasStat: (item: Item, character: Character) => boolean;
   value: (item: Item, character: Character) => string;
 }
@@ -10,6 +11,9 @@ type CalculatedItemStat = {
 const calculatedItemStats: CalculatedItemStat[] = [
   {
     name: 'Level Req',
+    class: (item, character) => {
+      return character.level < (item.tier - 3) * 5 ? "text-red-500" : "";
+    },
     hasStat: (item, character) => {
       return item.tier > 3;
     },

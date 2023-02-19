@@ -1,4 +1,4 @@
-import Item from "./Item";
+import Item, { ItemType } from "./Item";
 
 export enum EquippedItemSlot {
   Weapon = "Weapon",
