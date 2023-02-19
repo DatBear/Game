@@ -1,6 +1,6 @@
 import Character, { classStats, defaultCharacterStats } from "@/models/Character";
 import { EquippedItemSlot } from "@/models/EquippedItem";
-import Item, { classArmors, classCharms, classWeapons, defaultEquippedItems, defaultStats, getItemType, ItemSubType, ItemType } from "@/models/Item";
+import Item, { classArmors, classCharms, classWeapons, defaultEquippedItems, ItemSubType } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
 import MarketItem from "@/models/MarketItem";
 import { CharacterStats } from "@/models/Stats";
@@ -10,12 +10,12 @@ import { v4 as uuid } from "uuid";
 import { UIMarketplaceWindowState, UIShrineWindowState, UIWindow, useUI, useWindow } from "./UIContext";
 
 const defaultInventoryItems = [
-  { id: uuid(), subType: ItemSubType.Club, stats: defaultStats, tier: 4 },
-  { id: uuid(), subType: ItemSubType.Club, stats: defaultStats, tier: 3 },
-  { id: uuid(), subType: ItemSubType.PaddedRobe, stats: defaultStats, tier: 3 },
-  { id: uuid(), subType: ItemSubType.Fire, stats: defaultStats, tier: 3 },
-  { id: uuid(), subType: ItemSubType.Fire, stats: defaultStats, tier: 3 },
-  { id: uuid(), subType: ItemSubType.PlateMail, stats: defaultStats, tier: 3 }
+  { id: uuid(), subType: ItemSubType.Club, stats: { [CharacterStats.Strength]: 1 }, tier: 4 },
+  { id: uuid(), subType: ItemSubType.Club, stats: { [CharacterStats.Dexterity]: 3 }, tier: 3 },
+  { id: uuid(), subType: ItemSubType.PaddedRobe, stats: { [CharacterStats.Intelligence]: 1, [CharacterStats.FireMastery]: 1 }, tier: 3 },
+  { id: uuid(), subType: ItemSubType.Fire, stats: { [CharacterStats.EnhancedEffect]: 20 }, tier: 3 },
+  { id: uuid(), subType: ItemSubType.Fire, stats: {}, tier: 2 },
+  { id: uuid(), subType: ItemSubType.PlateMail, stats: { [CharacterStats.MaxLife]: 60 }, tier: 1 }
 ];
 
 const defaultPartialCharacter: Partial<Character> = {
@@ -139,7 +139,7 @@ export function useCharacter() {
     }
   }
 
-  const canEquipItem = useCallback((item: Item, slot: EquippedItemSlot) => {
+  const canEquipItem = useCallback((item: Item, slot: EquippedItemSlot): boolean => {
     if (item == null || character.equipment.find(x => x?.id === item.id) == undefined) return false;
     let canEquip = true;
     let maxTier = Math.floor(3 + character.level / 5);
@@ -159,14 +159,20 @@ export function useCharacter() {
     return canEquip;
   }, [character]);
 
-  const canUnequipItem = useCallback(() => {
+  const canUnequipItem = useCallback((): boolean => {
     return character.equipment.length < character.equipmentSlots;
   }, [character]);
 
-  const canDoItemAction = (item: Item, action: ItemAction) => {
+  const canDoItemAction = (item: Item, action: ItemAction): boolean => {
     switch (action) {
       case ItemAction.Sell:
         return character.equipment.find(x => x.id === item.id) != undefined;
+      case ItemAction.Buy:
+        return marketplaceWindowState?.searchResults.find(x => x.item.id === item.id) !== undefined;
+      case ItemAction.Transfer:
+        return character.equipment.find(x => x.id === item.id) != undefined;
+      case ItemAction.Shrine:
+        return character.equipment.find(x => x.id === item.id) != undefined && Object.keys(item.stats).length > 0;
     }
     return true;
   }
@@ -182,11 +188,11 @@ export function useCharacter() {
       case ItemAction.Buy:
         if (!marketplaceWindowState) return;
         marketplaceWindowState.buyItem = marketplaceWindowState.searchResults.find(x => x.item.id === item.id);
-        console.log("buy", marketplaceWindowState.buyItem);
         setMarketplaceWindowState(marketplaceWindowState);
         break;
       case ItemAction.Transfer:
         if (!marketplaceWindowState) return;
+        if (!character.equipment.find(x => x.id === item.id)) return;
         marketplaceWindowState.transferItem = item;
         setMarketplaceWindowState(marketplaceWindowState);
         break;

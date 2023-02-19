@@ -9,16 +9,17 @@ import { useEffect, useState } from "react";
 import { useCharacter, useUser } from "./contexts/UserContext";
 import Character from "@/models/Character";
 import clsx from "clsx";
+import { CharacterStats } from "@/models/Stats";
 
 
 const marketItems: MarketItem[] = [
-  { price: 100, item: { id: uuid(), subType: ItemSubType.Club, stats: Array(1), tier: 3 } },
-  { price: 110, item: { id: uuid(), subType: ItemSubType.PaddedRobe, stats: Array(1), tier: 3 } },
-  { price: 120, item: { id: uuid(), subType: ItemSubType.Fire, stats: Array(1), tier: 3 } },
-  { price: 130, item: { id: uuid(), subType: ItemSubType.Fire, stats: Array(1), tier: 3 } },
-  { price: 140, item: { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 12 } },
-  { price: 150, item: { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 1 } },
-  { price: 160, item: { id: uuid(), subType: ItemSubType.Fish, stats: Array(1), tier: 3, quantity: 20 } },
+  { price: 100, item: { id: uuid(), subType: ItemSubType.Club, stats: { [CharacterStats.Strength]: 1 }, tier: 4 } },
+  { price: 110, item: { id: uuid(), subType: ItemSubType.PaddedRobe, stats: { [CharacterStats.CriticalFlux]: 1 }, tier: 2 } },
+  { price: 120, item: { id: uuid(), subType: ItemSubType.Fire, stats: { [CharacterStats.DamageReturn]: 3 }, tier: 3 } },
+  { price: 130, item: { id: uuid(), subType: ItemSubType.Fire, stats: { [CharacterStats.ArmorPierce]: 1 }, tier: 1 } },
+  { price: 140, item: { id: uuid(), subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 19 }, tier: 1, quantity: 12 } },
+  { price: 150, item: { id: uuid(), subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 100 }, tier: 2, quantity: 1 } },
+  { price: 160, item: { id: uuid(), subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 130, [CharacterStats.MaxMana]: 100 }, tier: 3, quantity: 20 } },
 ];
 
 //let buyItem: MarketItem = marketItems[0];

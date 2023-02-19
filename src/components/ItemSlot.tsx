@@ -1,5 +1,5 @@
 import { EquippedItemSlot } from "@/models/EquippedItem";
-import Item, { itemIcons, itemTiers, itemTypes, ItemSubType, ItemType, getItemType, canEquipItem } from "@/models/Item";
+import Item, { itemIcons, itemTiers, ItemSubType, ItemType, getItemType } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
 import clsx from "clsx";
 import { useRef } from "react";
@@ -42,10 +42,11 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
       if (slot != null && item != null && draggedSlot == null) {
         return canEquipItem(draggedItem, slot!);
       }
-      if (slot == null && draggedSlot != null && draggedItem != null) {
+      if (slot == null && draggedSlot != null && draggedItem != null && action == null) {
         return canUnequipItem();
       }
       if (action != null && draggedItem != null) {
+        //console.log('action', canDoItemAction(draggedItem, action));
         return canDoItemAction(draggedItem, action);
       }
 
@@ -68,7 +69,6 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     drop(dragging, monitor) {
       const { item: draggedItem, slot: draggedSlot } = dragging as DragObject;
       //console.log('drop: item', draggedItem, 'slot', draggedSlot);
-
       if (slot != null && draggedSlot == null && draggedItem != null) {
         return equipItem(draggedItem, slot);
       }
@@ -120,7 +120,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
       {item && !isDragging && <>
         <img src={`svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`} className="absolute inset-0 p-1 mx-auto w-full h-full" />
         {!small && <>
-          {item.stats.length > 0 && <span className="absolute top-0 left-0 px-1">+{item.stats.length}</span>}
+          {Object.keys(item.stats).length > 0 && <span className="absolute top-0 left-0 px-1">+{Object.keys(item.stats).length}</span>}
           {item.tier > 0 && <span className="absolute top-0 right-0 px-1">{itemTiers[item.tier]}</span>}
         </>}
         {item.quantity && <span className={clsx(small && "text-2xs", "absolute bottom-0 left-0 px-px")}>{item.quantity}</span>}

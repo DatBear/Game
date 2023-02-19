@@ -14,6 +14,8 @@ function StatsWindow() {
     useStatPoint(stat);
   }
 
+  const canAddStat = character.statPoints > 0;
+
   return <Window className="w-max" close={() => closeWindow()}>
     <Window.Title>Player Stats</Window.Title>
     <div className="flex flex-col gap-y-3">
@@ -25,13 +27,25 @@ function StatsWindow() {
           <label className={labelClasses}>Experience:</label>
           <span>{character.experience}</span>
           <label className={labelClasses}>Strength:</label>
-          <span className="flex flex-row items-center justify-between">{character.stats[CharacterStats.Strength]}<div onClick={_ => addStatPoint(CharacterStats.Strength)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div></span>
+          <span className="flex flex-row items-center justify-between">
+            {character.stats[CharacterStats.Strength]}
+            {canAddStat && <div onClick={_ => addStatPoint(CharacterStats.Strength)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div>}
+          </span>
           <label className={labelClasses}>Dexterity:</label>
-          <span className="flex flex-row items-center justify-between">{character.stats[CharacterStats.Dexterity]}<div onClick={_ => addStatPoint(CharacterStats.Dexterity)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div></span>
+          <span className="flex flex-row items-center justify-between">
+            {character.stats[CharacterStats.Dexterity]}
+            {canAddStat && <div onClick={_ => addStatPoint(CharacterStats.Dexterity)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div>}
+          </span>
           <label className={labelClasses}>Intelligence:</label>
-          <span className="flex flex-row items-center justify-between">{character.stats[CharacterStats.Intelligence]}<div onClick={_ => addStatPoint(CharacterStats.Intelligence)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div></span>
+          <span className="flex flex-row items-center justify-between">
+            {character.stats[CharacterStats.Intelligence]}
+            {canAddStat && <div onClick={_ => addStatPoint(CharacterStats.Intelligence)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div>}
+          </span>
           <label className={labelClasses}>Vitality:</label>
-          <span className="flex flex-row items-center justify-between">{character.stats[CharacterStats.Vitality]}<div onClick={_ => addStatPoint(CharacterStats.Vitality)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div></span>
+          <span className="flex flex-row items-center justify-between">
+            {character.stats[CharacterStats.Vitality]}
+            {canAddStat && <div onClick={_ => addStatPoint(CharacterStats.Vitality)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" /></div>}
+          </span>
           <label className={labelClasses}>Stat Points:</label>
           <span>{character.statPoints}</span>
           <label className={labelClasses}>Ability Points:</label>

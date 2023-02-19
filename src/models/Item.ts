@@ -55,7 +55,7 @@ type Item = {
   tier: number;
   quantity?: number;
   subType: ItemSubType;
-  stats: Record<Stats, number>;
+  stats: Partial<Record<Stats, number>>;
 }
 
 
@@ -207,6 +207,7 @@ let defaultItemStats: Record<ItemStats, number> = {
 }
 
 let defaultStats: Record<Stats, number> = {
+  [CharacterStats.EnhancedEffect]: 0,
   [CharacterStats.Strength]: 0,
   [CharacterStats.Dexterity]: 0,
   [CharacterStats.Vitality]: 0,
@@ -250,7 +251,7 @@ let defaultStats: Record<Stats, number> = {
 let defaultItem = (subType: ItemSubType) => {
   return {
     id: uuid(),
-    stats: { ...defaultStats },
+    stats: {},
     subType: subType,
     tier: 1,
   } as Item;

@@ -1,4 +1,5 @@
 export enum CharacterStats {
+  EnhancedEffect,
   Strength,
   Dexterity,
   Vitality,
@@ -40,7 +41,7 @@ export enum CharacterStats {
 
 
 export enum ItemStats {
-  WarmLights = 37,
+  WarmLights = 38,
   EvilPresences,
   TreasureChests,
   Rooms,
