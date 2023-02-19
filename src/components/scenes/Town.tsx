@@ -20,6 +20,7 @@ export default function Town() {
       <div className="flex flex-row gap-5">
         <button onClick={_ => showWindow(UIWindow.Inventory)}>Inventory</button>
         <button onClick={_ => showWindow(UIWindow.Groups)}>Groups</button>
+        <button onClick={_ => showWindow(UIWindow.Stats)}>Stats</button>
         <button onClick={_ => goToCharacterSelect()}>Character Select</button>
       </div>
 

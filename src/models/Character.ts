@@ -35,7 +35,11 @@ type Character = {
   life: number;
   mana: number;
   experience: number;
+  statPoints: number;
+  abilityPoints: number;
   equipmentSlots: number;
+  kills: number;
+  deaths: number;
   stats: Record<CharacterStats, number>;
 }
 

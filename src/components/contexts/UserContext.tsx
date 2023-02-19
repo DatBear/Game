@@ -25,7 +25,11 @@ const defaultPartialCharacter: Partial<Character> = {
   mana: defaultCharacterStats[CharacterStats.MaxMana],
   items: [],
   experience: 0,
-  equipmentSlots: 8
+  equipmentSlots: 8,
+  statPoints: 10,//todo add on mq
+  abilityPoints: 1,
+  kills: 0,
+  deaths: 0
 }
 
 type UserContextData = {
@@ -219,6 +223,13 @@ export function useCharacter() {
     return true;
   }
 
+  const useStatPoint = (stat: CharacterStats) => {
+    if (character.statPoints <= 0) return;
+    character.statPoints -= 1;
+    character.stats[stat] += 1;
+    updateCharacter(character);
+  }
+
   return {
     character,
     hasSelectedCharacter: user.selectedCharacter !== null,
@@ -226,6 +237,7 @@ export function useCharacter() {
     canUnequipItem, unequipItem,
     canDoItemAction, doItemAction,
     buyMarketItem,
-    shrineItem
+    shrineItem,
+    useStatPoint
   };
 }

@@ -7,6 +7,7 @@ import InventoryWindow from "../InventoryWindow";
 import MarketplaceWindow from "../MarketplaceWindow";
 import ShrineWindow from "../ShrineWindow";
 import SkillingWindow from "../SkillingWindow";
+import StatsWindow from "../StatsWindow";
 import { useUser } from "./UserContext";
 
 export enum UIWindow {
@@ -18,7 +19,8 @@ export enum UIWindow {
   Transmuting,
   Suffusencing,
   Fishing,
-  Glyphing
+  Glyphing,
+  Stats
 }
 
 export type UIWindowState = {
@@ -46,7 +48,7 @@ type UIContextProps = {
 
 
 let defaultWindowState: WindowRecord<any> = {
-  [UIWindow.Inventory]: { isVisible: true },
+  [UIWindow.Inventory]: { isVisible: false },
   [UIWindow.Groups]: { isVisible: false },
   [UIWindow.Shrine]: { isVisible: false } as UIShrineWindowState,
   [UIWindow.Marketplace]: { isVisible: false, searchResults: [] } as UIMarketplaceWindowState,
@@ -54,7 +56,8 @@ let defaultWindowState: WindowRecord<any> = {
   [UIWindow.Transmuting]: { isVisible: false },
   [UIWindow.Suffusencing]: { isVisible: false },
   [UIWindow.Fishing]: { isVisible: false },
-  [UIWindow.Glyphing]: { isVisible: false }
+  [UIWindow.Glyphing]: { isVisible: false },
+  [UIWindow.Stats]: { isVisible: true },
 }
 
 const UIContext = createContext({} as UIContextProps);
@@ -88,6 +91,7 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
           {renderWindow(UIWindow.Transmuting, <SkillingWindow skill={Transmuting} window={UIWindow.Transmuting} />)}
           {renderWindow(UIWindow.Glyphing, <SkillingWindow skill={Glyphing} window={UIWindow.Glyphing} />)}
           {renderWindow(UIWindow.Suffusencing, <SkillingWindow skill={Suffusencing} window={UIWindow.Suffusencing} />)}
+          {renderWindow(UIWindow.Stats, <StatsWindow />)}
         </div>
       </div>
     }
