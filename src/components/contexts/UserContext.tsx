@@ -193,7 +193,6 @@ export function useCharacter() {
         if (skill === undefined) return false;
         switch (skill) {
           case SkillType.Fishing:
-            console.log('fishing', character.items.find(x => x.id === item.id) !== undefined && item.subType == ItemSubType.FishingRod);
             return character.items.find(x => x.id === item.id) !== undefined && item.subType == ItemSubType.FishingRod;
           case SkillType.Cooking:
             return character.items.find(x => x.id === item.id) !== undefined && item.subType === ItemSubType.Fish;

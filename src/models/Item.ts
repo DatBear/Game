@@ -70,8 +70,7 @@ let itemTypes: Record<ItemType, ItemSubType[]> = {
 
 let getItemType = (subType: ItemSubType): ItemType => {
   //console.log(Object.entries(ItemType));
-  //return parseInt([...Object.entries(itemTypes)].find((x) => x[1].find(x => x == subType) !== undefined)![0]) as ItemType;
-  return Object.entries(ItemType).find(itemType => itemTypes[itemType[1] as ItemType].find(x => x === subType) !== undefined)![1] as ItemType;
+  return parseInt([...Object.entries(itemTypes)].find((x) => x[1].find(x => x == subType) !== undefined)![0]) as ItemType;
 };
 
 let itemIcons: Record<ItemSubType, string> = {
@@ -127,7 +126,7 @@ let itemTiers: Record<number, string> = {
   [14]: 'XIV'
 }
 
-let magicPrefixes: Record<number, string> = {
+let itemMagicPrefixes: Record<number, string> = {
   [0]: 'Normal',
   [1]: 'Magical',
   [2]: 'Rare',
@@ -141,6 +140,41 @@ let magicPrefixes: Record<number, string> = {
   [10]: 'Relic',
   [11]: 'Artifact',
   [12]: 'Unique'
+}
+
+let itemNames: Record<ItemSubType, string> = {
+  [ItemSubType.Sword]: "Sword",
+  [ItemSubType.Club]: "Club",
+  [ItemSubType.Axe]: "Axe",
+  [ItemSubType.Dagger]: "Dagger",
+  [ItemSubType.Staff]: "Staff",
+  [ItemSubType.Longsword]: "Longsword",
+  [ItemSubType.Warhammer]: "Warhammer",
+  [ItemSubType.Battleaxe]: "Battleaxe",
+  [ItemSubType.Spear]: "Spear",
+  [ItemSubType.Polearm]: "Polearm",
+  [ItemSubType.Robe]: "Robe",
+  [ItemSubType.PaddedRobe]: "Padded Robe",
+  [ItemSubType.LeatherArmor]: "Leather Armor",
+  [ItemSubType.ScaleArmor]: "Scale Armor",
+  [ItemSubType.ChainMail]: "Chain Mail",
+  [ItemSubType.PlateMail]: "Plate Mail",
+  [ItemSubType.Ice]: "Ice Charm",
+  [ItemSubType.Fire]: "Fire Charm",
+  [ItemSubType.Lightning]: "Lightning Charm",
+  [ItemSubType.Wind]: "Wind Charm",
+  [ItemSubType.Earth]: "Earth Charm",
+  [ItemSubType.WildHeal]: "Wild Heal Charm",
+  [ItemSubType.Heal]: "Heal Charm",
+  [ItemSubType.FocusedHeal]: "Focused Heal Charm",
+  [ItemSubType.Fish]: "Fish",
+  [ItemSubType.Glyph]: "Glyph",
+  [ItemSubType.Comfrey]: "Comfrey",
+  [ItemSubType.Potion]: "Potion",
+  [ItemSubType.Totem]: "Totem",
+  [ItemSubType.Map]: "Map",
+  [ItemSubType.FishingRod]: "FishingRod",
+  [ItemSubType.Essence]: "Essence",
 }
 
 let classWeapons: Record<CharacterClass, ItemSubType[]> = {
@@ -190,64 +224,6 @@ let classCharms: Record<CharacterClass, ItemSubType[]> = {
   [CharacterClass.Alchemist]: allCharms
 }
 
-let defaultItemStats: Record<ItemStats, number> = {
-  [ItemStats.WarmLights]: 0,
-  [ItemStats.EvilPresences]: 0,
-  [ItemStats.TreasureChests]: 0,
-  [ItemStats.Rooms]: 0,
-  [ItemStats.WarmLightEffectiveness]: 0,
-  [ItemStats.MonsterDifficulty]: 0,
-  [ItemStats.ExperienceGained]: 0,
-  [ItemStats.ItemDrops]: 0,
-  [ItemStats.ItemQuality]: 0,
-  [ItemStats.Swarm]: 0,
-  [ItemStats.GuildPoints]: 0,
-  [ItemStats.LevelUp]: 0,
-  [ItemStats.LevelCap]: 0
-}
-
-let defaultStats: Record<Stats, number> = {
-  [CharacterStats.EnhancedEffect]: 0,
-  [CharacterStats.Strength]: 0,
-  [CharacterStats.Dexterity]: 0,
-  [CharacterStats.Vitality]: 0,
-  [CharacterStats.Intelligence]: 0,
-  [CharacterStats.MaxLife]: 0,
-  [CharacterStats.MaxMana]: 0,
-  [CharacterStats.ExperienceGained]: 0,
-  [CharacterStats.MagicLuck]: 0,
-  [CharacterStats.LifeRegen]: 0,
-  [CharacterStats.ManaRegen]: 0,
-  [CharacterStats.ExtraEquipmentSlots]: 0,
-  [CharacterStats.CriticalStrike]: 0,
-  [CharacterStats.LifePerAttack]: 0,
-  [CharacterStats.ManaPerAttack]: 0,
-  [CharacterStats.LifePerKill]: 0,
-  [CharacterStats.ManaPerKill]: 0,
-  [CharacterStats.LifeSteal]: 0,
-  [CharacterStats.DamageReturn]: 0,
-  [CharacterStats.MindNumb]: 0,
-  [CharacterStats.ArmorPierce]: 0,
-  [CharacterStats.Parry]: 0,
-  [CharacterStats.CriticalFlux]: 0,
-  [CharacterStats.PhysicalDamageReduction]: 0,
-  [CharacterStats.MagicalDamageReduction]: 0,
-  [CharacterStats.ManaSyphon]: 0,
-  [CharacterStats.QuickDraw]: 0,
-  [CharacterStats.ManaConsumption]: 0,
-  [CharacterStats.IceMastery]: 0,
-  [CharacterStats.FireMastery]: 0,
-  [CharacterStats.LightningMastery]: 0,
-  [CharacterStats.EarthMastery]: 0,
-  [CharacterStats.WindMastery]: 0,
-  [CharacterStats.HealMastery]: 0,
-  [CharacterStats.ManaSkin]: 0,
-  [CharacterStats.PowerShot]: 0,
-  [CharacterStats.GlancingBlow]: 0,
-  [CharacterStats.Jubilance]: 0,
-  ...defaultItemStats
-}
-
 let defaultItem = (subType: ItemSubType) => {
   return {
     id: uuid(),
@@ -277,5 +253,5 @@ let defaultEquippedItems: Record<CharacterClass, EquippedItem[]> = {
   [CharacterClass.Warlock]: [], [CharacterClass.Headhunter]: [], [CharacterClass.Alchemist]: []
 }
 
-export { itemTypes, getItemType, itemIcons, itemTiers, classWeapons, classArmors, classCharms, defaultEquippedItems, defaultStats }
+export { itemTypes, getItemType, itemIcons, itemTiers, itemMagicPrefixes, itemNames, classWeapons, classArmors, classCharms, defaultEquippedItems }
 export default Item;

@@ -52,7 +52,7 @@ type UIContextProps = {
 
 
 let defaultWindowState: WindowRecord<any> = {
-  [UIWindow.Inventory]: { isVisible: false },
+  [UIWindow.Inventory]: { isVisible: true },
   [UIWindow.Groups]: { isVisible: false },
   [UIWindow.Shrine]: { isVisible: false } as UIShrineWindowState,
   [UIWindow.Marketplace]: { isVisible: false, searchResults: [] } as UIMarketplaceWindowState,
@@ -61,7 +61,7 @@ let defaultWindowState: WindowRecord<any> = {
   [UIWindow.Transmuting]: { isVisible: false, items: Array(2) } as UISkillWindowState,
   [UIWindow.Suffusencing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
   [UIWindow.Glyphing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
-  [UIWindow.Stats]: { isVisible: true },
+  [UIWindow.Stats]: { isVisible: false },
 }
 
 const UIContext = createContext({} as UIContextProps);

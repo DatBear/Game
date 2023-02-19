@@ -17,6 +17,10 @@ body {
   line-height: .8rem;
 }
 
-.item{
+.item {
+  text-shadow: black -1px -1px 1px, black 1px -1px 1px, black -1px 1px 1px, black 1px 1px 1px, black -1px 0 0px;
+}
+
+.item-tooltip {
   text-shadow: black -1px -1px 1px, black 1px -1px 1px, black -1px 1px 1px, black 1px 1px 1px, black -1px 0 0px;
 }

@@ -15,7 +15,6 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
   let minSkillUpTier = skillType !== SkillType.Fishing ? 'Tier I' : '';//todo implement
   const { closeWindow, windowState, setWindowState } = useWindow<UISkillWindowState>(window);
 
-  console.log('items', windowState?.items);
   return <Window className="!w-96" close={() => closeWindow()}>
     <Window.Title>{skill.name}</Window.Title>
     <div className="flex flex-col gap-y-3 items-center">

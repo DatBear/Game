@@ -1,3 +1,6 @@
+import Character from "./Character";
+import Item, { getItemType, ItemType } from "./Item";
+
 export enum CharacterStats {
   EnhancedEffect,
   Strength,
@@ -56,4 +59,54 @@ export enum ItemStats {
   LevelCap,
 }
 
+const statNames: Record<CharacterStats, string> = {
+  [CharacterStats.EnhancedEffect]: "% Enhanced Effect",
+  [CharacterStats.Strength]: "Strength",
+  [CharacterStats.Dexterity]: "Dexterity",
+  [CharacterStats.Vitality]: "Vitality",
+  [CharacterStats.Intelligence]: "Intelligence",
+  [CharacterStats.MaxLife]: "Max Life",
+  [CharacterStats.MaxMana]: "Max Mana",
+  [CharacterStats.ExperienceGained]: "% Experience Gained",
+  [CharacterStats.MagicLuck]: "Magic Luck",
+  [CharacterStats.LifeRegen]: "Life Regen",
+  [CharacterStats.ManaRegen]: "Mana Regen",
+  [CharacterStats.ExtraEquipmentSlots]: "Extra Equipment Slots",
+  [CharacterStats.CriticalStrike]: "Critical Strike",
+  [CharacterStats.LifePerAttack]: "Life PerAttack",
+  [CharacterStats.ManaPerAttack]: "Mana Per Attack",
+  [CharacterStats.LifePerKill]: "Life Per Kill",
+  [CharacterStats.ManaPerKill]: "Mana Per Kill",
+  [CharacterStats.LifeSteal]: "% Life Steal",
+  [CharacterStats.DamageReturn]: "% Damage Return",
+  [CharacterStats.MindNumb]: "% Mind Numb",
+  [CharacterStats.ArmorPierce]: "% Armor Pierce",
+  [CharacterStats.Parry]: "% Parry",
+  [CharacterStats.CriticalFlux]: "% Critical Flux",
+  [CharacterStats.PhysicalDamageReduction]: "% Physical Damage Reduction",
+  [CharacterStats.MagicalDamageReduction]: "% Magical Damage Reduction",
+  [CharacterStats.ManaSyphon]: "% Mana Syphon",
+  [CharacterStats.QuickDraw]: "% Quick Draw",
+  [CharacterStats.ManaConsumption]: "% Mana Consumption",
+  [CharacterStats.IceMastery]: "% Ice Mastery",
+  [CharacterStats.FireMastery]: "% Fire Mastery",
+  [CharacterStats.LightningMastery]: "% Lightning Mastery",
+  [CharacterStats.EarthMastery]: "% Earth Mastery",
+  [CharacterStats.WindMastery]: "% Wind Mastery",
+  [CharacterStats.HealMastery]: "% Heal Mastery",
+  [CharacterStats.ManaSkin]: "% Mana Skin",
+  [CharacterStats.PowerShot]: "% Power Shot",
+  [CharacterStats.GlancingBlow]: "% Glancing Blow",
+  [CharacterStats.Jubilance]: "Jubilance",
+}
+
+
+const itemSpecificStatNames: Record<CharacterStats, string> = {
+  ...statNames,
+  [CharacterStats.MaxLife]: "Heals {x} Life",
+  [CharacterStats.MaxMana]: "Recovers {x} Mana",
+}
+
+
+export { statNames, itemSpecificStatNames }
 export type Stats = CharacterStats | ItemStats;

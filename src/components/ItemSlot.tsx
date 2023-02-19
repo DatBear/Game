@@ -1,15 +1,16 @@
 import { EquippedItemSlot } from "@/models/EquippedItem";
-import Item, { itemIcons, itemTiers, ItemSubType, ItemType, getItemType } from "@/models/Item";
+import Item, { itemIcons, itemTiers, ItemSubType, ItemType, getItemType, itemMagicPrefixes, itemNames } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
 import { SkillType } from "@/models/Skill";
 import clsx from "clsx";
-import { useRef } from "react";
+import { useId, useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useCharacter } from "./contexts/UserContext";
+import { Tooltip } from "react-tooltip"
+import { CharacterStats, itemSpecificStatNames, statNames } from "@/models/Stats";
+import calculatedItemStats from "@/models/CalculatedItemStat";
 
-const type = "Item";
-
-
+const dragType = "Item";
 
 type ItemProps = {
   item?: Item;
@@ -21,7 +22,7 @@ type ItemProps = {
   acceptSubTypes?: ItemSubType[];
   acceptMaxTier?: number;
   noDrag?: boolean;
-  //todo add a source enum and acceptSource or something to give more drag+drop context
+  noTooltip?: boolean;
 } & React.PropsWithChildren & Partial<React.HTMLAttributes<HTMLDivElement>>;
 
 type DragObject = {
@@ -29,8 +30,9 @@ type DragObject = {
   slot?: EquippedItemSlot;
 };
 
-export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, skill, noDrag, children, className, ...props }: ItemProps) {
+export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, skill, noDrag, noTooltip, children, className, ...props }: ItemProps) {
   const ref = useRef(null);
+  const id = useId().replaceAll(':', '');
   const { character, hasSelectedCharacter,
     canEquipItem, equipItem,
     canUnequipItem, unequipItem,
@@ -38,7 +40,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
   } = useCharacter();
 
   const [{ canDrop, isOver }, drop] = useDrop({
-    accept: type,
+    accept: dragType,
     canDrop(dragging, monitor) {
       const { item: draggedItem, slot: draggedSlot } = dragging as DragObject;
       if (slot != null && item != null && draggedSlot == null) {
@@ -90,7 +92,7 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
   });
 
   const [{ isDragging }, drag] = useDrag(() => ({
-    type: type,
+    type: dragType,
     item: { item, slot },
     collect: (monitor) => {
       return {
@@ -105,8 +107,6 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     drop(ref);
   }
 
-
-
   let sizeClass = small ? "w-6 h-6" : "w-16 h-16";
   let dragClass = isDragging ? '!border-green-500/25' : '';
   let dropClass = '';
@@ -116,17 +116,45 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     }
   }
 
-  return (<div ref={ref} className={clsx("item", className, sizeClass, dragClass, dropClass, "flex-none border relative bg-stone-900", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} {...props}>
-    <>
+  const prefix = itemMagicPrefixes[Object.keys(item?.stats ?? 0).length];
+  const type = item && getItemType(item.subType);
+  const iconPath = !item ? '' : `svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`;
+
+  return (<>
+    <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, "flex-none border relative bg-stone-900", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} {...props}>
       {children}
       {item && !isDragging && <>
-        <img src={`svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`} className="absolute inset-0 p-1 mx-auto w-full h-full" />
+        <img src={iconPath} className="absolute inset-0 p-1 mx-auto w-full h-full" />
         {!small && <>
           {Object.keys(item.stats).length > 0 && <span className="absolute top-0 left-0 px-1">+{Object.keys(item.stats).length}</span>}
           {item.tier > 0 && <span className="absolute top-0 right-0 px-1">{itemTiers[item.tier]}</span>}
         </>}
         {item.quantity && <span className={clsx(small && "text-2xs", "absolute bottom-0 left-0 px-px")}>{item.quantity}</span>}
       </>}
-    </>
-  </div>)
+    </div>
+    {item && item.tier > 0 && !isDragging && <Tooltip anchorSelect={`#${id}`} className="absolute item-tooltip" positionStrategy="absolute" noArrow>
+      <div className="flex flex-row">
+        <div className="flex flex-col p-2 bg-stone-900 text-white relative border border-cyan-300" style={{ zIndex: 1 }}>
+          <div className="absolute flex justify-center items-center w-full h-full">
+            <img src={iconPath} className="w-3/5 h-3/5 opacity-50" />
+          </div>
+
+          <div className="relative flex flex-col">
+            <div className="w-max"><b>{prefix} {itemNames[item.subType]} {itemTiers[item.tier]}</b></div>
+            {calculatedItemStats.filter(x => x.hasStat(item, character)).map(x => <div key={x.name}>{x.name}: {x.value(item, character)}</div>)}
+            {Object.keys(item.stats).map((k, idx) => {
+              const statNamesRecord = type === ItemType.Item ? itemSpecificStatNames : statNames;
+              const statName = statNamesRecord[parseInt(k) as CharacterStats];
+              const value = item.stats[parseInt(k) as CharacterStats]?.toString() ?? '';
+              const isReplace = statName.indexOf('{x}') > -1;
+              const replaced = `${isReplace ? '' : '+'}${isReplace ? '' : value}${(statName.startsWith('%') ? '' : ' ')}${statName.replaceAll('{x}', value)}`
+              return <div key={k}>{replaced}</div>
+            })}
+            {item.quantity && <div>Quantity: {item.quantity}</div>}
+          </div>
+
+        </div>
+      </div>
+    </Tooltip>}
+  </>)
 }
