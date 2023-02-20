@@ -1,10 +1,11 @@
+import { Zone } from "@/models/Zone";
 import CharacterImage from "../CharacterImage";
 import { UIWindow, useUI, useWindow } from "../contexts/UIContext";
 import { useCharacter, useUser } from "../contexts/UserContext";
 
 export default function Town() {
   const { user, selectCharacter } = useUser();
-  const { character } = useCharacter();
+  const { character, goToZone } = useCharacter();
   const { setWindowState } = useUI();
 
   const showWindow = (window: UIWindow) => {
@@ -13,6 +14,10 @@ export default function Town() {
 
   const goToCharacterSelect = () => {
     selectCharacter(null);
+  }
+
+  const goToCatacombs = () => {
+    goToZone(Zone.Catacombs);
   }
 
   return <>
@@ -44,6 +49,10 @@ export default function Town() {
         <div className="w-36 h-36 flex flex-col items-center" onClick={_ => showWindow(UIWindow.Cooking)}>
           <img src="svg/iconKitchen.svg" className="w-full h-full" alt="kitchen" />
           <span className="text-xl">Cooking</span>
+        </div>
+        <div className="w-36 h-36 flex flex-col items-center" onClick={_ => goToCatacombs()}>
+          <img src="svg/iconCatacombs.svg" className="w-full h-full" alt="catacombs" />
+          <span className="text-xl">Catacombs</span>
         </div>
         <div className="flex flex-col">
           <div className="flex flex-row">

@@ -1,6 +1,7 @@
 import EquippedItem from "./EquippedItem";
 import Item from "./Item";
 import { CharacterStats } from "./Stats";
+import { Zone } from "./Zone";
 
 export enum CharacterClass {
   Fighter = "Fighter",
@@ -41,6 +42,7 @@ type Character = {
   kills: number;
   deaths: number;
   stats: Record<CharacterStats, number>;
+  zone: Zone;
 }
 
 

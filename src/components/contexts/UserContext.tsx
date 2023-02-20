@@ -6,6 +6,7 @@ import MarketItem from "@/models/MarketItem";
 import { SkillType } from "@/models/Skill";
 import { CharacterStats } from "@/models/Stats";
 import User from "@/models/User";
+import { Zone } from "@/models/Zone";
 import { createContext, useCallback, useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { UIMarketplaceWindowState, UIShrineWindowState, UISkillWindowState, UIWindow, useUI, useWindow } from "./UIContext";
@@ -36,7 +37,8 @@ const defaultPartialCharacter: Partial<Character> = {
   statPoints: 10,//todo add on mq
   abilityPoints: 1,
   kills: 0,
-  deaths: 0
+  deaths: 0,
+  zone: Zone.Town
 }
 
 type UserContextData = {
@@ -261,10 +263,15 @@ export function useCharacter() {
     return true;
   }
 
-  const useStatPoint = (stat: CharacterStats) => {
+  const addStatPoint = (stat: CharacterStats) => {
     if (character.statPoints <= 0) return;
     character.statPoints -= 1;
     character.stats[stat] += 1;
+    updateCharacter(character);
+  }
+
+  const goToZone = (zone: Zone) => {
+    character.zone = zone;
     updateCharacter(character);
   }
 
@@ -276,6 +283,7 @@ export function useCharacter() {
     canDoItemAction, doItemAction,
     buyMarketItem,
     shrineItem,
-    addStatPoint: useStatPoint
+    addStatPoint,
+    goToZone
   };
 }
