@@ -254,5 +254,5 @@ let defaultEquippedItems: Record<CharacterClass, EquippedItem[]> = {
   [CharacterClass.Warlock]: [], [CharacterClass.Headhunter]: [], [CharacterClass.Alchemist]: []
 }
 
-export { itemTypes, getItemType, itemIcons, itemTiers, itemMagicPrefixes, itemNames, classWeapons, classArmors, classCharms, defaultEquippedItems }
+export { itemTypes, getItemType, itemIcons, itemTiers, itemMagicPrefixes, itemNames, classWeapons, classArmors, classCharms, defaultEquippedItems, defaultItem }
 export default Item;

@@ -1,6 +1,7 @@
 import Character, { Gender } from "@/models/Character";
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import { itemIcons } from "@/models/Item";
+import { forwardRef } from "react";
 
 let svgs: Record<string, string[]> = {
   cGod: ["0 0 284.2 479.7"],
@@ -70,7 +71,7 @@ type CharacterImageProps = {
   className?: string;
 }
 
-export default function CharacterImage({ character, className }: CharacterImageProps) {
+const CharacterImage = forwardRef<HTMLDivElement, CharacterImageProps>(function ({ character, className }, ref) {
   const sc = 1 / (character.gender === Gender.Male ? 415.4 + 64.2 : 499.8);
   const sex = character.gender === Gender.Male ? 1 : 2;
   const bodySvgKey = `cBody${sex}`;
@@ -89,10 +90,12 @@ export default function CharacterImage({ character, className }: CharacterImageP
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full" ref={ref}>
       {Svg(bodySvgKey, 'static')}
       {Svg(classSvgKey)}
       {Svg(armorKey)}
       {Svg(weaponKey)}
     </div>);
-}
+});
+
+export default CharacterImage;

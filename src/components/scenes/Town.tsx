@@ -28,11 +28,6 @@ export default function Town() {
         <button onClick={_ => showWindow(UIWindow.Stats)}>Stats</button>
         <button onClick={_ => goToCharacterSelect()}>Character Select</button>
       </div>
-
-      <div>
-        <div className="w-24 h-48"><CharacterImage character={character} /></div>
-      </div>
-
       <div className="flex flex-row flex-wrap gap-x-4 gap-y-8 h-full w-full">
         <div className="w-36 h-36 flex flex-col items-center" onClick={_ => showWindow(UIWindow.Marketplace)}>
           <img src="svg/iconMarket.svg" className="w-full h-full" alt="market" />

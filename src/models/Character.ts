@@ -1,3 +1,4 @@
+import { ForwardedRef, Ref, RefObject } from "react";
 import EquippedItem from "./EquippedItem";
 import Item from "./Item";
 import { CharacterStats } from "./Stats";
@@ -43,6 +44,8 @@ type Character = {
   deaths: number;
   stats: Record<CharacterStats, number>;
   zone: Zone;
+
+  imageRef: RefObject<HTMLDivElement>;
 }
 
 

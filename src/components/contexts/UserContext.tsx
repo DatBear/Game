@@ -275,6 +275,30 @@ export function useCharacter() {
     updateCharacter(character);
   }
 
+  const addKill = () => {
+    character.kills += 1;
+    updateCharacter(character);
+  }
+
+  const addDeath = () => {
+    character.deaths += 1;
+    //todo log out hc
+    updateCharacter(character);
+  }
+
+  const addExperience = (exp: number) => {
+    character.experience += exp;
+    if (character.experience >= character.level * 1000000) {
+      character.experience = character.level * 1000000;
+      character.level += 1;
+      character.statPoints += 1;
+      character.life = character.stats[CharacterStats.MaxLife];
+      character.mana = character.stats[CharacterStats.MaxMana];
+      //todo max life + mana + etc
+    }
+    updateCharacter(character);
+  }
+
   return {
     character,
     hasSelectedCharacter: user.selectedCharacter !== null,
@@ -284,6 +308,7 @@ export function useCharacter() {
     buyMarketItem,
     shrineItem,
     addStatPoint,
-    goToZone
+    goToZone,
+    addExperience, addKill, addDeath
   };
 }

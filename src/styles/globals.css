@@ -17,10 +17,32 @@ body {
   line-height: .8rem;
 }
 
+.text-shadow {
+  text-shadow: black -1px -1px 1px, black 1px -1px 1px, black -1px 1px 1px, black 1px 1px 1px, black -1px 0 0px;
+}
+
 .item {
   text-shadow: black -1px -1px 1px, black 1px -1px 1px, black -1px 1px 1px, black 1px 1px 1px, black -1px 0 0px;
 }
 
 .item-tooltip {
   text-shadow: black -1px -1px 1px, black 1px -1px 1px, black -1px 1px 1px, black 1px 1px 1px, black -1px 0 0px;
+}
+
+.fade-out {
+  animation: fadeOut 1s normal forwards;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.img-drop-shadow {
+  filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
 }

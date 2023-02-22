@@ -16,6 +16,7 @@ const dragType = "Item";
 type ItemProps = {
   item?: Item;
   small?: boolean;
+  medium?: boolean;
   slot?: EquippedItemSlot;
   action?: ItemAction;
   skill?: SkillType;
@@ -24,6 +25,9 @@ type ItemProps = {
   acceptMaxTier?: number;
   noDrag?: boolean;
   noTooltip?: boolean;
+  hotkey?: string;
+  borderless?: boolean;
+  noBackground?: boolean;
 } & React.PropsWithChildren & Partial<React.HTMLAttributes<HTMLDivElement>>;
 
 type DragObject = {
@@ -37,7 +41,7 @@ const typeSlots: Partial<Record<ItemType, EquippedItemSlot>> = {
   [ItemType.Charm]: EquippedItemSlot.Charm,
 }
 
-export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, skill, noDrag, noTooltip, children, className, ...props }: ItemProps) {
+export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, skill, noDrag, noTooltip, hotkey, borderless, noBackground, children, className, ...props }: ItemProps) {
   const prefix = itemMagicPrefixes[Object.keys(item?.stats ?? 0).length];
   const type = item && getItemType(item.subType);
   const iconPath = !item ? '' : `svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`;
@@ -118,33 +122,36 @@ export default function ItemSlot({ item, small, acceptTypes, acceptSubTypes, acc
     drop(ref);
   }
 
-  let sizeClass = small ? "w-6 h-6" : "w-16 h-16";
-  let equippableClass = item && type !== undefined && character && !slot && !isDragging
+  let sizeClass = small ? "w-6 h-6" : medium ? "w-10 h-10" : "w-16 h-16";
+  let equippableClass = !(noBackground ?? false) && item && type !== undefined && character && !slot && !isDragging
     && [ItemType.Weapon, ItemType.Armor, ItemType.Charm].indexOf(type) > -1
     && !canEquipItem(item, typeSlots[getItemType(item.subType)]!)
     ? "bg-red-600/20"
     : "";
-  let dragClass = isDragging ? '!border-green-500/25' : '';
+  let borderClass = (borderless ?? false) ? "" : "border";
+  let bgClass = (noBackground ?? false) ? "" : "bg-stone-900";
+  let dragClass = !(noDrag ?? false) && isDragging ? '!border-green-500/25' : '';
   let dropClass = '';
-  if (isOver) {
+  if (isOver && !(noDrag ?? false)) {
     if (acceptTypes != null || acceptSubTypes != null || acceptMaxTier != null || slot != null || action != null) {
       dropClass = canDrop ? '!bg-green-500/25' : '!bg-red-500/25';
     }
   }
 
   return (<>
-    <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, equippableClass, "flex-none border relative bg-stone-900", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} {...props}>
+    <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, equippableClass, borderClass, bgClass, "flex-none relative", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} {...props}>
       {children}
       {item && !isDragging && <>
         <img src={iconPath} className="absolute inset-0 p-1 mx-auto w-full h-full" alt={itemNames[item.subType]} />
-        {!small && <>
+        {!small && !medium && <>
           {Object.keys(item.stats).length > 0 && <span className="absolute top-0 left-0 px-1">+{Object.keys(item.stats).length}</span>}
           {item.tier > 0 && <span className="absolute top-0 right-0 px-1">{itemTiers[item.tier]}</span>}
         </>}
         {item.quantity && <span className={clsx(small && "text-2xs", "absolute bottom-0 left-0 px-px")}>{item.quantity}</span>}
       </>}
+      {hotkey && <span className="absolute top-0 left-0 px-1 text-sm">{hotkey}</span>}
     </div>
-    {item && item.tier > 0 && !isDragging && <Tooltip anchorSelect={`#${id}`} className="absolute item-tooltip" positionStrategy="absolute" style={{ zIndex: 1 }}>
+    {!noTooltip && item && item.tier > 0 && !isDragging && <Tooltip anchorSelect={`#${id}`} className="absolute item-tooltip" positionStrategy="fixed" delayShow={1} style={{ zIndex: 1 }}>
       <div className="flex flex-row">
         <div className="flex flex-col p-2 bg-stone-900 text-white relative border border-cyan-300">
           <div className="absolute flex justify-center items-center w-full h-full">
