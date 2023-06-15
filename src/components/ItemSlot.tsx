@@ -152,7 +152,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
       {hotkey && <span className="absolute top-0 left-0 px-1 text-sm">{hotkey}</span>}
     </div>
     {!noTooltip && item && item.tier > 0 && !isDragging && <Tooltip anchorSelect={`#${id}`} className="absolute item-tooltip" positionStrategy="fixed" delayShow={1} style={{ zIndex: 1 }}>
-      <div className="flex flex-row">
+      <div className="flex flex-row gap-2">
         <div className="flex flex-col p-2 bg-stone-900 text-white relative border border-cyan-300">
           <div className="absolute flex justify-center items-center w-full h-full">
             <img src={iconPath} className="w-3/5 h-3/5 opacity-50" alt="" />

@@ -219,7 +219,7 @@ export function Catacombs() {
         const left = (x.isPlayer ? x.xMob : x.xPlayer) + 'px';
         const top = (x.isPlayer ? x.yMob : x.yPlayer) + 'px';
         return x.isPlayer ? <div key={x.created} className="absolute w-10 h-10" style={{ left, top }}>
-          <div className="flex flex-row items-center fade-out">
+          <div className="flex flex-row items-center move-up fade-out">
             {x.weapon && <ItemSlot medium noDrag noTooltip borderless noBackground item={x.weapon} />}
             <div className="text-shadow text-2xl">{x.damage}{x.isCritical ? '!' : ''}</div>
           </div>

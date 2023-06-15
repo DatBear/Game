@@ -33,14 +33,59 @@ body {
   animation: fadeOut 1s normal forwards;
 }
 
+.grow {
+  animation: grow 1s normal forwards;
+}
+
+.grow.fade-out{
+  animation: grow 1s normal forwards, fadeOut 1s normal forwards;
+}
+
+.grow.move-up{
+  animation: grow 1s normal forwards, moveUp 1s normal forwards;
+}
+
+.move-up.fade-out{
+  animation: fadeOut 1s normal forwards, moveUp 1s normal forwards;
+}
+
+.move-up{
+  animation: moveUp 1s normal forwards;
+}
+
 @keyframes fadeIn {
   0% { opacity: 0; }
   100% { opacity: 1; }
 }
 
 @keyframes fadeOut {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
+  0% { 
+    opacity: 1;
+  }
+  100% { 
+    opacity: 0; 
+  }
+}
+
+@keyframes grow{
+  0% {
+    transform: scale(1);
+  }
+  50%{
+    transform: scale(2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes moveUp{
+  0% { 
+    transform: translateY(0);
+  }
+  100% { 
+    transform: translateY(-2rem);
+  }
 }
 
 .img-drop-shadow {

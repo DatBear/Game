@@ -97,5 +97,6 @@ const CharacterImage = forwardRef<HTMLDivElement, CharacterImageProps>(function 
       {Svg(weaponKey)}
     </div>);
 });
+CharacterImage.displayName = "CharacterImage";
 
 export default CharacterImage;
