@@ -38,3 +38,10 @@ next-env.d.ts
 o.js
 
 *.env
+
+.dtbcache.v2
+FileContentIndex/
+*.suo
+*.dll
+bin/
+obj/

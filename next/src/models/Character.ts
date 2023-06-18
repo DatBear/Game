@@ -20,8 +20,8 @@ export enum CharacterClass {
 }
 
 export enum Gender {
-  Male = "Male",
-  Female = "Female"
+  Male,
+  Female
 }
 
 type Character = {
@@ -76,7 +76,7 @@ let defaultCharacterStats: Record<CharacterStats, number> = {
   [CharacterStats.CriticalFlux]: 0,
   [CharacterStats.PhysicalDamageReduction]: 0,
   [CharacterStats.MagicalDamageReduction]: 0,
-  [CharacterStats.ManaSyphon]: 0,
+  [CharacterStats.ManaSiphon]: 0,
   [CharacterStats.QuickDraw]: 0,
   [CharacterStats.ManaConsumption]: 0,
   [CharacterStats.IceMastery]: 0,

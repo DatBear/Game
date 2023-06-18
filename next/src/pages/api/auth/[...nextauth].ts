@@ -3,10 +3,53 @@ import { compare, hash } from 'bcrypt'
 import NextAuth, { type NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
+// import { hkdf } from "@panva/hkdf"
+// import { EncryptJWT, jwtDecrypt } from "jose"
+// import { JWT } from "next-auth/jwt"
+
+
+// const DEFAULT_MAX_AGE = 30 * 24 * 60 * 60 // 30 days
+// async function getDerivedEncryptionKey(secret: string) {
+//   return await hkdf(
+//     "sha256",
+//     secret,
+//     "",
+//     "NextAuth.js Generated Encryption Key",
+//     32
+//   )
+// }
+// const now = () => (Date.now() / 1000) | 0
+
 export const authOptions: NextAuthOptions = {
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
   },
+
+  // jwt: {
+  //   encode: async params => {
+  //     const { token = {}, secret, maxAge = DEFAULT_MAX_AGE } = params
+  //     const encryptionSecret = await getDerivedEncryptionKey(secret + '')
+  //     console.log('encryption secret', encryptionSecret);
+  //     let jwt = await new EncryptJWT(token)
+  //       .setProtectedHeader({ alg: "dir", enc: "A256GCM" })
+  //       .setIssuedAt()
+  //       .setExpirationTime(now() + maxAge)
+  //       .setJti(crypto.randomUUID())
+  //       .encrypt(encryptionSecret);
+  //     console.log('jwt', jwt);
+  //     return jwt;
+  //   },
+  //   decode: async params => {
+  //     const { token, secret } = params
+  //     if (!token) return null
+  //     const encryptionSecret = await getDerivedEncryptionKey(secret + '')
+  //     const { payload } = await jwtDecrypt(token, encryptionSecret, {
+  //       clockTolerance: 15,
+  //     });
+  //     console.log('payload', payload);
+  //     return payload as JWT
+  //   }
+  // },
   providers: [
     CredentialsProvider({
       name: 'account',
@@ -21,7 +64,7 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: {
-            username: credentials.username
+            Username: credentials.username
           }
         });
 
@@ -30,11 +73,10 @@ export const authOptions: NextAuthOptions = {
         }
 
         console.log('hash', await hash('test', 12));
-        //console.log('pass', user.password);
 
         const isPasswordValid = await compare(
           credentials.password,
-          user.password
+          user.Password
         )
 
         if (!isPasswordValid) {
@@ -42,16 +84,16 @@ export const authOptions: NextAuthOptions = {
         }
 
         return {
-          id: user.id + '',
-          email: user.email,
-          name: user.username
+          id: user.Id + '',
+          email: user.Email,
+          name: user.Username
         }
       }
     })
   ],
   callbacks: {
     session: ({ session, token }) => {
-      console.log('Session Callback', { session, token })
+      //console.log('Session Callback', { session, token })
       return {
         ...session,
         user: {
@@ -61,7 +103,7 @@ export const authOptions: NextAuthOptions = {
       }
     },
     jwt: ({ token, user }) => {
-      console.log('JWT Callback', { token, user })
+      //console.log('JWT Callback', { token, user })
       if (user) {
         return {
           ...token,

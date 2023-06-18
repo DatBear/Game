@@ -8,11 +8,25 @@ import Town from "@/components/scenes/Town";
 import { Zone } from "@/models/Zone";
 import { Catacombs } from "@/components/scenes/Catacombs";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { prisma } from "@/lib/prisma";
+import { listen, socket } from '@/network/Socket';
+import { useEffect } from "react";
+import ResponsePacketType from "@/network/ResponsePacketType";
+import ListCharacters from "@/network/models/ListCharacters";
 
 type GameProps = InferGetServerSidePropsType<typeof getServerSideProps>;
 
-export default function Game({ user }: GameProps) {
+export default function Game({ }: GameProps) {
+  useEffect(() => {
+    socket().onopen = (evt) => {
+      (async () => await new Promise(r => setTimeout(r, 2000)))()
+      socket().send('test');
+    }
+
+    return listen(ResponsePacketType.ListCharacters, (data: ListCharacters) => {
+      console.log('listCharacters', data);
+    });
+  }, []);
+
   return (<DndProvider backend={HTML5Backend}>
     <div className={gs.gameContainer}>
       <UserContextProvider>
@@ -37,14 +51,8 @@ function CurrentZone() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const user = await prisma.user.findFirst({
-    where: {
-      email: 'test@test.com'
-    }
-  });
   return {
     props: {
-      user
     }
   };
 }

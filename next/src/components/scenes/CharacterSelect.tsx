@@ -1,22 +1,33 @@
 import Character, { CharacterClass, defaultCharacterStats, Gender } from "@/models/Character";
 import { classArmors, classWeapons } from "@/models/Item";
 import { clsx } from "clsx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CharacterImage from "../CharacterImage";
 import { useUser } from "../contexts/UserContext";
 import ItemSlot from "../ItemSlot";
 import { v4 as uuid } from "uuid";
+import { listen } from "@/network/Socket";
+import ResponsePacketType from "@/network/ResponsePacketType";
+import ListCharacters from "@/network/models/ListCharacters";
 
 const classes = Object.keys(CharacterClass).filter((_, idx) => idx < 5);
-const genders = Object.keys(Gender);
+const genders = Object.values(Gender);
 const defaultCharacter: Partial<Character> = {
   class: classes[0] as CharacterClass,
-  gender: genders[0] as Gender
+  gender: Gender.Male
 }
 
 export default function CharacterSelect() {
-  const { user } = useUser();
+  const { user, setCharacters } = useUser();
   const [showCreate, setShowCreate] = useState(user.characters.length === 0);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.ListCharacters, (data: ListCharacters) => {
+      console.log('listCharacters', data);
+      setCharacters(data);
+      setShowCreate(data.length == 0);
+    });
+  }, []);
 
   if (user.selectedCharacter) {
     return <></>;

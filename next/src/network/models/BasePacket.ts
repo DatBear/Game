@@ -1,0 +1,2 @@
+type BasePacket<T> = T & {
+}

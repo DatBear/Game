@@ -43,6 +43,7 @@ const defaultPartialCharacter: Partial<Character> = {
 
 type UserContextData = {
   user: User;
+  setCharacters: (characters: Character[]) => void;
   createCharacter: (character: Character) => void;
   deleteCharacter: (character: Character) => void;
   selectCharacter: (character: Character | null) => void;
@@ -55,6 +56,13 @@ const UserContext = createContext<UserContextData>({} as UserContextData);
 
 export default function UserContextProvider({ children }: React.PropsWithChildren) {
   const [user, setUser] = useState<User>({ id: 1, characters: [], gold: 1000, name: 'DatBear', marketItems: [] });
+
+  const setCharacters = (characters: Character[]) => {
+    setUser(user => ({
+      ...user,
+      characters
+    }));
+  }
 
   const createCharacter = (character: Character) => {
     const char = {
@@ -73,6 +81,9 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
   }
 
   const selectCharacter = (character: Character | null) => {
+    if (character != null) {
+      character.zone = Zone.Town;
+    }
     setUser(user => ({ ...user, selectedCharacter: character }));
   }
 
@@ -104,7 +115,7 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     return true;
   }
 
-  return <UserContext.Provider value={{ user, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>
+  return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>
     {children}
   </UserContext.Provider>
 }
