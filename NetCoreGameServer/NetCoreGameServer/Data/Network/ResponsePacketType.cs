@@ -4,5 +4,5 @@ public enum ResponsePacketType
 {
     Ping = 0,
     Pong = 1,
-    ListCharacters
+    ListCharacters = 2,
 }

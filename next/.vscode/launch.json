@@ -5,17 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "firefox",
+            "name": "Next.js: debug server-side",
+            "type": "node-terminal",
             "request": "launch",
-            "name": "Launch Firefox against localhost",
-            "url": "http://localhost:3000/game",
-            "webRoot": "${workspaceFolder}",
-            "pathMappings": [
-                {
-                    "url": "webpack://_n_e",
-                    "path": "${workspaceFolder}"
-                }
-            ]
-        }
+            "command": "npm run dev",
+            "serverReadyAction": {
+                "pattern": ", url:.+(https?://.+)",
+                "uriFormat": "%s",
+                "action": "debugWithChrome"
+            }
+        },
     ]
 }

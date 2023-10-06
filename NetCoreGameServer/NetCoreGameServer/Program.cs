@@ -5,7 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NetCoreGameServer.Data.Config;
 using System.Net;
+using MediatR;
 using MySql.Data.MySqlClient;
+using NetCoreGameServer.Data.Network.Characters;
+using NetCoreGameServer.Extension;
 using NetCoreGameServer.Helper;
 using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
@@ -19,17 +22,21 @@ internal class Program
     private readonly NextAuthHelper _nextAuthHelper;
     private readonly WebsocketConfig _websocketConfig;
     private readonly UserService _userService;
+    private readonly IServiceCollection _serviceCollection;
+    private readonly IConfigurationRoot _configuration;
 
-    public Program(NextAuthHelper nextAuthHelper, IOptions<WebsocketConfig> websocketConfig, UserService userService)
+    public Program(NextAuthHelper nextAuthHelper, IOptions<WebsocketConfig> websocketConfig, UserService userService, IServiceCollection serviceCollection, IConfigurationRoot configuration)
     {
         _nextAuthHelper = nextAuthHelper;
         _userService = userService;
+        _serviceCollection = serviceCollection;
+        _configuration = configuration;
         _websocketConfig = websocketConfig.Value;
     }
 
-    async Task Run()
+    async Task Run(IServiceProvider serviceProvider)
     {
-        var server = new EchoServer(IPAddress.Any, _websocketConfig.Port, _nextAuthHelper, _userService);
+        var server = new GameServer(IPAddress.Any, _websocketConfig.Port, _nextAuthHelper, _userService, _serviceCollection, serviceProvider, _configuration);
 
         // Start the server
         Console.Write("Server starting...");
@@ -38,7 +45,7 @@ internal class Program
 
         Console.WriteLine("Press Enter to stop the server or '!' to restart the server...");
 
-        while(true)
+        while (true)
         {
             string line = Console.ReadLine();
             if (string.IsNullOrEmpty(line))
@@ -71,17 +78,11 @@ internal class Program
 
         var services = new ServiceCollection();
 
-        services.AddLogging();
-        services.AddSingleton<Program>();
-        services.AddSingleton<NextAuthHelper>();
+        services.AddServices(configuration);
 
-        //db
-        services.AddTransient<IDbConnection>(x => new MySqlConnection(configuration.GetConnectionString("DB")));
-        services.AddTransient<UserService>();
-        
-        //configs
-        services.Configure<NextAuthConfig>(configuration.GetSection("NEXTAUTH"));
-        services.Configure<WebsocketConfig>(configuration.GetSection("WEBSOCKET"));
+
+        services.AddSingleton<IServiceCollection>(services);
+        services.AddSingleton(configuration);
 
         var serviceProvider = services.BuildServiceProvider();
 
@@ -90,11 +91,7 @@ internal class Program
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
 
-
         var program = serviceProvider.GetRequiredService<Program>();
-        await program.Run();
-
-
-        
+        await program.Run(serviceProvider);
     }
 }

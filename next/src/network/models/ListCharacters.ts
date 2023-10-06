@@ -1,4 +1,6 @@
 import Character from "@/models/Character";
 
-type ListCharacters = BasePacket<Character[]>;
-export default ListCharacters;
+type ListCharactersRequest = BasePacket<void>;
+type ListCharactersResponse = BasePacket<Character[]>;
+
+export type { ListCharactersRequest, ListCharactersResponse };

@@ -25,7 +25,7 @@ export enum Gender {
 }
 
 type Character = {
-  id: string;
+  id: number;
   name: string;
   level: number;
   guild?: string;

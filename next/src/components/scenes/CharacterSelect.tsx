@@ -8,10 +8,10 @@ import ItemSlot from "../ItemSlot";
 import { v4 as uuid } from "uuid";
 import { listen } from "@/network/Socket";
 import ResponsePacketType from "@/network/ResponsePacketType";
-import ListCharacters from "@/network/models/ListCharacters";
+import { ListCharactersResponse } from "@/network/models/ListCharacters";
 
 const classes = Object.keys(CharacterClass).filter((_, idx) => idx < 5);
-const genders = Object.values(Gender);
+const genders = Object.values(Gender).filter(x => typeof x == "number").map(x => x as Gender);
 const defaultCharacter: Partial<Character> = {
   class: classes[0] as CharacterClass,
   gender: Gender.Male
@@ -22,8 +22,7 @@ export default function CharacterSelect() {
   const [showCreate, setShowCreate] = useState(user.characters.length === 0);
 
   useEffect(() => {
-    return listen(ResponsePacketType.ListCharacters, (data: ListCharacters) => {
-      console.log('listCharacters', data);
+    return listen(ResponsePacketType.ListCharacters, (data: ListCharactersResponse) => {
       setCharacters(data);
       setShowCreate(data.length == 0);
     });
@@ -45,7 +44,7 @@ function CharacterList({ characters, showCreate }: { characters: Character[], sh
   return (<div className="h-full flex flex-row">
     <div className="flex flex-col bg-stone-800 w-min gap-2 p-1 h-full">
       {characters.map(x => {
-        return <div key={x.id} onClick={_ => setSelectedCharacter(x)} className="bg-stone-600 flex flex-row gap-1">
+        return <div key={x.name} onClick={_ => setSelectedCharacter(x)} className="bg-stone-600 flex flex-row gap-1">
           <div className="overflow-hidden">
             <div className="w-20 h-12 top-10 inline-block">
               <div className="w-24 h-48 relative" style={{ left: '-10%', top: '10%' }}>
@@ -92,7 +91,7 @@ function CharacterCreate({ showList }: { showList: () => void }) {
 
   const create = () => {
     if (!character.name || character.name == '') return;
-    createCharacter({ ...character, id: uuid() } as Character);
+    createCharacter({ ...character } as Character);
     showList();
   }
 
@@ -110,8 +109,8 @@ function CharacterCreate({ showList }: { showList: () => void }) {
       </div>
       <div className="flex flex-row gap-x-3">
         {genders.map(x => {
-          var btnClasses = clsx(x == character.gender ? "!bg-stone-700 border-green-500/50" : "");
-          return <button key={x} onClick={_ => setCharacter({ ...character, gender: x as unknown as Gender })} className={btnClasses}>{x}</button>
+          var btnClasses = clsx(x === character.gender ? "!bg-stone-700 border-green-500/50" : "");
+          return <button key={x} onClick={_ => setCharacter({ ...character, gender: x as Gender })} className={btnClasses}>{Gender[x]}</button>
         })}
       </div>
     </div>

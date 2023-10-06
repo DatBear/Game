@@ -13,7 +13,6 @@ namespace NetCoreGameServer.Migrations
             DotEnv.Load(new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5));
 
             var serviceProvider = CreateServices();
-
             using var scope = serviceProvider.CreateScope();
 
             try

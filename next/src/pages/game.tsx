@@ -8,23 +8,19 @@ import Town from "@/components/scenes/Town";
 import { Zone } from "@/models/Zone";
 import { Catacombs } from "@/components/scenes/Catacombs";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { listen, socket } from '@/network/Socket';
+import { listen, send, socket } from '@/network/Socket';
 import { useEffect } from "react";
 import ResponsePacketType from "@/network/ResponsePacketType";
-import ListCharacters from "@/network/models/ListCharacters";
+import RequestPacketType from "@/network/RequestPacketType";
 
 type GameProps = InferGetServerSidePropsType<typeof getServerSideProps>;
 
 export default function Game({ }: GameProps) {
   useEffect(() => {
-    socket().onopen = (evt) => {
-      (async () => await new Promise(r => setTimeout(r, 2000)))()
-      socket().send('test');
+    socket().onopen = async (evt) => {
+      //await (async () => await new Promise(r => setTimeout(r, 2000)))()
+      send(RequestPacketType.ListCharacters, null);
     }
-
-    return listen(ResponsePacketType.ListCharacters, (data: ListCharacters) => {
-      console.log('listCharacters', data);
-    });
   }, []);
 
   return (<DndProvider backend={HTML5Backend}>
