@@ -19,7 +19,8 @@ public static class ServiceCollectionExtensions
 
         //db
         services.AddTransient<IDbConnection>(x => new MySqlConnection(config.GetConnectionString("DB")));
-        services.AddTransient<UserService>();
+        services.AddTransient<UserRepository>();
+        services.AddTransient<CharacterRepository>();
 
         //configs
         services.Configure<NextAuthConfig>(config.GetSection("NEXTAUTH"));

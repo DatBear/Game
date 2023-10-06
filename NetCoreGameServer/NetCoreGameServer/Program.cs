@@ -21,14 +21,14 @@ internal class Program
 {
     private readonly NextAuthHelper _nextAuthHelper;
     private readonly WebsocketConfig _websocketConfig;
-    private readonly UserService _userService;
+    private readonly UserRepository _userRepository;
     private readonly IServiceCollection _serviceCollection;
     private readonly IConfigurationRoot _configuration;
 
-    public Program(NextAuthHelper nextAuthHelper, IOptions<WebsocketConfig> websocketConfig, UserService userService, IServiceCollection serviceCollection, IConfigurationRoot configuration)
+    public Program(NextAuthHelper nextAuthHelper, IOptions<WebsocketConfig> websocketConfig, UserRepository userRepository, IServiceCollection serviceCollection, IConfigurationRoot configuration)
     {
         _nextAuthHelper = nextAuthHelper;
-        _userService = userService;
+        _userRepository = userRepository;
         _serviceCollection = serviceCollection;
         _configuration = configuration;
         _websocketConfig = websocketConfig.Value;
@@ -36,7 +36,7 @@ internal class Program
 
     async Task Run(IServiceProvider serviceProvider)
     {
-        var server = new GameServer(IPAddress.Any, _websocketConfig.Port, _nextAuthHelper, _userService, _serviceCollection, serviceProvider, _configuration);
+        var server = new GameServer(IPAddress.Any, _websocketConfig.Port, _nextAuthHelper, _userRepository, _serviceCollection, serviceProvider, _configuration);
 
         // Start the server
         Console.Write("Server starting...");

@@ -4,7 +4,7 @@ using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Data.Network.Characters;
-public class ListCharactersRequest : BaseRequestPacket<NullData>, IRequest<ListCharactersResponse>
+public class ListCharactersRequest : BaseRequestPacket<NullData>, IRequest
 {
     public override int Type => (int)RequestPacketType.ListCharacters;
 }
@@ -14,26 +14,25 @@ public class ListCharactersResponse : BaseResponsePacket<Character[]>
     public override int Type => (int)ResponsePacketType.ListCharacters;
 }
 
-public class ListCharactersHandler : IRequestHandler<ListCharactersRequest, ListCharactersResponse>
+public class ListCharactersHandler : IRequestHandler<ListCharactersRequest>
 {
     private readonly GameSession _session;
-    private readonly UserService _userService;
+    private readonly UserRepository _userRepository;
     private readonly User _user;
 
-    public ListCharactersHandler(GameSession session, UserService userService, User user)
+    public ListCharactersHandler(GameSession session, UserRepository userRepository, User user)
     {
         _session = session;
-        _userService = userService;
+        _userRepository = userRepository;
         _user = user;
     }
 
-    public Task<ListCharactersResponse>? Handle(ListCharactersRequest request, CancellationToken cancellationToken)
+    public async Task Handle(ListCharactersRequest request, CancellationToken cancellationToken)
     {
-        var user = _userService.GetUserDetails(_user.Id)!;
+        var user = _userRepository.GetUserDetails(_user.Id)!;
         _session.Send(new ListCharactersResponse
         {
             Data = user.Characters.ToArray()
         });
-        return null;
     }
 }

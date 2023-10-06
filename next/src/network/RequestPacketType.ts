@@ -1,7 +1,8 @@
 enum RequestPacketType {
   Ping,
   Pong,
-  ListCharacters
+  ListCharacters,
+  CreateCharacter,
 }
 
 export default RequestPacketType;

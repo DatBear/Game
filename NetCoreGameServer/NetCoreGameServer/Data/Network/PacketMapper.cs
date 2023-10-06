@@ -11,7 +11,7 @@ public class PacketMapper
         _requestTypes = requestPackets.ToDictionary(x => x.Type, x => x.GetType());
     }
 
-    public object Deserialize(RequestPacketType type, string message)
+    public object? Deserialize(RequestPacketType type, string message)
     {
         if(_requestTypes.TryGetValue((int)type, out var dType))
         {

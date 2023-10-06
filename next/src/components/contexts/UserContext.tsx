@@ -10,6 +10,8 @@ import { Zone } from "@/models/Zone";
 import { createContext, useCallback, useContext, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { UIMarketplaceWindowState, UIShrineWindowState, UISkillWindowState, UIWindow, useUI, useWindow } from "./UIContext";
+import { send } from "@/network/Socket";
+import RequestPacketType from "@/network/RequestPacketType";
 
 const defaultEquipment = [
   { subType: ItemSubType.Club, stats: { [CharacterStats.Strength]: 1 }, tier: 4 },
@@ -65,15 +67,7 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
   }
 
   const createCharacter = (character: Character) => {
-    const char = {
-      ...character,
-      ...defaultPartialCharacter,
-      equippedItems: defaultEquippedItems[character.class],
-      equipment: [...defaultEquipment.map(x => ({ ...x, id: uuid() }))],
-      items: [...defaultItems.map(x => ({ ...x, id: uuid() }))],
-      stats: { ...defaultCharacterStats, ...classStats[character.class] }
-    } as Character;
-    setUser(user => ({ ...user, characters: user.characters.concat(char) }));
+    send(RequestPacketType.CreateCharacter, character);
   }
 
   const deleteCharacter = (character: Character) => {

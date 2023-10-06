@@ -30,7 +30,7 @@ public class Init : Migration {
 
         create table CharacterClass
         (
-            Id   int auto_increment
+            Id   int
                 primary key,
             Name varchar(255) not null
         );
@@ -54,7 +54,7 @@ public class Init : Migration {
 
         alter table `Character`
             add constraint Character_Stats_Id_fk
-                foreign key (StatsId) references Stats (Id);
+                foreign key (StatsId) references Stats (Id) ON DELETE CASCADE;
 
         create table User
         (
@@ -80,11 +80,8 @@ public class Init : Migration {
     {
         Execute.Sql(@"
         drop table `Character`;
-
         drop table CharacterClass;
-
         drop table Stats;
-
         drop table User;
         ");
     }

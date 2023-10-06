@@ -24,4 +24,6 @@ public class Character
     public List<Item> EquippedItems { get; set; } = new();
     public List<Item> Equipment { get; set; } = new();
     public List<Item> Items { get; set; } = new();
+
+    public int UserId { get; set; }
 }

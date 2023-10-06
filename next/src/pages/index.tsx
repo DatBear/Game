@@ -4,16 +4,22 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]";
 import Link from "next/link";
 import { getToken } from "next-auth/jwt";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type HomeProps = Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'user.image'>;
 
 export default function Home({ authenticated, token }: HomeProps) {
+  const isSetup = useRef(false);
+
+
   useEffect(() => {
+    if (isSetup.current) {
+      return;
+    }
+    isSetup.current = true;
     var ws = new WebSocket('ws://localhost:4000');
-    ws.onopen = (evt) => {
-      (async () => await new Promise(r => setTimeout(r, 2000)))()
-      ws.send('test');
+    ws.onopen = async (evt) => {
+      await (async () => await new Promise(r => setTimeout(r, 2000)))();
     }
 
   }, []);

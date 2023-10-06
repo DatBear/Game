@@ -34,10 +34,10 @@ public class InitialSeed : Migration {
     public override void Down()
     {
         Execute.Sql(@"
-        truncate table `Character`;
-        truncate table CharacterClass;
-        truncate table Stats;
-        truncate table User;
+        delete from `Character` where 1 = 1;
+        delete from Stats where 1 = 1;
+        delete from CharacterClass where 1 = 1;
+        delete from User where 1 = 1;
         ");
     }
 }

@@ -5,11 +5,11 @@ using NetCoreGameServer.Data.Model;
 
 namespace NetCoreGameServer.Service;
 
-public class UserService
+public class UserRepository
 {
     private readonly IDbConnection _db;
 
-    public UserService(IDbConnection db)
+    public UserRepository(IDbConnection db)
     {
         _db = db;
     }

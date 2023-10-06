@@ -17,6 +17,7 @@ using NetCoreGameServer.Service;
 using NetCoreServer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Nito.AsyncEx;
 
 namespace NetCoreGameServer.Websocket;
 
@@ -25,17 +26,17 @@ public class GameSession : WsSession
     private WsServer _wsServer => (WsServer)Server;
 
     private readonly NextAuthHelper _nextAuthHelper;
-    private readonly UserService _userService;
+    private readonly UserRepository _userRepository;
     private readonly IServiceCollection _serviceCollection;
     private readonly IServiceProvider _serviceProvider;
     private readonly IConfigurationRoot _config;
 
     private User? _user;
 
-    public GameSession(WsServer server, NextAuthHelper nextAuthHelper, UserService userService, IServiceCollection serviceCollection, IServiceProvider serviceProvider, IConfigurationRoot config) : base(server)
+    public GameSession(WsServer server, NextAuthHelper nextAuthHelper, UserRepository userRepository, IServiceCollection serviceCollection, IServiceProvider serviceProvider, IConfigurationRoot config) : base(server)
     {
         _nextAuthHelper = nextAuthHelper;
-        _userService = userService;
+        _userRepository = userRepository;
         _serviceCollection = serviceCollection;
         _serviceProvider = serviceProvider;
         _config = config;
@@ -52,7 +53,7 @@ public class GameSession : WsSession
         {
             var cookie = request.GetCookie("next-auth.session-token");
             var jwt = _nextAuthHelper.GetJwt(cookie);
-            var user = _userService.GetUser(Convert.ToInt32(jwt.id));
+            var user = _userRepository.GetUser(Convert.ToInt32(jwt.id));
             return user;
         }
         catch (Exception e)
@@ -71,7 +72,7 @@ public class GameSession : WsSession
             return;
         }
 
-        _user = _userService.GetUserDetails(user.Id)!;
+        _user = _userRepository.GetUserDetails(user.Id)!;
 
         //var listCharPacket = new
         //{
@@ -97,7 +98,13 @@ public class GameSession : WsSession
 
     public override void OnWsReceived(byte[] buffer, long offset, long size)
     {
-        string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
+        var message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
+
+        if (message == null)
+        {
+            return;
+        }
+
         Console.WriteLine($"Incoming: {message} from user: {_user?.Id}");
 
         var nullPacket = JsonConvert.DeserializeObject<NullPacket>(message);
@@ -108,8 +115,8 @@ public class GameSession : WsSession
 
         serviceCollection.AddMediatR(x => x.RegisterServicesFromAssembly(typeof(ListCharactersHandler).Assembly));
         serviceCollection.AddSingleton(this);
-        serviceCollection.AddSingleton(_user);
-        Assembly.GetAssembly(typeof(IRequestPacket)).GetTypesAssignableFrom<IRequestPacket>()
+        serviceCollection.AddSingleton(_user!);
+        Assembly.GetAssembly(typeof(IRequestPacket))!.GetTypesAssignableFrom<IRequestPacket>()
                 .ForEach(x => serviceCollection.AddTransient(typeof(IRequestPacket), x));
         serviceCollection.AddTransient<PacketMapper>();
 
@@ -118,14 +125,18 @@ public class GameSession : WsSession
         var mediator = provider.GetRequiredService<IMediator>();
         var mapper = provider.GetRequiredService<PacketMapper>();
         var packet = mapper.Deserialize((RequestPacketType)nullPacket.PacketType, message);
-        mediator.Send(packet);
+        if (packet != null)
+        {
+            try
+            {
+                AsyncContext.Run(async () => await mediator.Send(packet));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
         Console.WriteLine($"time: {stopwatch.ElapsedMilliseconds}ms");
-
-        //switch ((RequestPacketType)nullPacket.PacketType)
-        //{
-        //    case RequestPacketType.ListCharacters:
-        //        break;
-        //}
     }
 
     private ServiceCollection CreateServiceCollection()

@@ -14,7 +14,7 @@ const classes = Object.keys(CharacterClass).filter((_, idx) => idx < 5);
 const genders = Object.values(Gender).filter(x => typeof x == "number").map(x => x as Gender);
 const defaultCharacter: Partial<Character> = {
   class: classes[0] as CharacterClass,
-  gender: Gender.Male
+  gender: Gender.Male,
 }
 
 export default function CharacterSelect() {
@@ -82,7 +82,6 @@ function CharacterList({ characters, showCreate }: { characters: Character[], sh
 
 function CharacterCreate({ showList }: { showList: () => void }) {
   const { user, createCharacter } = useUser();
-
 
   const [character, setCharacter] = useState<Partial<Character>>(defaultCharacter);
 

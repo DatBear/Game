@@ -25,9 +25,11 @@ const onMessage = (msg: MessageEvent<any>) => {
   }
 }
 
-const send = <T>(event: RequestPacketType, data: T) => {
+const send = <T>(type: RequestPacketType, data: T) => {
   let s = socket();
-  s.send(JSON.stringify({ ...data, type: event }));
+  let str = JSON.stringify({ data, type });
+  console.log('sending', str, { data, type });
+  s.send(str);
 }
 
 const listen = <T>(event: ResponsePacketType, handler: (data: T) => void) => {
