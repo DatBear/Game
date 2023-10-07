@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build --no-mangling && next export",
+    "build": "next build --no-mangling",
+    "prisma:build:start": "prisma generate && next build --no-mangling && next start",
     "start": "next start",
+    "build:start": "next build --no-mangling && next start",
     "lint": "next lint"
   },
   "dependencies": {

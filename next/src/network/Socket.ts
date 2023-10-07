@@ -6,7 +6,7 @@ import ResponsePacketType from "./ResponsePacketType";
 let _socket: WebSocket;
 const socket = () => {
   if (!_socket) {
-    _socket = new WebSocket('ws://localhost:4000');
+    _socket = new WebSocket(process.env.NEXT_PUBLIC_WEBSOCKET_URL!);
     _socket.onmessage = onMessage;
   }
   return _socket;
