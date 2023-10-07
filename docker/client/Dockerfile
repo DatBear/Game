@@ -6,6 +6,6 @@ COPY next/package*.json .
 COPY next/yarn.lock .
 RUN yarn install
 COPY ./next/. .
-COPY ./next/docker-local.env ./.env
+
 EXPOSE 8080
 CMD yarn prisma:build:start -- -p 8080

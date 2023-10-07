@@ -26,6 +26,21 @@ class GameServer : WsServer
         _config = config;
     }
 
+    public override bool Start()
+    {
+        var success = base.Start();
+        if (success)
+        {
+            Console.WriteLine($"Server started on {Address}:{Port}.");
+        }
+        else
+        {
+            Console.WriteLine($"FAILED to start server on {Address}:{Port}");
+        }
+
+        return success;
+    }
+
     protected override TcpSession CreateSession()
     {
         return new GameSession(this, _nextAuthHelper, _userRepository, _serviceCollection, _serviceProvider, _config);

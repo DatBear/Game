@@ -39,33 +39,16 @@ internal class Program
         var server = new GameServer(IPAddress.Any, _websocketConfig.Port, _nextAuthHelper, _userRepository, _serviceCollection, serviceProvider, _configuration);
 
         // Start the server
-        Console.Write("Server starting...");
+        Console.WriteLine("Server starting...");
         server.Start();
-        Console.WriteLine("Done!");
-
-        Console.WriteLine("Press Enter to stop the server or '!' to restart the server...");
 
         while (true)
         {
-            string line = Console.ReadLine();
-            if (string.IsNullOrEmpty(line))
-                break;
-
-            // Restart the server
-            if (line == "!")
-            {
-                Console.Write("Server restarting...");
-                server.Restart();
-                Console.WriteLine("Done!");
-            }
-
-            // Multicast admin message to all sessions
-            line = "(admin) " + line;
-            server.MulticastText(line);
+            await Task.Delay(1000);
         }
 
         // Stop the server
-        Console.Write("Server stopping...");
+        Console.WriteLine("Server stopping...");
         server.Stop();
         Console.WriteLine("Done!");
     }

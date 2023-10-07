@@ -15,7 +15,21 @@ services:
       context: .
       dockerfile: ./docker/client/Dockerfile
     container_name: bs-client
-    environment:
-      - PORT=8080
+    env_file:
+      - next/.env
+      - next/docker-local.env
     ports:
       - "5200:8080"
+    depends_on:
+      - ws
+
+  ws:
+    build:
+      context: .
+      dockerfile: ./docker/ws/Dockerfile
+    container_name: bs-ws
+    env_file:
+      - NetCoreGameServer/.env
+      - NetCoreGameServer/docker-local.env
+    ports:
+      - "5201:4000"
