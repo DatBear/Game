@@ -29,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: ./docker/ws/Dockerfile
+      args:
+        ENV_FILE: docker-local.env
     container_name: bs-ws
     env_file:
       - NetCoreGameServer/.env
