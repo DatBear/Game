@@ -91,3 +91,9 @@ body {
 .img-drop-shadow {
   filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
 }
+
+
+.wrap{
+  word-break: break-word !important; /* Chrome, Safari */
+  word-wrap: break-word !important; /* IE11, Firefox */
+}

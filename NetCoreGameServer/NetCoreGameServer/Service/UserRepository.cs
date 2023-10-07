@@ -30,12 +30,16 @@ public class UserRepository
             LEFT JOIN {TableNames.Character} c ON c.UserId = u.Id
             LEFT JOIN {TableNames.CharacterClass} cc ON c.ClassId = cc.Id
             LEFT JOIN {TableNames.Stats} s ON c.StatsId = s.Id
-        ", (u, c, s) =>
+            WHERE u.Id = @Id;
+        ", (user, character, stats) =>
         {
-            chars.Add(c);
-            c.Stats = s;
-            u.Characters = chars;
-            return u;
+            if (character != null)
+            {
+                chars.Add(character);
+                character.Stats = stats;
+            }
+            user.Characters = chars;
+            return user;
         }, new { Id = id }).FirstOrDefault();
     }
 }
