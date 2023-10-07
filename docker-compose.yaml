@@ -14,6 +14,8 @@ services:
     build:
       context: .
       dockerfile: ./docker/client/Dockerfile
+      args:
+        ENV_FILE: docker-local.env
     container_name: bs-client
     env_file:
       - next/.env

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build --no-mangling",
-    "prisma:build:start": "prisma generate && next build --no-mangling && next start",
+    "prisma:build": "prisma generate && next build --no-mangling",
     "start": "next start",
     "build:start": "next build --no-mangling && next start",
     "lint": "next lint"
