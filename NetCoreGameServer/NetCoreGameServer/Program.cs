@@ -83,6 +83,7 @@ internal class Program
 
         services.AddSingleton<IServiceCollection>(services);
         services.AddSingleton(configuration);
+        services.AddSingleton<SessionManager>();
 
         var serviceProvider = services.BuildServiceProvider();
 

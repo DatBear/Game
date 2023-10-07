@@ -14,6 +14,8 @@ import ShrineWindow from "../ShrineWindow";
 import SkillingWindow from "../SkillingWindow";
 import StatsWindow from "../StatsWindow";
 import { useCharacter, useUser } from "./UserContext";
+import ChatMessage from "@/models/ChatMessage";
+import ChatWindow from "../ChatWindow";
 
 export enum UIWindow {
   Inventory,
@@ -25,7 +27,8 @@ export enum UIWindow {
   Suffusencing,
   Fishing,
   Glyphing,
-  Stats
+  Stats,
+  Chat
 }
 
 export type UIWindowState = {
@@ -47,6 +50,10 @@ export type UISkillWindowState = UIWindowState & {
   items: Item[];
 }
 
+export type UIChatWindowState = UIWindowState & {
+  messages: ChatMessage[];
+}
+
 type WindowRecord<T> = Record<UIWindow, T & UIWindowState>;
 
 type UIContextProps = {
@@ -66,6 +73,9 @@ let defaultWindowState: WindowRecord<any> = {
   [UIWindow.Transmuting]: { isVisible: false, items: Array(2) } as UISkillWindowState,
   [UIWindow.Suffusencing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
   [UIWindow.Glyphing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
+  [UIWindow.Chat]: {
+    isVisible: true, messages: []
+  } as UIChatWindowState,
   [UIWindow.Stats]: { isVisible: false },
 }
 
@@ -134,6 +144,7 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
           {renderWindow(UIWindow.Transmuting, <SkillingWindow skillType={SkillType.Transmuting} window={UIWindow.Transmuting} />)}
           {renderWindow(UIWindow.Glyphing, <SkillingWindow skillType={SkillType.Glyphing} window={UIWindow.Glyphing} />)}
           {renderWindow(UIWindow.Suffusencing, <SkillingWindow skillType={SkillType.Suffusencing} window={UIWindow.Suffusencing} />)}
+          {renderWindow(UIWindow.Chat, <ChatWindow />)}
           {renderWindow(UIWindow.Stats, <StatsWindow />)}
         </div>
       </div>

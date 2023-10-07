@@ -14,10 +14,9 @@ const socket = () => {
 
 const onMessage = (msg: MessageEvent<any>) => {
   try {
-    //console.log(msg);
+    //console.log('received', msg.data);
     let data = JSON.parse(msg.data);
     let eventName = `ws-ev-${data.type}`;
-    //console.log('sending event ', eventName, data.data);
     const event = new CustomEvent(eventName, { detail: data.data });
     document.dispatchEvent(event);
   } catch (e) {
@@ -28,7 +27,7 @@ const onMessage = (msg: MessageEvent<any>) => {
 const send = <T>(type: RequestPacketType, data: T) => {
   let s = socket();
   let str = JSON.stringify({ data, type });
-  console.log('sending', str, { data, type });
+  //console.log('sending', str);
   s.send(str);
 }
 

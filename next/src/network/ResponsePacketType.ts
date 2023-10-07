@@ -3,6 +3,7 @@ enum ResponsePacketType {
   Pong,
   ListCharacters,
   CreateCharacter,
+  SendChatMessage
 }
 
 export default ResponsePacketType;

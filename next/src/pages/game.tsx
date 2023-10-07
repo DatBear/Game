@@ -10,7 +10,6 @@ import { Catacombs } from "@/components/scenes/Catacombs";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { listen, send, socket } from '@/network/Socket';
 import { useEffect } from "react";
-import ResponsePacketType from "@/network/ResponsePacketType";
 import RequestPacketType from "@/network/RequestPacketType";
 
 type GameProps = InferGetServerSidePropsType<typeof getServerSideProps>;

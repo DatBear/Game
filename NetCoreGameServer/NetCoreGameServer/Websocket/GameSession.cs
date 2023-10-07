@@ -73,17 +73,8 @@ public class GameSession : WsSession
         }
 
         _user = _userRepository.GetUserDetails(user.Id)!;
-
-        //var listCharPacket = new
-        //{
-        //    type = ResponsePacketType.ListCharacters,
-        //    data = _user.Characters
-        //};
-
-        ////SendTextAsync(JsonConvert.SerializeObject(listCharPacket));
-        //Send(listCharPacket);
-
-        Console.WriteLine($"Chat WebSocket session with Id {Id} connected!");
+        Console.WriteLine($"WebSocket session with Id {Id} connected!");
+        _serviceProvider.GetService<SessionManager>()!.SetSession(_user.Id, this);
     }
 
     public bool Send<T>(T obj)
@@ -91,9 +82,14 @@ public class GameSession : WsSession
         return SendTextAsync(JsonConvert.SerializeObject(obj));
     }
 
+    public bool SendAll<T>(T obj)
+    {
+        return _wsServer.MulticastText(JsonConvert.SerializeObject(obj));
+    }
+
     public override void OnWsDisconnected()
     {
-        Console.WriteLine($"Chat WebSocket session with Id {Id} disconnected!");
+        Console.WriteLine($"WebSocket session with Id {Id} disconnected!");
     }
 
     public override void OnWsReceived(byte[] buffer, long offset, long size)
@@ -105,21 +101,13 @@ public class GameSession : WsSession
             return;
         }
 
-        Console.WriteLine($"Incoming: {message} from user: {_user?.Id}");
-
+        Console.WriteLine($"Incoming: {message} from user: {_user?.Username}");
         var nullPacket = JsonConvert.DeserializeObject<NullPacket>(message);
 
         var stopwatch = new Stopwatch();
         stopwatch.Start();
+
         var serviceCollection = CreateServiceCollection();
-
-        serviceCollection.AddMediatR(x => x.RegisterServicesFromAssembly(typeof(ListCharactersHandler).Assembly));
-        serviceCollection.AddSingleton(this);
-        serviceCollection.AddSingleton(_user!);
-        Assembly.GetAssembly(typeof(IRequestPacket))!.GetTypesAssignableFrom<IRequestPacket>()
-                .ForEach(x => serviceCollection.AddTransient(typeof(IRequestPacket), x));
-        serviceCollection.AddTransient<PacketMapper>();
-
         var provider = serviceCollection.BuildServiceProvider();
 
         var mediator = provider.GetRequiredService<IMediator>();
@@ -143,11 +131,21 @@ public class GameSession : WsSession
     {
         var collection = new ServiceCollection();
         collection.AddServices(_config);
+
+        collection.AddMediatR(x => x.RegisterServicesFromAssembly(typeof(ListCharactersHandler).Assembly));
+        collection.AddSingleton(this);
+        collection.AddSingleton(_user!);
+        Assembly.GetAssembly(typeof(IRequestPacket))!.GetTypesAssignableFrom<IRequestPacket>()
+                .ForEach(x => collection.AddTransient(typeof(IRequestPacket), x));
+        collection.AddTransient<PacketMapper>();
+
+        collection.AddSingleton(_serviceProvider.GetService<SessionManager>()!);
+
         return collection;
     }
 
     protected override void OnError(SocketError error)
     {
-        Console.WriteLine($"Chat WebSocket session caught an error with code {error}");
+        Console.WriteLine($"WebSocket session caught an error with code {error}");
     }
 }

@@ -6,4 +6,5 @@ public enum ResponsePacketType
     Pong = 1,
     ListCharacters = 2,
     CreateCharacter = 3,
+    SendChatMessage = 4,
 }

@@ -26,6 +26,7 @@ export default function Town() {
         <button onClick={_ => showWindow(UIWindow.Inventory)}>Inventory</button>
         <button onClick={_ => showWindow(UIWindow.Groups)}>Groups</button>
         <button onClick={_ => showWindow(UIWindow.Stats)}>Stats</button>
+        <button onClick={_ => showWindow(UIWindow.Chat)}>Chat</button>
         <button onClick={_ => goToCharacterSelect()}>Character Select</button>
       </div>
       <div className="flex flex-row flex-wrap gap-x-4 gap-y-8 h-full w-full">
