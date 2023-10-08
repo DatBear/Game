@@ -4,6 +4,6 @@ public interface IResponsePacket
 {
 }
 
-public abstract class BaseResponsePacket<T> : BasePacket<T>
+public abstract class BaseResponsePacket<T> : BasePacket<T>, IResponsePacket
 {
 }

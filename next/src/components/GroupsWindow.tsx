@@ -1,7 +1,7 @@
 import Character, { CharacterClass } from "@/models/Character";
 import Group from "@/models/Group";
 import { useCallback } from "react";
-import { useWindow, UIWindow } from "./contexts/UIContext";
+import { useWindow, UIWindow, UIWindowState } from "./contexts/UIContext";
 import Window from "./Window";
 
 let chars: Partial<Character>[] = [
@@ -38,9 +38,9 @@ function CharListing({ char }: { char: Character }) {
 
 
 export default function GroupsWindow() {
-  const { closeWindow } = useWindow(UIWindow.Groups);
+  const { windowState, closeWindow } = useWindow<UIWindowState>(UIWindow.Groups);
 
-  return <Window tabbed close={() => closeWindow()}>
+  return <Window tabbed isVisible={windowState!.isVisible} close={() => closeWindow()}>
     <Window.Title>
       <Window.TabList>
         <Window.Tab>Group List</Window.Tab>

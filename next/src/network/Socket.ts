@@ -24,16 +24,20 @@ const onMessage = (msg: MessageEvent<any>) => {
   }
 }
 
-const send = <T>(type: RequestPacketType, data: T) => {
+const send = <T>(type: RequestPacketType, data: T, log: boolean = false) => {
   let s = socket();
   let str = JSON.stringify({ data, type });
-  //console.log('sending', str);
   s.send(str);
+  if (log) {
+    console.log('sent ', RequestPacketType[type], str);
+  }
 }
 
-const listen = <T>(event: ResponsePacketType, handler: (data: T) => void) => {
+const listen = <T>(event: ResponsePacketType, handler: (data: T) => void, log: boolean = false) => {
   const eventListener = (msg: CustomEvent<any>) => {
-    //console.log('received msg', msg.detail);
+    if (log) {
+      console.log('received ', ResponsePacketType[event], msg.detail);
+    }
     handler(msg.detail as T);
   }
   const eventName = `ws-ev-${event}`;

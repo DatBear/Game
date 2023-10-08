@@ -13,6 +13,13 @@ public class CharacterRepository
         _db = db;
     }
 
+    public async Task<Character?> GetByName(string name)
+    {
+        var sql = $@"SELECT c.* FROM `Character` c where Name = @name";
+        var result = await _db.QueryFirstOrDefaultAsync<Character>(sql, new { name });
+        return result;
+    }
+
     public async Task<int> CreateCharacter(Character character)
     {
 

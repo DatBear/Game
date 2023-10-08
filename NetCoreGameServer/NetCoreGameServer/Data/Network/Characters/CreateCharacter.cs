@@ -34,6 +34,14 @@ public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
     public async Task Handle(CreateCharacterRequest request, CancellationToken cancellationToken)
     {
         var character = request.Data;
+
+        var existingCharacter = await _characterRepository.GetByName(character.Name);
+        if (existingCharacter != null)
+        {
+            _session.SendError("A character with that name already exists.");
+            return;
+        }
+
         character.UserId = _user.Id;
         character.Stats = new Stats
         {
@@ -48,7 +56,7 @@ public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
         character.Life = character.Stats.MaxLife;
         character.Mana = character.Stats.MaxMana;
         character.EquipmentSlots = 8;
-
+        character.StatPoints = 10;
 
         var id = await _characterRepository.CreateCharacter(character);
         character.Id = id;

@@ -85,7 +85,7 @@ let itemIcons: Record<ItemSubType, string> = {
   [ItemSubType.Spear]: "iconSpear",
   [ItemSubType.Polearm]: "iconPolearm",
   [ItemSubType.Robe]: "iconRobe",
-  [ItemSubType.PaddedRobe]: "iconPaddedrobe",
+  [ItemSubType.PaddedRobe]: "iconPaddedRobe",
   [ItemSubType.LeatherArmor]: "iconLeather",
   [ItemSubType.ScaleArmor]: "iconScale",
   [ItemSubType.ChainMail]: "iconChainmail",

@@ -26,7 +26,7 @@ export default function ChatWindow() {
     }
   }
 
-  return <Window className="" close={() => closeWindow()}>
+  return <Window className="" isVisible={windowState!.isVisible} close={() => closeWindow()}>
     <Window.Title>Chat</Window.Title>
     <div className="flex flex-col gap-y-1 h-60 w-96 border border-white overflow-y-scroll wrap">
       <div className="flex-grow"></div>
@@ -38,6 +38,6 @@ export default function ChatWindow() {
       })}
       <div ref={scrollRef}></div>
     </div>
-    <input className="align-bottom self-end items-end" value={message} onChange={e => setMessage(e.target.value)} onKeyDown={e => onKeyDown(e)} />
+    <input className="align-bottom self-end items-end focus:border-white" value={message} onChange={e => setMessage(e.target.value)} onKeyDown={e => onKeyDown(e)} />
   </Window>
 }

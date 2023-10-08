@@ -18,7 +18,7 @@ export default function ShrineWindow() {
     }
   }
 
-  return <Window className="!w-80" close={() => closeWindow()}>
+  return <Window className="!w-80" isVisible={windowState!.isVisible} close={() => closeWindow()}>
     <Window.Title>Shrine</Window.Title>
     <div className="flex flex-col h-full relative">
       <div className="flex flex-col gap-y-3">

@@ -77,14 +77,25 @@ public class GameSession : WsSession
         _serviceProvider.GetService<SessionManager>()!.SetSession(_user.Id, this);
     }
 
-    public bool Send<T>(T obj)
+    public bool Send<T>(T obj) where T : IResponsePacket
     {
         return SendTextAsync(JsonConvert.SerializeObject(obj));
     }
 
-    public bool SendAll<T>(T obj)
+    public bool SendAll<T>(T obj) where T : IResponsePacket
     {
         return _wsServer.MulticastText(JsonConvert.SerializeObject(obj));
+    }
+
+    public bool SendError(string message)
+    {
+        return Send(new ErrorResponse()
+        {
+            Data = new ErrorMessage()
+            {
+                Message = message
+            }
+        });
     }
 
     public override void OnWsDisconnected()

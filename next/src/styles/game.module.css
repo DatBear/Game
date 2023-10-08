@@ -9,11 +9,11 @@
 
 /* forms */
 .gameContainer select {
-  @apply bg-stone-900 px-2 py-1 flex-grow outline outline-1;
+  @apply bg-stone-900 px-2 py-1 flex-grow outline outline-1 outline-white;
 }
 
 .gameContainer input:not([type="checkbox"]) {
-  @apply bg-stone-900 p-1 w-full outline outline-1;
+  @apply bg-stone-900 p-1 w-full outline outline-1 outline-white;
 }
 
 .gameContainer input[disabled] {

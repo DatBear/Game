@@ -109,7 +109,7 @@ export default function MarketplaceWindow() {
     }
   }
 
-  return <Window tabbed close={() => closeWindow()}>
+  return <Window tabbed isVisible={windowState!.isVisible} close={() => closeWindow()}>
     <Window.Title>
       <Window.TabList>
         <Window.Tab>Market Search</Window.Tab>

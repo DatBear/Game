@@ -6,6 +6,7 @@ import WindowDataContextProvider, { useWindowData } from "./contexts/WindowDataC
 import { useDrag, useDragDropManager, useDragLayer, useDrop, XYCoord } from "react-dnd";
 
 type WindowProps = {
+  isVisible: boolean;
   className?: string;
   tabbed?: boolean;
   close?: () => void;
@@ -16,13 +17,17 @@ type _Data = ReturnType<typeof useWindowData>;
 
 let type = "Window";
 
-export default function Window({ children, className, tabbed, close, ...props }: WindowProps) {
+export default function Window({ children, isVisible, className, tabbed, close, ...props }: WindowProps) {
   tabbed = tabbed ?? false;
 
   const windowRef = useRef<HTMLDivElement>(null);
   const [coords, setCoords] = useState<XYCoord>();
 
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(isVisible);
+
+  useEffect(() => {
+    setShow(isVisible);
+  }, [isVisible])
 
   const handleClose = useCallback(() => {
     if (close) {

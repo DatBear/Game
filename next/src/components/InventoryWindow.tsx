@@ -1,6 +1,6 @@
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item, { classArmors, classCharms, classWeapons, ItemSubType } from "@/models/Item";
-import { UIWindow, useWindow } from "./contexts/UIContext";
+import { UIWindow, UIWindowState, useWindow } from "./contexts/UIContext";
 import { useCharacter, useUser } from "./contexts/UserContext";
 import ItemSlot from "./ItemSlot";
 import Window from "./Window";
@@ -9,7 +9,7 @@ let itemSlots = 16;
 
 function InventoryWindow() {
   const { character } = useCharacter();
-  const { closeWindow } = useWindow(UIWindow.Inventory);
+  const { windowState, closeWindow } = useWindow<UIWindowState>(UIWindow.Inventory);
 
   let equippedSlots = Object.values(EquippedItemSlot);
   let equippableGear: Record<EquippedItemSlot, ItemSubType[]> = {
@@ -20,7 +20,7 @@ function InventoryWindow() {
   }
 
   return (<>
-    <Window close={() => closeWindow()}>
+    <Window isVisible={windowState!.isVisible} close={() => closeWindow()}>
       <Window.Title>Inventory</Window.Title>
       <div>
         <div className="flex flex-row gap-7">

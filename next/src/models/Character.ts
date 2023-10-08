@@ -42,7 +42,7 @@ type Character = {
   equipmentSlots: number;
   kills: number;
   deaths: number;
-  stats: Record<CharacterStats, number>;
+  stats: Record<CharacterStats | string, number>;
   zone: Zone;
 
   imageRef: RefObject<HTMLDivElement>;

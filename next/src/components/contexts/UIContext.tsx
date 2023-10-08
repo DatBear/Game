@@ -16,6 +16,7 @@ import StatsWindow from "../StatsWindow";
 import { useCharacter, useUser } from "./UserContext";
 import ChatMessage from "@/models/ChatMessage";
 import ChatWindow from "../ChatWindow";
+import ErrorWindow from "../ErrorWindow";
 
 export enum UIWindow {
   Inventory,
@@ -28,7 +29,8 @@ export enum UIWindow {
   Fishing,
   Glyphing,
   Stats,
-  Chat
+  Chat,
+  Error
 }
 
 export type UIWindowState = {
@@ -77,6 +79,7 @@ let defaultWindowState: WindowRecord<any> = {
     isVisible: true, messages: []
   } as UIChatWindowState,
   [UIWindow.Stats]: { isVisible: false },
+  [UIWindow.Error]: { isVisible: false }
 }
 
 const UIContext = createContext({} as UIContextProps);
@@ -99,7 +102,7 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
   }
 
   const renderWindow = (window: UIWindow, component: ReactNode) => {
-    return windowStates[window].isVisible ? component : <></>;
+    return component;
   }
 
   return (<UIContext.Provider value={{ setWindowState, windowStates }}>
@@ -146,6 +149,14 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
           {renderWindow(UIWindow.Suffusencing, <SkillingWindow skillType={SkillType.Suffusencing} window={UIWindow.Suffusencing} />)}
           {renderWindow(UIWindow.Chat, <ChatWindow />)}
           {renderWindow(UIWindow.Stats, <StatsWindow />)}
+          {renderWindow(UIWindow.Error, <ErrorWindow />)}
+        </div>
+      </div>
+    </>}
+    {!user.selectedCharacter && <>
+      <div className="flex flex-row flex-wrap gap-3 p-5 absolute left-0 top-0">
+        <div className="relative">
+          {renderWindow(UIWindow.Error, <ErrorWindow />)}
         </div>
       </div>
     </>}
