@@ -91,7 +91,6 @@ function CharacterCreate({ showList }: { showList: () => void }) {
   const create = () => {
     if (!character.name || character.name == '') return;
     createCharacter({ ...character } as Character);
-    showList();
   }
 
   return (<div className="flex flex-col gap-y-3 w-min p-4 items-center">
