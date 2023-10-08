@@ -3,6 +3,7 @@ import Window from "./Window";
 import { UIWindow, UIWindowState, useWindow } from "./contexts/UIContext";
 import { listen } from "@/network/Socket";
 import { useEffect, useState } from "react";
+import ErrorMessage from "@/models/ErrorMessage";
 
 export default function ErrorWindow() {
   const { closeWindow, windowState, setWindowState } = useWindow<UIWindowState>(UIWindow.Error);

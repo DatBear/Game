@@ -49,3 +49,4 @@ obj/
 !**/.vscode/
 /.vscode
 
+!sample.env
