@@ -164,7 +164,10 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
             {recordKeys(item.stats).map(k => {
               const statNamesRecord = type === ItemType.Item ? itemSpecificStatNames : statNames;
               const statName = statNamesRecord[k];
-              const value = item.stats[k as CharacterStats]?.toString() ?? '';
+              if (!statName) {
+                return null;
+              }
+              const value = item.stats[k]?.toString() ?? '';
               const isReplace = statName.indexOf('{x}') > -1;
               const replaced = `${isReplace ? '' : '+'}${isReplace ? '' : value}${(statName.startsWith('%') ? '' : ' ')}${statName.replaceAll('{x}', value)}`
               return <div key={k}>{replaced}</div>

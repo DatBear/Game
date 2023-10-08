@@ -1,126 +1,131 @@
 import Character from "./Character";
 import Item, { getItemType, ItemType } from "./Item";
 
-export enum CharacterStats {
-  EnhancedEffect,
-  Strength,
-  Dexterity,
-  Vitality,
-  Intelligence,
-  MaxLife,
-  MaxMana,
-  ExperienceGained,
-  MagicLuck,
-  LifeRegen,
-  ManaRegen,
-  ExtraEquipmentSlots,
-  CriticalStrike,
-  LifePerAttack,
-  ManaPerAttack,
-  LifePerKill,
-  ManaPerKill,
-  LifeSteal,
-  DamageReturn,
-  MindNumb,
-  ArmorPierce,
-  Parry,
-  CriticalFlux,
-  PhysicalDamageReduction,
-  MagicalDamageReduction,
-  ManaSiphon,
-  QuickDraw,
-  ManaConsumption,
-  IceMastery,
-  FireMastery,
-  LightningMastery,
-  EarthMastery,
-  WindMastery,
-  HealMastery,
-  ManaSkin,
-  PowerShot,
-  GlancingBlow,
-  Jubilance,
+type CharacterStats = {
+  enhancedEffect: number;
+  strength: number;
+  dexterity: number;
+  vitality: number;
+  intelligence: number;
+  maxLife: number;
+  maxMana: number;
+  experienceGained: number;
+  magicLuck: number;
+  lifeRegen: number;
+  manaRegen: number;
+  extraEquipmentSlots: number;
+  criticalStrike: number;
+  lifePerAttack: number;
+  manaPerAttack: number;
+  lifePerKill: number;
+  manaPerKill: number;
+  lifeSteal: number;
+  damageReturn: number;
+  mindNumb: number;
+  armorPierce: number;
+  parry: number;
+  criticalFlux: number;
+  physicalDamageReduction: number;
+  magicalDamageReduction: number;
+  manaSiphon: number;
+  quickDraw: number;
+  manaConsumption: number;
+  iceMastery: number;
+  fireMastery: number;
+  lightningMastery: number;
+  earthMastery: number;
+  windMastery: number;
+  healMastery: number;
+  manaSkin: number;
+  powerShot: number;
+  glancingBlow: number;
+  jubilance: number;
 }
 
-
-export enum ItemStats {
-  WarmLights = 38,
-  EvilPresences,
-  TreasureChests,
-  Rooms,
-  WarmLightEffectiveness,
-  MonsterDifficulty,
-  ExperienceGained,
-  ItemDrops,
-  ItemQuality,
-  Swarm,
-  GuildPoints,
-  LevelUp,
-  LevelCap,
+type ItemStats = {
+  warmLights: number;
+  evilPresences: number;
+  treasureChests: number;
+  rooms: number;
+  warmLightEffectiveness: number;
+  monsterDifficulty: number;
+  experienceGained: number;
+  itemDrops: number;
+  itemQuality: number;
+  swarm: number;
+  guildPoints: number;
+  levelUp: number;
+  levelCap: number;
 }
 
-const statNames: Record<Stats, string> = {
-  [CharacterStats.EnhancedEffect]: "% Enhanced Effect",
-  [CharacterStats.Strength]: "Strength",
-  [CharacterStats.Dexterity]: "Dexterity",
-  [CharacterStats.Vitality]: "Vitality",
-  [CharacterStats.Intelligence]: "Intelligence",
-  [CharacterStats.MaxLife]: "Max Life",
-  [CharacterStats.MaxMana]: "Max Mana",
-  [CharacterStats.ExperienceGained]: "% Experience Gained",
-  [CharacterStats.MagicLuck]: "Magic Luck",
-  [CharacterStats.LifeRegen]: "Life Regen",
-  [CharacterStats.ManaRegen]: "Mana Regen",
-  [CharacterStats.ExtraEquipmentSlots]: "Extra Equipment Slots",
-  [CharacterStats.CriticalStrike]: "Critical Strike",
-  [CharacterStats.LifePerAttack]: "Life PerAttack",
-  [CharacterStats.ManaPerAttack]: "Mana Per Attack",
-  [CharacterStats.LifePerKill]: "Life Per Kill",
-  [CharacterStats.ManaPerKill]: "Mana Per Kill",
-  [CharacterStats.LifeSteal]: "% Life Steal",
-  [CharacterStats.DamageReturn]: "% Damage Return",
-  [CharacterStats.MindNumb]: "% Mind Numb",
-  [CharacterStats.ArmorPierce]: "% Armor Pierce",
-  [CharacterStats.Parry]: "% Parry",
-  [CharacterStats.CriticalFlux]: "% Critical Flux",
-  [CharacterStats.PhysicalDamageReduction]: "% Physical Damage Reduction",
-  [CharacterStats.MagicalDamageReduction]: "% Magical Damage Reduction",
-  [CharacterStats.ManaSiphon]: "% Mana Syphon",
-  [CharacterStats.QuickDraw]: "% Quick Draw",
-  [CharacterStats.ManaConsumption]: "% Mana Consumption",
-  [CharacterStats.IceMastery]: "% Ice Mastery",
-  [CharacterStats.FireMastery]: "% Fire Mastery",
-  [CharacterStats.LightningMastery]: "% Lightning Mastery",
-  [CharacterStats.EarthMastery]: "% Earth Mastery",
-  [CharacterStats.WindMastery]: "% Wind Mastery",
-  [CharacterStats.HealMastery]: "% Heal Mastery",
-  [CharacterStats.ManaSkin]: "% Mana Skin",
-  [CharacterStats.PowerShot]: "% Power Shot",
-  [CharacterStats.GlancingBlow]: "% Glancing Blow",
-  [CharacterStats.Jubilance]: "Jubilance",
-  [ItemStats.WarmLights]: "Warm Lights",
-  [ItemStats.EvilPresences]: "Evil Presences",
-  [ItemStats.TreasureChests]: "Treasure Chests",
-  [ItemStats.Rooms]: "Rooms",
-  [ItemStats.WarmLightEffectiveness]: "% Warm Light Effectiveness",
-  [ItemStats.MonsterDifficulty]: "% Monster Difficulty",
-  [ItemStats.ExperienceGained]: "% Experience Gained",
-  [ItemStats.ItemDrops]: "% Item Drops",
-  [ItemStats.ItemQuality]: "% Item Quality",
-  [ItemStats.Swarm]: "% Swarm",
-  [ItemStats.GuildPoints]: "% Guild Points",
-  [ItemStats.LevelUp]: "% Level Up",
-  [ItemStats.LevelCap]: "Level Cap"
+const statNames: Record<string, string> = {
+  ["enhancedEffect"]: "% Enhanced Effect",
+  ["strength"]: "Strength",
+  ["dexterity"]: "Dexterity",
+  ["vitality"]: "Vitality",
+  ["intelligence"]: "Intelligence",
+  ["maxLife"]: "Max Life",
+  ["maxMana"]: "Max Mana",
+  ["experienceGained"]: "% Experience Gained",
+  ["magicLuck"]: "Magic Luck",
+  ["lifeRegen"]: "Life Regen",
+  ["manaRegen"]: "Mana Regen",
+  ["extraEquipmentSlots"]: "Extra Equipment Slots",
+  ["criticalStrike"]: "Critical Strike",
+  ["lifePerAttack"]: "Life PerAttack",
+  ["manaPerAttack"]: "Mana Per Attack",
+  ["lifePerKill"]: "Life Per Kill",
+  ["manaPerKill"]: "Mana Per Kill",
+  ["lifeSteal"]: "% Life Steal",
+  ["damageReturn"]: "% Damage Return",
+  ["mindNumb"]: "% Mind Numb",
+  ["armorPierce"]: "% Armor Pierce",
+  ["parry"]: "% Parry",
+  ["criticalFlux"]: "% Critical Flux",
+  ["physicalDamageReduction"]: "% Physical Damage Reduction",
+  ["magicalDamageReduction"]: "% Magical Damage Reduction",
+  ["manaSiphon"]: "% Mana Syphon",
+  ["quickDraw"]: "% Quick Draw",
+  ["manaConsumption"]: "% Mana Consumption",
+  ["iceMastery"]: "% Ice Mastery",
+  ["fireMastery"]: "% Fire Mastery",
+  ["lightningMastery"]: "% Lightning Mastery",
+  ["earthMastery"]: "% Earth Mastery",
+  ["windMastery"]: "% Wind Mastery",
+  ["healMastery"]: "% Heal Mastery",
+  ["manaSkin"]: "% Mana Skin",
+  ["powerShot"]: "% Power Shot",
+  ["glancingBlow"]: "% Glancing Blow",
+  ["jubilance"]: "Jubilance",
+  ["warmLights"]: "Warm Lights",
+  ["evilPresences"]: "Evil Presences",
+  ["treasureChests"]: "Treasure Chests",
+  ["rooms"]: "Rooms",
+  ["warmLightEffectiveness"]: "% Warm Light Effectiveness",
+  ["monsterDifficulty"]: "% Monster Difficulty",
+  ["itemDrops"]: "% Item Drops",
+  ["itemQuality"]: "% Item Quality",
+  ["swarm"]: "% Swarm",
+  ["guildPoints"]: "% Guild Points",
+  ["levelUp"]: "% Level Up",
+  ["levelCap"]: "Level Cap"
 }
 
+type Stats = Partial<CharacterStats> & Partial<ItemStats> & {
+  id: number;
+};
 
-const itemSpecificStatNames: Record<Stats, string> = {
+const itemSpecificStatNames: Record<string, string> = {
   ...statNames,
-  [CharacterStats.MaxLife]: "Heals {x} Life",
-  [CharacterStats.MaxMana]: "Recovers {x} Mana",
-  [CharacterStats.ExperienceGained]: "% Cooked"
+  ["maxLife"]: "Heals {x} Life",
+  ["maxMana"]: "Recovers {x} Mana",
+  ["experienceGained"]: "% Cooked"
 }
 
 
 export { statNames, itemSpecificStatNames }
-export type Stats = CharacterStats | ItemStats;
+
+
+export type {
+  Stats, CharacterStats, ItemStats
+};

@@ -55,7 +55,7 @@ type Item = {
   tier: number;
   quantity?: number;
   subType: ItemSubType;
-  stats: Partial<Record<Stats, number>>;
+  stats: Stats;
 }
 
 

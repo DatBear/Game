@@ -22,8 +22,8 @@ export default function ShrineWindow() {
     <Window.Title>Shrine</Window.Title>
     <div className="flex flex-col h-full relative">
       <div className="flex flex-col gap-y-3">
-        <ProgressBar current={character.life} max={character.stats[CharacterStats.MaxLife]} color="red" />
-        <ProgressBar current={character.mana} max={character.stats[CharacterStats.MaxMana]} color="blue" />
+        <ProgressBar current={character.life} max={character.stats.maxLife!} color="red" />
+        <ProgressBar current={character.mana} max={character.stats.maxMana!} color="blue" />
       </div>
       <img className="h-96 self-center bottom-1 absolute" src="svg/iconStatue.svg" alt="" />
       <div className="flex-grow flex flex-col gap-y-3 items-center place-content-end h-96 relative">

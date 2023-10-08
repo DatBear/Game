@@ -8,4 +8,7 @@ public class User
 
     public List<Character> Characters { get; set; } = new();
     public int? GuildId { get; set; }
+
+    //not persisted
+    public Character? SelectedCharacter { get; set; }
 }

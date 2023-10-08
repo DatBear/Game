@@ -2,11 +2,7 @@ using Newtonsoft.Json;
 
 namespace NetCoreGameServer.Data.Network;
 
-public class NullPacket : BasePacket<NullData>
+public class NullPacket
 {
-    [JsonIgnore]
-    public override int Type { get; }
-
-    [JsonProperty("Type")]
-    public int PacketType { get; set; }
+    public int Type { get; set; }
 }

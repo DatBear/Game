@@ -123,7 +123,7 @@ public class GameSession : WsSession
 
         var mediator = provider.GetRequiredService<IMediator>();
         var mapper = provider.GetRequiredService<PacketMapper>();
-        var packet = mapper.Deserialize((RequestPacketType)nullPacket.PacketType, message);
+        var packet = mapper.Deserialize((RequestPacketType)nullPacket.Type, message);
         if (packet != null)
         {
             try

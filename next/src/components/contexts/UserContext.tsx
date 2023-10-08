@@ -1,4 +1,4 @@
-import Character, { classStats, defaultCharacterStats } from "@/models/Character";
+import Character from "@/models/Character";
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item, { classArmors, classCharms, classWeapons, defaultEquippedItems, ItemSubType } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
@@ -7,41 +7,12 @@ import { SkillType } from "@/models/Skill";
 import { CharacterStats } from "@/models/Stats";
 import User from "@/models/User";
 import { Zone } from "@/models/Zone";
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { UIMarketplaceWindowState, UIShrineWindowState, UISkillWindowState, UIWindow, useUI, useWindow } from "./UIContext";
-import { send } from "@/network/Socket";
+import { listen, send } from "@/network/Socket";
 import RequestPacketType from "@/network/RequestPacketType";
-
-const defaultEquipment = [
-  { subType: ItemSubType.Club, stats: { [CharacterStats.Strength]: 1 }, tier: 4 },
-  { subType: ItemSubType.Club, stats: { [CharacterStats.Dexterity]: 3 }, tier: 3 },
-  { subType: ItemSubType.PaddedRobe, stats: { [CharacterStats.Intelligence]: 1, [CharacterStats.FireMastery]: 1 }, tier: 3 },
-  { subType: ItemSubType.Fire, stats: { [CharacterStats.EnhancedEffect]: 20 }, tier: 3 },
-  { subType: ItemSubType.Fire, stats: {}, tier: 2 },
-  { subType: ItemSubType.PlateMail, stats: { [CharacterStats.MaxLife]: 60 }, tier: 1 },
-];
-
-const defaultItems = [
-  { subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 100 }, tier: 3, quantity: 12 },
-  { subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 100 }, tier: 3, quantity: 1 },
-  { subType: ItemSubType.Fish, stats: { [CharacterStats.MaxLife]: 100 }, tier: 3, quantity: 20 },
-  { subType: ItemSubType.FishingRod, stats: { [CharacterStats.EnhancedEffect]: 10 }, tier: 1 },
-]
-
-const defaultPartialCharacter: Partial<Character> = {
-  level: 1,
-  stats: defaultCharacterStats,
-  life: defaultCharacterStats[CharacterStats.MaxLife],
-  mana: defaultCharacterStats[CharacterStats.MaxMana],
-  experience: 0,
-  equipmentSlots: 8,
-  statPoints: 10,//todo add on mq
-  abilityPoints: 1,
-  kills: 0,
-  deaths: 0,
-  zone: Zone.Town
-}
+import ResponsePacketType from "@/network/ResponsePacketType";
 
 type UserContextData = {
   user: User;
@@ -75,10 +46,7 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
   }
 
   const selectCharacter = (character: Character | null) => {
-    if (character != null) {
-      character.zone = Zone.Town;
-    }
-    setUser(user => ({ ...user, selectedCharacter: character }));
+    send(RequestPacketType.SelectCharacter, character?.id, true);
   }
 
   const updateCharacter = (character: Character) => {
@@ -108,6 +76,19 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     user.selectedCharacter.equipment = user.selectedCharacter.equipment.filter(x => x.id !== item.id);
     return true;
   }
+
+  useEffect(() => {
+    return listen(ResponsePacketType.SelectCharacter, (e?: number) => {
+      const character = user.characters.find(x => x.id === e);
+      if (character != null) {
+        character.zone = Zone.Town;
+      }
+      setUser(user => ({
+        ...user,
+        selectedCharacter: character || null
+      }));
+    }, true);
+  }, [user]);
 
   return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>
     {children}
@@ -262,15 +243,16 @@ export function useCharacter() {
     const invItem = character.equipment.find(x => x.id === item.id);
     if (!invItem) return false;
     character.equipment = character.equipment.filter(x => x.id !== item.id);
-    character.life = Math.min(character.stats[CharacterStats.MaxLife], character.life - 10);//todo heal based on item
-    character.mana = Math.min(character.stats[CharacterStats.MaxMana], character.mana - 20);
+    character.life = Math.min(character.stats.maxLife!, character.life - 10);
+    character.mana = Math.min(character.stats.maxMana!, character.mana - 20);
     updateCharacter(character);
     return true;
   }
 
-  const addStatPoint = (stat: CharacterStats) => {
+  const addStatPoint = (stat: string) => {
     if (character.statPoints <= 0) return;
     character.statPoints -= 1;
+    //@ts-ignore
     character.stats[stat] += 1;
     updateCharacter(character);
   }
@@ -297,8 +279,8 @@ export function useCharacter() {
       character.experience = character.level * 1000000;
       character.level += 1;
       character.statPoints += 1;
-      character.life = character.stats[CharacterStats.MaxLife];
-      character.mana = character.stats[CharacterStats.MaxMana];
+      character.life = character.stats.maxLife!;
+      character.mana = character.stats.maxMana!;
       //todo max life + mana + etc
     }
     updateCharacter(character);

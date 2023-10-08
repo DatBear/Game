@@ -26,4 +26,7 @@ public class Character
     public List<Item> Items { get; set; } = new();
 
     public int UserId { get; set; }
+
+    //not persisted
+    public Zone? Zone { get; set; }
 }

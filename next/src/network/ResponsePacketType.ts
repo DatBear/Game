@@ -4,6 +4,7 @@ enum ResponsePacketType {
   ListCharacters,
   CreateCharacter,
   SendChatMessage,
+  SelectCharacter,
 
   Error = 255
 }

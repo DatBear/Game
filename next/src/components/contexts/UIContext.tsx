@@ -75,9 +75,7 @@ let defaultWindowState: WindowRecord<any> = {
   [UIWindow.Transmuting]: { isVisible: false, items: Array(2) } as UISkillWindowState,
   [UIWindow.Suffusencing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
   [UIWindow.Glyphing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
-  [UIWindow.Chat]: {
-    isVisible: true, messages: []
-  } as UIChatWindowState,
+  [UIWindow.Chat]: { isVisible: false, messages: [] } as UIChatWindowState,
   [UIWindow.Stats]: { isVisible: false },
   [UIWindow.Error]: { isVisible: false }
 }
@@ -122,8 +120,8 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
         <div className="flex flex-row">
           {character && <div className="flex flex-row gap-2">
             <div className="flex flex-col w-24 text-xs gap-1">
-              <ProgressBar current={character.life} max={character.stats[CharacterStats.MaxLife]} color={"red"} />
-              <ProgressBar current={character.mana} max={character.stats[CharacterStats.MaxMana]} color={"blue"} />
+              <ProgressBar current={character.life} max={character.stats.maxLife!} color={"red"} />
+              <ProgressBar current={character.mana} max={character.stats.maxMana!} color={"blue"} />
               <ProgressBar current={character.experience - (character.level - 1) * 1000000} max={1000000} color={"green"} text={`Lv. ${character.level}`} />
             </div>
             <div className="w-12 h-24">

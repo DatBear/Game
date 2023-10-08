@@ -10,17 +10,11 @@ function StatsWindow() {
 
   const labelClasses = clsx("text-right");
 
-  const spendStatPoint = (stat: CharacterStats) => {
+  const spendStatPoint = (stat: string) => {
     addStatPoint(stat);
   }
 
-  const getStatValue = (stat: CharacterStats) => {
-    return character.stats[CharacterStats[stat].toLowerCase()];
-  }
-
   const canAddStat = character.statPoints > 0;
-  console.log('character stats', character.stats);
-  console.log('vit', character.stats[CharacterStats[CharacterStats.Vitality].toLowerCase()], CharacterStats[CharacterStats.Vitality].toLowerCase());
 
   return <Window className="w-max" isVisible={windowState!.isVisible} close={() => closeWindow()}>
     <Window.Title>Player Stats</Window.Title>
@@ -34,23 +28,23 @@ function StatsWindow() {
           <span>{character.experience}</span>
           <label className={labelClasses}>Strength:</label>
           <span className="flex flex-row items-center justify-between">
-            {getStatValue(CharacterStats.Strength)}
-            {canAddStat && <div onClick={_ => spendStatPoint(CharacterStats.Strength)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
+            {character.stats.strength}
+            {canAddStat && <div onClick={_ => spendStatPoint("strength")}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
           </span>
           <label className={labelClasses}>Dexterity:</label>
           <span className="flex flex-row items-center justify-between">
-            {getStatValue(CharacterStats.Dexterity)}
-            {canAddStat && <div onClick={_ => spendStatPoint(CharacterStats.Dexterity)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
+            {character.stats.dexterity}
+            {canAddStat && <div onClick={_ => spendStatPoint("dexterity")}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
           </span>
           <label className={labelClasses}>Intelligence:</label>
           <span className="flex flex-row items-center justify-between">
-            {getStatValue(CharacterStats.Intelligence)}
-            {canAddStat && <div onClick={_ => spendStatPoint(CharacterStats.Intelligence)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
+            {character.stats.intelligence}
+            {canAddStat && <div onClick={_ => spendStatPoint("intelligence")}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
           </span>
           <label className={labelClasses}>Vitality:</label>
           <span className="flex flex-row items-center justify-between">
-            {getStatValue(CharacterStats.Vitality)}
-            {canAddStat && <div onClick={_ => spendStatPoint(CharacterStats.Vitality)}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
+            {character.stats.vitality}
+            {canAddStat && <div onClick={_ => spendStatPoint("vitality")}><img src="svg/iconPlus.svg" className="w-4 h-4 mr-4" alt="plus" /></div>}
           </span>
           <label className={labelClasses}>Stat Points:</label>
           <span>{character.statPoints}</span>
