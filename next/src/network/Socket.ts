@@ -8,6 +8,7 @@ const socket = () => {
   if (!_socket) {
     _socket = new WebSocket(process.env.NEXT_PUBLIC_WEBSOCKET_URL!);
     _socket.onmessage = onMessage;
+    _socket.onclose = onClose;
   }
   return _socket;
 };
@@ -22,6 +23,10 @@ const onMessage = (msg: MessageEvent<any>) => {
   } catch (e) {
     console.error('error sending event for data: ', msg.data);
   }
+}
+
+const onClose = (msg: CloseEvent) => {
+  window.location.href = window.location.protocol + '//' + window.location.host;
 }
 
 const send = <T>(type: RequestPacketType, data: T, log: boolean = false) => {
