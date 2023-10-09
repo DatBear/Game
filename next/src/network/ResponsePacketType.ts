@@ -5,6 +5,12 @@ enum ResponsePacketType {
   CreateCharacter,
   SendChatMessage,
   SelectCharacter,
+  CreateGroup,
+  ListGroups,
+  JoinGroup,
+  LeaveGroup,
+  GetUser,
+  SetGroupLeader,
 
   Error = 255
 }

@@ -1,9 +1,11 @@
-import Character from "./Character";
+import GroupOptions from "./GroupOptions";
+import GroupUser from "./GroupUser";
 
 type Group = {
-  id: string;
-  characters: Character[];
-  leader: Character;
+  id: number;
+  leaderId: number;
+  users: Partial<GroupUser>[];
+  options: GroupOptions;
 }
 
 export default Group;

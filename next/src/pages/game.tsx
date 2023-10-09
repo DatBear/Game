@@ -18,7 +18,7 @@ export default function Game({ }: GameProps) {
   useEffect(() => {
     socket().onopen = async (evt) => {
       //await (async () => await new Promise(r => setTimeout(r, 2000)))()
-      send(RequestPacketType.ListCharacters, null);
+      send(RequestPacketType.GetUser, null);
     }
   }, []);
 

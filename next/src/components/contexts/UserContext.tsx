@@ -13,6 +13,8 @@ import { UIMarketplaceWindowState, UIShrineWindowState, UISkillWindowState, UIWi
 import { listen, send } from "@/network/Socket";
 import RequestPacketType from "@/network/RequestPacketType";
 import ResponsePacketType from "@/network/ResponsePacketType";
+import Group from "@/models/Group";
+import GroupUser from "@/models/GroupUser";
 
 type UserContextData = {
   user: User;
@@ -28,7 +30,7 @@ type UserContextData = {
 const UserContext = createContext<UserContextData>({} as UserContextData);
 
 export default function UserContextProvider({ children }: React.PropsWithChildren) {
-  const [user, setUser] = useState<User>({ id: 1, characters: [], gold: 1000, name: 'DatBear', marketItems: [] });
+  const [user, setUser] = useState<User>({ id: 1, characters: [], gold: 1000, username: 'DatBear', marketItems: [] });
 
   const setCharacters = (characters: Character[]) => {
     setUser(user => ({
@@ -57,6 +59,13 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     }));
   }
 
+  const updateGroup = (group: Group | null) => {
+    setUser(user => ({
+      ...user,
+      group: group
+    }))
+  }
+
   const listMarketItem = (item: MarketItem) => {
     if (user.marketItems.length < 16 && item.price > 0 && user.selectedCharacter) {
       user.marketItems.push(item);
@@ -78,6 +87,13 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
   }
 
   useEffect(() => {
+    return listen(ResponsePacketType.GetUser, (e: User) => {
+      setUser(e);
+      send(RequestPacketType.ListCharacters, null);
+    }, true);
+  });
+
+  useEffect(() => {
     return listen(ResponsePacketType.SelectCharacter, (e?: number) => {
       const character = user.characters.find(x => x.id === e);
       if (character != null) {
@@ -89,6 +105,43 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
       }));
     }, true);
   }, [user]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.CreateGroup, (e: Group) => {
+      updateGroup(e);
+    }, true);
+  }, [updateGroup]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.LeaveGroup, (e: User) => {
+      console.log('leave group!!!', e, user);
+      if (e.id === user.id) {
+        console.log('updated group to null');
+        updateGroup(null);
+      } else {
+        if (user.group) {
+          user.group.users = user.group?.users.filter(x => x.user?.id !== e.id);
+          setUser(user);
+        }
+      }
+    }, true);
+  }, [user, setUser]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.JoinGroup, (e: GroupUser) => {
+      user.group?.users.push(e);
+      setUser({ ...user });
+    }, true);
+  }, [user, setUser]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.SetGroupLeader, (e: number) => {
+      if (!user.group) return;
+
+      user.group!.leaderId = e;
+      setUser({ ...user });
+    });
+  }, [user, setUser]);
 
   return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>
     {children}

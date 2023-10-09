@@ -18,13 +18,13 @@ public class SendChatMessageResponse : BaseResponsePacket<ChatMessage>
 
 public class SendChatMessageHandler : IRequestHandler<SendChatMessageRequest>
 {
-    private readonly User _user;
-    private readonly SessionManager _sessionManager;
+    private readonly GameSession _session;
+    private readonly GameManager _gameManager;
 
-    public SendChatMessageHandler(User user, SessionManager sessionManager)
+    public SendChatMessageHandler(GameSession session, GameManager gameManager)
     {
-        _user = user;
-        _sessionManager = sessionManager;
+        _session = session;
+        _gameManager = gameManager;
     }
 
     public async Task Handle(SendChatMessageRequest request, CancellationToken cancellationToken)
@@ -32,11 +32,11 @@ public class SendChatMessageHandler : IRequestHandler<SendChatMessageRequest>
         switch (request.Data.Type)
         {
             case ChatMessageType.GlobalChat:
-                _sessionManager.GetSession(_user.Id)!.SendAll(new SendChatMessageResponse()
+                _gameManager.GetSession(_session.User!.Id)!.SendAll(new SendChatMessageResponse()
                 {
                     Data = new ChatMessage
                     {
-                        From = _user.Username,
+                        From = _session.User.Username,
                         Message = request.Data.Message,
                         Type = request.Data.Type,
                         Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()

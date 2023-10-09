@@ -66,13 +66,14 @@ internal class Program
 
         services.AddSingleton<IServiceCollection>(services);
         services.AddSingleton(configuration);
-        services.AddSingleton<SessionManager>();
+        services.AddSingleton<GameManager>();
 
         var serviceProvider = services.BuildServiceProvider();
 
-        JsonConvert.DefaultSettings = () => new JsonSerializerSettings()
+        JsonConvert.DefaultSettings = () => new JsonSerializerSettings
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
 
         var program = serviceProvider.GetRequiredService<Program>();

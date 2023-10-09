@@ -5,6 +5,12 @@ enum RequestPacketType {
   CreateCharacter,
   SendChatMessage,
   SelectCharacter,
+  CreateGroup,
+  ListGroups,
+  JoinGroup,
+  LeaveGroup,
+  GetUser,
+  SetGroupLeader,
 }
 
 export default RequestPacketType;

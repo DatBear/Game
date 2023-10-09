@@ -31,7 +31,7 @@ public class GameSession : WsSession
     private readonly IServiceProvider _serviceProvider;
     private readonly IConfigurationRoot _config;
 
-    private User? _user;
+    public User? User { get; set; }
 
     public GameSession(WsServer server, NextAuthHelper nextAuthHelper, UserRepository userRepository, IServiceCollection serviceCollection, IServiceProvider serviceProvider, IConfigurationRoot config) : base(server)
     {
@@ -72,9 +72,9 @@ public class GameSession : WsSession
             return;
         }
 
-        _user = _userRepository.GetUserDetails(user.Id)!;
+        User = _userRepository.GetUserDetails(user.Id)!;
         Console.WriteLine($"WebSocket session with Id {Id} connected!");
-        _serviceProvider.GetService<SessionManager>()!.SetSession(_user.Id, this);
+        _serviceProvider.GetService<GameManager>()!.SetSession(User.Id, this);
     }
 
     public bool Send<T>(T obj) where T : IResponsePacket
@@ -89,9 +89,9 @@ public class GameSession : WsSession
 
     public bool SendError(string message)
     {
-        return Send(new ErrorResponse()
+        return Send(new ErrorResponse
         {
-            Data = new ErrorMessage()
+            Data = new ErrorMessage
             {
                 Message = message
             }
@@ -100,7 +100,12 @@ public class GameSession : WsSession
 
     public override void OnWsDisconnected()
     {
+        if (User != null)
+        {
+            _serviceProvider.GetService<GameManager>()!.RemoveSession(User.Id);
+        }
         Console.WriteLine($"WebSocket session with Id {Id} disconnected!");
+        
     }
 
     public override void OnWsReceived(byte[] buffer, long offset, long size)
@@ -112,7 +117,7 @@ public class GameSession : WsSession
             return;
         }
 
-        Console.WriteLine($"Incoming: {message} from user: {_user?.Username}");
+        Console.WriteLine($"Incoming: {message} from user: {User?.Username}");
         var nullPacket = JsonConvert.DeserializeObject<NullPacket>(message);
 
         var stopwatch = new Stopwatch();
@@ -145,12 +150,11 @@ public class GameSession : WsSession
 
         collection.AddMediatR(x => x.RegisterServicesFromAssembly(typeof(ListCharactersHandler).Assembly));
         collection.AddSingleton(this);
-        collection.AddSingleton(_user!);
         Assembly.GetAssembly(typeof(IRequestPacket))!.GetTypesAssignableFrom<IRequestPacket>()
                 .ForEach(x => collection.AddTransient(typeof(IRequestPacket), x));
         collection.AddTransient<PacketMapper>();
 
-        collection.AddSingleton(_serviceProvider.GetService<SessionManager>()!);
+        collection.AddSingleton(_serviceProvider.GetService<GameManager>()!);
 
         return collection;
     }

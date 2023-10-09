@@ -9,26 +9,11 @@ import { useEffect, useRef } from "react";
 type HomeProps = Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'user.image'>;
 
 export default function Home({ authenticated, token }: HomeProps) {
-  const isSetup = useRef(false);
-
-
-  useEffect(() => {
-    if (isSetup.current) {
-      return;
-    }
-    isSetup.current = true;
-    var ws = new WebSocket('ws://localhost:4000');
-    ws.onopen = async (evt) => {
-      await (async () => await new Promise(r => setTimeout(r, 2000)))();
-    }
-
-  }, []);
-
-
   return (
     <div className="w-full h-full min-h-screen flex flex-col justify-center items-center">
-      <Link href="game" className="py-2 px-3 bg-stone-800 border border-white">Play!</Link>
-      {authenticated && <>{token}</>}
+      <Link href="game" className="py-2 px-3 bg-stone-800 border border-white">{authenticated ? "Play!" : "Log in"}</Link>
+
+      {/* {authenticated && <>{token}</>} */}
     </div>
   )
 }

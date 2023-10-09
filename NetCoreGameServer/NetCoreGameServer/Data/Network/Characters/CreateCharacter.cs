@@ -17,16 +17,14 @@ public class CreateCharacterResponse : BaseResponsePacket<Character>
 
 public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
 {
-    private readonly User _user;
     private readonly CharacterRepository _characterRepository;
     private readonly UserRepository _userRepository;
     private readonly GameSession _session;
 
 
-    public CreateCharacterHandler(CharacterRepository characterRepository, User user, UserRepository userRepository, GameSession session)
+    public CreateCharacterHandler(CharacterRepository characterRepository, UserRepository userRepository, GameSession session)
     {
         _characterRepository = characterRepository;
-        _user = user;
         _userRepository = userRepository;
         _session = session;
     }
@@ -42,7 +40,7 @@ public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
             return;
         }
 
-        character.UserId = _user.Id;
+        character.UserId = _session.User!.Id;
         character.Stats = new Stats
         {
             Dexterity = 1,
@@ -61,10 +59,10 @@ public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
         var id = await _characterRepository.CreateCharacter(character);
         character.Id = id;
 
-        var user = _userRepository.GetUserDetails(_user.Id)!;
+        _session.User.Characters.Add(character);
         _session.Send(new ListCharactersResponse
         {
-            Data = user.Characters.ToArray()
+            Data = _session.User.Characters.ToArray()
         });
     }
 }

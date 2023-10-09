@@ -227,10 +227,10 @@ export default function MarketplaceWindow() {
           </div>
           <div className="basis-4/5 flex flex-col gap-y-4">
             <div className="flex-grow border p-1">
-              {user.marketItems.length > 0 && <div className="grid grid-cols-6">
+              {user.marketItems && user.marketItems.length > 0 && <div className="grid grid-cols-6">
                 {user.marketItems.map(x => <MarketItemSlot key={x.item.id} marketItem={x} />)}
               </div>}
-              {user.marketItems.length === 0 && <span className="p-3">No items found.</span>}
+              {(user.marketItems?.length ?? 0) === 0 && <span className="p-3">No items found.</span>}
             </div>
             <div className="flex flex-row items-center justify-end">
               <div className="px-4">

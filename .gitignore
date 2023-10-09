@@ -45,6 +45,8 @@ FileContentIndex/
 *.dll
 bin/
 obj/
+v17/
+.vs/
 
 !**/.vscode/
 /.vscode

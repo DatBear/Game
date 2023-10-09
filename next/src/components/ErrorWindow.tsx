@@ -14,7 +14,7 @@ export default function ErrorWindow() {
       setError(e);
       setWindowState({ ...windowState!, isVisible: true });
     }, true);
-  }, [windowState, error]);
+  }, [windowState, error, setWindowState]);
 
   return <Window isVisible={windowState!.isVisible} className="w-96 h-40 left-0 top-0" close={closeWindow}>
     <Window.Title>Error</Window.Title>

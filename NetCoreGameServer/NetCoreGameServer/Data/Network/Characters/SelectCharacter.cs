@@ -16,27 +16,25 @@ public class SelectCharacterResponse : BaseResponsePacket<int?>
 
 public class SelectCharacterHandler : IRequestHandler<SelectCharacterRequest>
 {
-    private readonly User _user;
     private readonly GameSession _session;
 
-    public SelectCharacterHandler(User user, GameSession session)
+    public SelectCharacterHandler(GameSession session)
     {
-        _user = user;
         _session = session;
     }
 
     public async Task Handle(SelectCharacterRequest request, CancellationToken cancellationToken)
     {
-        _user.SelectedCharacter = _user.Characters.FirstOrDefault(x => x.Id == request.Data);
+        _session.User!.SelectedCharacter = _session.User!.Characters.FirstOrDefault(x => x.Id == request.Data);
 
-        if (_user.SelectedCharacter != null)
+        if (_session.User.SelectedCharacter != null)
         {
-            _user.SelectedCharacter.Zone = Zone.Town;
+            _session.User.SelectedCharacter.Zone = Zone.Town;
         }
 
         _session.Send(new SelectCharacterResponse
         {
-            Data = _user.SelectedCharacter != null ? request.Data : null
+            Data = _session.User.SelectedCharacter != null ? request.Data : null
         });
     }
 }

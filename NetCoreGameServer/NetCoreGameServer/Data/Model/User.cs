@@ -11,4 +11,17 @@ public class User
 
     //not persisted
     public Character? SelectedCharacter { get; set; }
+    public Group? Group { get; set; }
+
+    public GroupUser AsGroupUser(FightingPosition fightingPosition = FightingPosition.Front)
+    {
+        var user = new User
+        {
+            Id = Id,
+            Username = Username,
+            GuildId = GuildId,
+            SelectedCharacter = SelectedCharacter
+        };
+        return new GroupUser(user, fightingPosition);
+    }
 }
