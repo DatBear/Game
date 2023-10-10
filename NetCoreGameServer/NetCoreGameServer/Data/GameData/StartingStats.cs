@@ -15,7 +15,7 @@ public class StartingStats
         };
     }
 
-    public Dictionary<CharacterClasses, Stats> ForClass = new()
+    public static Dictionary<CharacterClasses, Stats> ForClass = new()
     {
         { CharacterClasses.Fighter, Stats(50, 40, 10, 50) },
         { CharacterClasses.Barbarian, Stats(60, 25, 5, 60) },

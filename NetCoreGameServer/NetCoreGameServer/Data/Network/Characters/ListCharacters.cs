@@ -17,12 +17,10 @@ public class ListCharactersResponse : BaseResponsePacket<Character[]>
 public class ListCharactersHandler : IRequestHandler<ListCharactersRequest>
 {
     private readonly GameSession _session;
-    private readonly UserRepository _userRepository;
 
-    public ListCharactersHandler(GameSession session, UserRepository userRepository)
+    public ListCharactersHandler(GameSession session)
     {
         _session = session;
-        _userRepository = userRepository;
     }
 
     public async Task Handle(ListCharactersRequest request, CancellationToken cancellationToken)

@@ -144,7 +144,7 @@ export function Catacombs() {
       }, 250);
     }
 
-    const item = character.equippedItems.find(x => x.slot === EquippedItemSlot.Weapon)?.item;
+    const item = character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon);
     const attack = getAttack(character.imageRef, mobTarget.ref, dmg, Math.random() > .5, item, true);
     if (attack != null) {
       setAttacks(a => [...a, attack])

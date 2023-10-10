@@ -64,8 +64,6 @@ type UIContextProps = {
   setWindowState: (window: UIWindow, state: UIWindowState) => void;
 };
 
-
-
 let defaultWindowState: WindowRecord<any> = {
   [UIWindow.Inventory]: { isVisible: false },
   [UIWindow.Groups]: { isVisible: false },
@@ -105,9 +103,9 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
     {user.selectedCharacter && <>
       <div className="flex flex-col gap-3 p-2">
         {character && <div className="flex flex-row gap-2">
-          <ItemSlot medium noDrag noTooltip hotkey="Q" item={character.equippedItems.find(x => x.slot === EquippedItemSlot.Weapon)?.item} />
-          <ItemSlot medium noDrag noTooltip hotkey="E" item={character.equippedItems.find(x => x.slot === EquippedItemSlot.Charm)?.item} />
-          <ItemSlot medium noDrag noTooltip hotkey="R" item={character.equippedItems.find(x => x.slot === EquippedItemSlot.AccCharm)?.item} />
+          <ItemSlot medium noDrag noTooltip hotkey="Q" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon)} />
+          <ItemSlot medium noDrag noTooltip hotkey="E" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Charm)} />
+          <ItemSlot medium noDrag noTooltip hotkey="R" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.AccCharm)} />
           <ItemSlot medium noDrag noTooltip hotkey="1" />
           <ItemSlot medium noDrag noTooltip hotkey="2" />
           <ItemSlot medium noDrag noTooltip hotkey="3" />

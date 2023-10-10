@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Dapper;
+using NetCoreGameServer.Data;
 using NetCoreGameServer.Data.Model;
 
 namespace NetCoreGameServer.Service;
@@ -17,15 +18,15 @@ public class ItemRepository
     {
         //todo add other stats
         var statId = await _db.QueryFirstAsync<int>($@"
-            INSERT INTO ItemStats (EnhancedEffect, Strength, Dexterity, Vitality, Intelligence, MaxLife, MaxMana) 
-                VALUES (0, @Strength, @Dexterity, @Vitality, @Intelligence, @MaxLife, @MaxMana);            
+            INSERT INTO {TableNames.ItemStats} (EnhancedEffect, Strength, Dexterity, Vitality, Intelligence, MaxLife, MaxMana) 
+                VALUES (0, @Strength, @Dexterity, @Vitality, @Intelligence, @MaxLife, @MaxMana);
             SELECT LAST_INSERT_ID();
         ", item.Stats);
 
         item.ItemStatsId = statId;
 
         var itemId = await _db.QueryFirstAsync<int>($@"
-            INSERT INTO Item (
+            INSERT INTO {TableNames.Item} (
                 Tier,
                 Quantity,
                 SubType,
@@ -35,9 +36,9 @@ public class ItemRepository
                 ItemStatsId
             ) 
             VALUES (
-                @Tier, 
+                @Tier,
                 @Quantity,
-                @SubType, 
+                @SubType,
                 @Position,
                 @EquippedItemSlot,
                 @OwnerId,

@@ -22,7 +22,7 @@ public class Character
     public int Deaths { get; set; }
     public int StatsId { get; set; }
 
-    public Stats Stats { get; set; }
+    public Stats Stats { get; set; } = new();
 
     [JsonIgnore]
     public List<Item> AllItems = new();

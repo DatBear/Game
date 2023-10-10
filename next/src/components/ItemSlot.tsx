@@ -17,7 +17,7 @@ type ItemProps = {
   item?: Item;
   small?: boolean;
   medium?: boolean;
-  slot?: number;
+  slot?: EquippedItemSlot;
   action?: ItemAction;
   skill?: SkillType;
   acceptTypes?: ItemType[];
@@ -87,7 +87,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
     },
     drop(dragging, monitor) {
       const { item: draggedItem, slot: draggedSlot } = dragging as DragObject;
-      //console.log('drop: item', draggedItem, 'slot', draggedSlot);
+      //console.log('drop: item', draggedItem, 'slot', draggedSlot, 'slot', slot);
       if (slot != null && draggedSlot == null && draggedItem != null) {
         return equipItem(draggedItem, slot);
       }

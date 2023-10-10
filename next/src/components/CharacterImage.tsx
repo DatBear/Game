@@ -77,10 +77,10 @@ const CharacterImage = forwardRef<HTMLDivElement, CharacterImageProps>(function 
   const bodySvgKey = `cBody${sex}`;
   const bodySvgData = svgs[bodySvgKey][0].split(" ").map(x => parseFloat(x))
   const classSvgKey = `c${character.class}${sex}`;
-  const weapon = character.equippedItems?.find(x => x.slot == EquippedItemSlot.Weapon);
-  const weaponKey = weapon ? `wm${weapon?.item.subType}` : '';
-  const armor = character.equippedItems?.find(x => x.slot == EquippedItemSlot.Armor);
-  const armorKey = armor ? `${itemIcons[armor.item.subType].replace("icon", "c")}${sex}` : '';
+  const weapon = character.equippedItems?.find(x => x.equippedItemSlot == EquippedItemSlot.Weapon);
+  const weaponKey = weapon ? `wm${weapon?.subType}` : '';
+  const armor = character.equippedItems?.find(x => x.equippedItemSlot == EquippedItemSlot.Armor);
+  const armorKey = armor ? `${itemIcons[armor.subType].replace("icon", "c")}${sex}` : '';
 
   const Svg = (key: string, position?: "static" | "absolute") => {
     if (key === '') return;

@@ -44,18 +44,7 @@ public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
         }
 
         character.UserId = _session.User!.Id;
-        character.Stats = new Stats
-        {
-            Dexterity = 1,
-            Strength = 2,
-            Intelligence = 3,
-            Vitality = 4,
-            MaxLife = 101,
-            MaxMana = 100,
-        };
         character.Level = 1;
-        character.Life = character.Stats.MaxLife;
-        character.Mana = character.Stats.MaxMana;
         character.EquipmentSlots = 8;
         character.StatPoints = 10;
 

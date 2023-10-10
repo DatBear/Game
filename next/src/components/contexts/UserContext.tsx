@@ -170,15 +170,15 @@ export function useCharacter() {
   function equipItem(item: Item, slot: EquippedItemSlot) {
     if (!canEquipItem(item, slot)) return;
     //console.log('equip to ', slot, ' item', item);
-    var currentItem = character.equippedItems.find(x => x.slot === slot);
+    var currentItem = character.equippedItems.find(x => x.equippedItemSlot === slot);
     if (currentItem != null) {
-      const oldItem = { ...currentItem.item };
-      currentItem.item = item;
+      const oldItem = { ...currentItem };
+      currentItem = item;
       let idx = character.equipment.findIndex(x => x?.id === item.id);
       character.equipment.splice(idx, 1, oldItem);
     } else {
       character.equippedItems.push({
-        item, slot
+        ...item, equippedItemSlot: slot
       });
     }
 
@@ -188,10 +188,10 @@ export function useCharacter() {
 
   function unequipItem(slot: EquippedItemSlot) {
     if (!canUnequipItem()) return;
-    var currentItem = character.equippedItems.find(x => x.slot === slot);
+    var currentItem = character.equippedItems.find(x => x.equippedItemSlot === slot);
     if (currentItem) {
-      character.equipment.push(currentItem.item);
-      character.equippedItems = character.equippedItems.filter(x => x.slot !== currentItem!.slot);
+      character.equipment.push(currentItem);
+      character.equippedItems = character.equippedItems.filter(x => x.equippedItemSlot !== currentItem!.equippedItemSlot);
       updateCharacter(character);
     }
   }
