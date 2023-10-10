@@ -49,8 +49,113 @@ public class Init : Migration {
             Vitality       int default 0 not null,
             Intelligence   int default 0 not null,
             MaxLife        int default 0 not null,
-            MaxMana        int default 0 not null
+            MaxMana        int default 0 not null,
+            ExperienceGained int default 0 not null,
+            MagicLuck int default 0 not null,
+            LifeRegen int default 0 not null,
+            ManaRegen int default 0 not null,
+            ExtraEquipmentSlots int default 0 not null,
+            CriticalStrike int default 0 not null,
+            LifePerAttack int default 0 not null,
+            ManaPerAttack int default 0 not null,
+            LifePerKill int default 0 not null,
+            ManaPerKill int default 0 not null,
+            LifeSteal int default 0 not null,
+            DamageReturn int default 0 not null,
+            MindNumb int default 0 not null,
+            ArmorPierce int default 0 not null,
+            Parry int default 0 not null,
+            CriticalFlux int default 0 not null,
+            PhysicalDamageReduction int default 0 not null,
+            MagicalDamageReduction int default 0 not null,
+            ManaSiphon int default 0 not null,
+            QuickDraw int default 0 not null,
+            ManaConsumption int default 0 not null,
+            IceMastery int default 0 not null,
+            FireMastery int default 0 not null,
+            LightningMastery int default 0 not null,
+            EarthMastery int default 0 not null,
+            WindMastery int default 0 not null,
+            HealMastery int default 0 not null,
+            ManaSkin int default 0 not null,
+            PowerShot int default 0 not null,
+            GlancingBlow int default 0 not null,
+            Jubilance int default 0 not null
         );
+
+        create table ItemStats
+        (
+            Id             int auto_increment
+                primary key,
+            EnhancedEffect int default 0 not null,
+            Strength       int default 0 not null,
+            Dexterity      int default 0 not null,
+            Vitality       int default 0 not null,
+            Intelligence   int default 0 not null,
+            MaxLife        int default 0 not null,
+            MaxMana        int default 0 not null,
+            ExperienceGained int default 0 not null,
+            MagicLuck int default 0 not null,
+            LifeRegen int default 0 not null,
+            ManaRegen int default 0 not null,
+            ExtraEquipmentSlots int default 0 not null,
+            CriticalStrike int default 0 not null,
+            LifePerAttack int default 0 not null,
+            ManaPerAttack int default 0 not null,
+            LifePerKill int default 0 not null,
+            ManaPerKill int default 0 not null,
+            LifeSteal int default 0 not null,
+            DamageReturn int default 0 not null,
+            MindNumb int default 0 not null,
+            ArmorPierce int default 0 not null,
+            Parry int default 0 not null,
+            CriticalFlux int default 0 not null,
+            PhysicalDamageReduction int default 0 not null,
+            MagicalDamageReduction int default 0 not null,
+            ManaSiphon int default 0 not null,
+            QuickDraw int default 0 not null,
+            ManaConsumption int default 0 not null,
+            IceMastery int default 0 not null,
+            FireMastery int default 0 not null,
+            LightningMastery int default 0 not null,
+            EarthMastery int default 0 not null,
+            WindMastery int default 0 not null,
+            HealMastery int default 0 not null,
+            ManaSkin int default 0 not null,
+            PowerShot int default 0 not null,
+            GlancingBlow int default 0 not null,
+            Jubilance int default 0 not null,
+            WarmLights int default 0 not null,
+            EvilPresences int default 0 not null,
+            TreasureChests int default 0 not null,
+            Rooms int default 0 not null,
+            WarmLightEffectiveness int default 0 not null,
+            MonsterDifficulty int default 0 not null,
+            ItemDrops int default 0 not null,
+            ItemQuantity int default 0 not null,
+            Swarm int default 0 not null,
+            GuildPoints int default 0 not null,
+            LevelUp int default 0 not null,
+            LevelCap int default 0 not null
+        );
+
+        create table Item
+        (
+            Id           int auto_increment
+                primary key,
+            Tier         int default 1 not null,
+            Quantity     int           null,
+            SubType      int           not null,
+            ItemStatsId  int           not null,
+            Position     int           null,
+            EquippedItemSlot int           null,
+            OwnerId      int           not null,
+            constraint Item_Character_Id_fk
+                foreign key (OwnerId) references `Character` (Id),
+            constraint Item_ItemStats_fk
+                foreign key (ItemStatsId) references ItemStats (Id)
+        );
+
 
         alter table `Character`
             add constraint Character_Stats_Id_fk
@@ -73,16 +178,57 @@ public class Init : Migration {
         alter table User
             add constraint User_Username_key
                 unique (Username);
+
+#        create table CharacterInventoryItem
+#        (
+#            CharacterId int not null,
+#            ItemId      int not null,
+#            Position    int not null,
+#            constraint CharacterInventoryItem_pk
+#                primary key (CharacterId, Itemid),
+#            constraint CharacterInventoryItem_Character_fk
+#                foreign key (CharacterId) references `Character` (Id),
+#            constraint CharacterInventoryItem_Item_fk
+#                foreign key (ItemId) references Item (Id)
+#        );
+#
+#        create table CharacterInventoryEquipment
+#        (
+#            CharacterId int not null,
+#            ItemId      int not null,
+#            Position    int not null,
+#            constraint CharacterInventoryEquipment_pk
+#                primary key (CharacterId, Itemid),
+#            constraint CharacterInventoryEquipment_Character_fk
+#                foreign key (CharacterId) references `Character` (Id),
+#            constraint CharacterInventoryEquipment_Item_fk
+#                foreign key (ItemId) references Item (Id)
+#        );
+#
+#        create table CharacterEquippedItem
+#        (
+#            CharacterId int not null,
+#            ItemId      int not null,
+#            Slot        int not null,
+#            constraint CharacterEquippedItem_pk
+#                primary key (CharacterId, Itemid),
+#            constraint CharacterEquippedItem_Character_Id_fk
+#                foreign key (CharacterId) references `Character` (Id),
+#            constraint CharacterEquippedItem_Item_Id_fk
+#                foreign key (ItemId) references Item (Id)
+#        );
         ");
     }
 
     public override void Down()
     {
         Execute.Sql(@"
-        drop table `Character`;
-        drop table CharacterClass;
-        drop table Stats;
-        drop table User;
+            drop table Item;
+            drop table `Character`;
+            drop table CharacterClass;
+            drop table Stats;
+            drop table User;
+            drop table ItemStats;
         ");
     }
 }

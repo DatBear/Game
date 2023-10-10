@@ -1,5 +1,4 @@
-import { ForwardedRef, Ref, RefObject } from "react";
-import EquippedItem from "./EquippedItem";
+import { RefObject } from "react";
 import Item from "./Item";
 import { CharacterStats } from "./Stats";
 import { Zone } from "./Zone";
@@ -31,7 +30,7 @@ type Character = {
   guild?: string;
   class: CharacterClass;
   gender: Gender;
-  equippedItems: EquippedItem[];
+  equippedItems: Item[];
   equipment: Item[];
   items: Item[];
   life: number;

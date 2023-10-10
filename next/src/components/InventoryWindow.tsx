@@ -1,17 +1,17 @@
-import { EquippedItemSlot } from "@/models/EquippedItem";
+import { EquippedItemSlot, slotNames } from "@/models/EquippedItem";
 import Item, { classArmors, classCharms, classWeapons, ItemSubType } from "@/models/Item";
 import { UIWindow, UIWindowState, useWindow } from "./contexts/UIContext";
 import { useCharacter, useUser } from "./contexts/UserContext";
 import ItemSlot from "./ItemSlot";
 import Window from "./Window";
 
-let itemSlots = 16;
+const itemSlots = 16;
 
 function InventoryWindow() {
   const { character } = useCharacter();
   const { windowState, closeWindow } = useWindow<UIWindowState>(UIWindow.Inventory);
 
-  let equippedSlots = Object.values(EquippedItemSlot);
+  let equippedSlots = Object.values(EquippedItemSlot).filter(x => !isNaN(Number(x))).map(x => x as EquippedItemSlot);
   let equippableGear: Record<EquippedItemSlot, ItemSubType[]> = {
     [EquippedItemSlot.Weapon]: [...classWeapons[character.class]],
     [EquippedItemSlot.Armor]: [...classArmors[character.class]],
@@ -25,10 +25,10 @@ function InventoryWindow() {
       <div>
         <div className="flex flex-row gap-7">
           {equippedSlots.map((s, idx) => {
-            let slot = character?.equippedItems.find(x => x.slot == s);
-            return <div key={slot?.item.id ?? idx} className="flex flex-col items-center">
-              <span className="block text-center w-max">{s}</span>
-              <ItemSlot item={slot?.item} slot={s} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + character.level / 5)} />
+            let itemSlot = character?.equippedItems.find(x => x.equippedItemSlot == s);
+            return <div key={itemSlot?.id ?? idx - 5} className="flex flex-col items-center">
+              <span className="block text-center w-max">{slotNames[s]}</span>
+              <ItemSlot item={itemSlot} slot={s} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + character.level / 5)} />
             </div>
           })}
         </div>
@@ -37,7 +37,7 @@ function InventoryWindow() {
         <span>Equipment ({character.equipment.length}/{character.equipmentSlots})</span>
         <div className="grid grid-cols-5 gap-x-2 gap-y-3">
           {character.equipment.concat([...Array(character.equipmentSlots - character.equipment.length)]).map((x, idx) => {
-            return <ItemSlot key={x?.id ?? idx} item={x} />
+            return <ItemSlot key={x?.id ?? idx - character.equipmentSlots - 1} item={x} />
           })}
         </div>
       </div>
@@ -45,8 +45,8 @@ function InventoryWindow() {
         <span>Items</span>
         <div className="flex flex-wrap place-content-center gap-x-2 gap-y-3">
           <div className="grid grid-cols-8 gap-x-2 gap-y-2">
-            {character.items.concat([...Array(16 - character.items.length)]).map((x, idx) => {
-              return <ItemSlot key={idx} item={x} small />
+            {character.items.concat([...Array(itemSlots - character.items.length)]).map((x, idx) => {
+              return <ItemSlot key={x?.id ?? idx - itemSlots} item={x} small />
             })}
           </div>
         </div>

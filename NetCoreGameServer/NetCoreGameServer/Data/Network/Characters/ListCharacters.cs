@@ -27,10 +27,9 @@ public class ListCharactersHandler : IRequestHandler<ListCharactersRequest>
 
     public async Task Handle(ListCharactersRequest request, CancellationToken cancellationToken)
     {
-        var user = _userRepository.GetUserDetails(_session.User!.Id)!;
         _session.Send(new ListCharactersResponse
         {
-            Data = user.Characters.ToArray()
+            Data = _session.User!.Characters.ToArray()
         });
     }
 }

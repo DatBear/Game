@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using NetCoreGameServer.Data.GameData;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
@@ -20,13 +21,15 @@ public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
     private readonly CharacterRepository _characterRepository;
     private readonly UserRepository _userRepository;
     private readonly GameSession _session;
+    private readonly ItemRepository _itemRepository;
 
 
-    public CreateCharacterHandler(CharacterRepository characterRepository, UserRepository userRepository, GameSession session)
+    public CreateCharacterHandler(CharacterRepository characterRepository, UserRepository userRepository, GameSession session, ItemRepository itemRepository)
     {
         _characterRepository = characterRepository;
         _userRepository = userRepository;
         _session = session;
+        _itemRepository = itemRepository;
     }
 
     public async Task Handle(CreateCharacterRequest request, CancellationToken cancellationToken)
@@ -56,8 +59,26 @@ public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
         character.EquipmentSlots = 8;
         character.StatPoints = 10;
 
-        var id = await _characterRepository.CreateCharacter(character);
-        character.Id = id;
+        await _characterRepository.CreateCharacter(character);
+        
+        if (StartingItems.ForClass.TryGetValue((CharacterClasses)character.ClassId, out var startingItems))
+        {
+            foreach (var itemProps in startingItems)
+            {
+                var item = new Item
+                {
+                    OwnerId = character.Id,
+                    SubType = itemProps.subType,
+                    EquippedItemSlot = itemProps.slot,
+                    Tier = 1
+                };
+
+                item = await _itemRepository.CreateItem(item);
+                character.AllItems.Add(item);
+            }
+        }
+
+        
 
         _session.User.Characters.Add(character);
         _session.Send(new ListCharactersResponse

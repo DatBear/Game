@@ -1,4 +1,3 @@
-import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item, { itemIcons, itemTiers, ItemSubType, ItemType, getItemType, itemMagicPrefixes, itemNames } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
 import { SkillType } from "@/models/Skill";
@@ -10,6 +9,7 @@ import { Tooltip } from "react-tooltip"
 import { CharacterStats, itemSpecificStatNames, statNames } from "@/models/Stats";
 import calculatedItemStats from "@/models/CalculatedItemStat";
 import { recordKeys } from "@/utils/RecordUtils";
+import { EquippedItemSlot } from "@/models/EquippedItem";
 
 const dragType = "Item";
 
@@ -17,7 +17,7 @@ type ItemProps = {
   item?: Item;
   small?: boolean;
   medium?: boolean;
-  slot?: EquippedItemSlot;
+  slot?: number;
   action?: ItemAction;
   skill?: SkillType;
   acceptTypes?: ItemType[];
@@ -41,7 +41,7 @@ const typeSlots: Partial<Record<ItemType, EquippedItemSlot>> = {
   [ItemType.Charm]: EquippedItemSlot.Charm,
 }
 
-export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, skill, noDrag, noTooltip, hotkey, borderless, noBackground, children, className, ...props }: ItemProps) {
+export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTypes, acceptMaxTier, slot: slot, action, skill, noDrag, noTooltip, hotkey, borderless, noBackground, children, className, ...props }: ItemProps) {
   const prefix = itemMagicPrefixes[Object.keys(item?.stats ?? 0).length];
   const type = item && getItemType(item.subType);
   const iconPath = !item ? '' : `svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`;
@@ -144,7 +144,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
       {item && !isDragging && <>
         <img src={iconPath} className="absolute inset-0 p-1 mx-auto w-full h-full" alt={itemNames[item.subType]} />
         {!small && !medium && <>
-          {Object.keys(item.stats).length > 0 && <span className="absolute top-0 left-0 px-1">+{Object.keys(item.stats).length}</span>}
+          {Object.keys(item.stats).length > 0 && <span className="absolute top-0 left-0 px-1">+{Object.keys(item.stats).length - 1}</span>}
           {item.tier > 0 && <span className="absolute top-0 right-0 px-1">{itemTiers[item.tier]}</span>}
         </>}
         {item.quantity && <span className={clsx(small && "text-2xs", "absolute bottom-0 left-0 px-px")}>{item.quantity}</span>}

@@ -22,24 +22,41 @@ public class UserRepository
     public User? GetUserDetails(int id)
     {
         var chars = new List<Character>();
-        return _db.Query<User, Character, Stats, User>(@$"SELECT
+        var charItems = new Dictionary<int, List<Item>>();
+        var user = _db.Query<User, Character, Stats, Item, ItemStats, User>(@$"SELECT
                 u.*
                 , c.*, cc.Name as Class
                 , s.*
+                , i.*
+                , itemStats.*
             FROM {TableNames.User} u
             LEFT JOIN {TableNames.Character} c ON c.UserId = u.Id
             LEFT JOIN {TableNames.CharacterClass} cc ON c.ClassId = cc.Id
             LEFT JOIN {TableNames.Stats} s ON c.StatsId = s.Id
+            LEFT JOIN {TableNames.Item} i ON i.OwnerId = c.Id
+            LEFT JOIN {TableNames.ItemStats} itemStats ON i.ItemStatsId = itemStats.Id
             WHERE u.Id = @Id;
-        ", (user, character, stats) =>
+        ", (user, character, stats, item, itemStats) =>
         {
             if (character != null)
             {
                 chars.Add(character);
                 character.Stats = stats;
+                if (item != null)
+                {
+                    charItems.TryGetValue(character.Id, out var items);
+                    items ??= new List<Item>();
+                    item.Stats = itemStats;
+                    items.Add(item);
+                    charItems[character.Id] = items;
+                    character.AllItems = items;
+                }
             }
             user.Characters = chars;
             return user;
         }, new { Id = id }).FirstOrDefault();
+
+        user.Characters = user.Characters.DistinctBy(x => x.Id).ToList();
+        return user;
     }
 }

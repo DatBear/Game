@@ -13,13 +13,13 @@ import { CharacterStats } from "@/models/Stats";
 
 
 const marketItems: MarketItem[] = [
-  { price: 100, item: { id: uuid(), subType: ItemSubType.Club, stats: { id: 0, strength: 1 }, tier: 4 } },
-  { price: 110, item: { id: uuid(), subType: ItemSubType.PaddedRobe, stats: { id: 0, criticalFlux: 1 }, tier: 2 } },
-  { price: 120, item: { id: uuid(), subType: ItemSubType.Fire, stats: { id: 0, damageReturn: 3 }, tier: 3 } },
-  { price: 130, item: { id: uuid(), subType: ItemSubType.Fire, stats: { id: 0, armorPierce: 1 }, tier: 1 } },
-  { price: 140, item: { id: uuid(), subType: ItemSubType.Fish, stats: { id: 0, maxLife: 19 }, tier: 1, quantity: 12 } },
-  { price: 150, item: { id: uuid(), subType: ItemSubType.Fish, stats: { id: 0, maxLife: 100 }, tier: 2, quantity: 1 } },
-  { price: 160, item: { id: uuid(), subType: ItemSubType.Fish, stats: { id: 0, maxLife: 130, maxMana: 100 }, tier: 3, quantity: 20 } },
+  { price: 100, item: { id: 0, subType: ItemSubType.Club, stats: { id: 0, strength: 1 }, tier: 4 } },
+  { price: 110, item: { id: 1, subType: ItemSubType.PaddedRobe, stats: { id: 0, criticalFlux: 1 }, tier: 2 } },
+  { price: 120, item: { id: 2, subType: ItemSubType.Fire, stats: { id: 0, damageReturn: 3 }, tier: 3 } },
+  { price: 130, item: { id: 3, subType: ItemSubType.Fire, stats: { id: 0, armorPierce: 1 }, tier: 1 } },
+  { price: 140, item: { id: 4, subType: ItemSubType.Fish, stats: { id: 0, maxLife: 19 }, tier: 1, quantity: 12 } },
+  { price: 150, item: { id: 5, subType: ItemSubType.Fish, stats: { id: 0, maxLife: 100 }, tier: 2, quantity: 1 } },
+  { price: 160, item: { id: 6, subType: ItemSubType.Fish, stats: { id: 0, maxLife: 130, maxMana: 100 }, tier: 3, quantity: 20 } },
 ];
 
 function MarketItemSlot({ marketItem, action }: { marketItem?: MarketItem, action?: ItemAction }) {

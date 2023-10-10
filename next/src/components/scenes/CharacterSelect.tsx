@@ -133,11 +133,11 @@ function CharacterCreate({ showList }: { showList: () => void }) {
       <div className="flex flex-col">
         <div className="w-max">Usable Weapons:</div>
         <div className="grid grid-cols-4 gap-1 w-max">
-          {weapons.map(x => <ItemSlot key={x.toString()} item={{ id: uuid(), stats: { id: 0 }, subType: x, tier: 0 }} noDrag />)}
+          {weapons.map((x, idx) => <ItemSlot key={x.toString()} item={{ id: idx, stats: { id: 0 }, subType: x, tier: 0 }} noDrag />)}
         </div>
         <div className="w-max">Usable Armors:</div>
         <div className="grid grid-cols-4 gap-1 w-max">
-          {armors.map(x => <ItemSlot key={x.toString()} item={{ id: uuid(), stats: { id: 0 }, subType: x, tier: 0 }} noDrag />)}
+          {armors.map((x, idx) => <ItemSlot key={x.toString()} item={{ id: idx, stats: { id: 0 }, subType: x, tier: 0 }} noDrag />)}
         </div>
       </div>
     </div>

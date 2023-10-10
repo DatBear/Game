@@ -1,4 +1,7 @@
-﻿namespace NetCoreGameServer.Data.Model;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
+
+namespace NetCoreGameServer.Data.Model;
 
 public class Character
 {
@@ -19,14 +22,19 @@ public class Character
     public int Deaths { get; set; }
     public int StatsId { get; set; }
 
-
     public Stats Stats { get; set; }
-    public List<Item> EquippedItems { get; set; } = new();
-    public List<Item> Equipment { get; set; } = new();
-    public List<Item> Items { get; set; } = new();
+
+    [JsonIgnore]
+    public List<Item> AllItems = new();
+    public List<Item> EquippedItems => AllItems.Where(x => x.EquippedItemSlot != null).ToList();
+    public List<Item> Equipment => AllItems.Where(x => x.SubType < ItemSubType.Fish && x.EquippedItemSlot == null).ToList();
+    public List<Item> Items => AllItems.Where(x => x.SubType >= ItemSubType.Fish).ToList();
+
+    
 
     public int UserId { get; set; }
 
     //not persisted
     public Zone? Zone { get; set; }
+    
 }

@@ -6,4 +6,10 @@ public class Item
     public int Tier { get; set; }
     public int? Quantity { get; set; }
     public ItemSubType SubType { get; set; }
+    public int? Position { get; set; }
+    public EquippedItemSlot? EquippedItemSlot { get; set; }
+    public int OwnerId { get; set; }
+
+    public int ItemStatsId { get; set; }
+    public ItemStats Stats { get; set; } = new();
 }

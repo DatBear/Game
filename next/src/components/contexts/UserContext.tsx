@@ -1,6 +1,6 @@
 import Character from "@/models/Character";
 import { EquippedItemSlot } from "@/models/EquippedItem";
-import Item, { classArmors, classCharms, classWeapons, defaultEquippedItems, ItemSubType } from "@/models/Item";
+import Item, { classArmors, classCharms, classWeapons, ItemSubType } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
 import MarketItem from "@/models/MarketItem";
 import { SkillType } from "@/models/Skill";

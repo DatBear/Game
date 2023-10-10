@@ -1,7 +1,6 @@
 import Character, { CharacterClass } from "./Character";
-import EquippedItem, { EquippedItemSlot } from "./EquippedItem";
-import { v4 as uuid } from 'uuid';
-import { CharacterStats, ItemStats, Stats } from "./Stats";
+import { EquippedItemSlot } from "./EquippedItem";
+import { Stats } from "./Stats";
 
 export enum ItemType {
   Weapon,
@@ -51,14 +50,13 @@ export enum ItemSubType {
 }
 
 type Item = {
-  id: string;
+  id: number;
   tier: number;
   quantity?: number;
+  equippedItemSlot?: EquippedItemSlot,
   subType: ItemSubType;
   stats: Stats;
-}
-
-
+};
 
 let itemTypes: Record<ItemType, ItemSubType[]> = {
   [ItemType.Weapon]: [ItemSubType.Sword, ItemSubType.Club, ItemSubType.Axe, ItemSubType.Dagger, ItemSubType.Staff, ItemSubType.Longsword, ItemSubType.Warhammer, ItemSubType.Battleaxe, ItemSubType.Spear, ItemSubType.Polearm],
@@ -227,32 +225,12 @@ let classCharms: Record<CharacterClass, ItemSubType[]> = {
 
 let defaultItem = (subType: ItemSubType) => {
   return {
-    id: uuid(),
+    id: 0,
     stats: {},
     subType: subType,
     tier: 1,
   } as Item;
 };
 
-let defaultEquippedItems: Record<CharacterClass, EquippedItem[]> = {
-  [CharacterClass.Fighter]: [{ slot: EquippedItemSlot.Weapon, item: defaultItem(ItemSubType.Sword) }],
-  [CharacterClass.Barbarian]: [{ slot: EquippedItemSlot.Weapon, item: defaultItem(ItemSubType.Club) }],
-  [CharacterClass.Rogue]: [
-    { slot: EquippedItemSlot.Weapon, item: defaultItem(ItemSubType.Dagger) },
-    { slot: EquippedItemSlot.Armor, item: defaultItem(ItemSubType.ScaleArmor) },//todo remove
-    { slot: EquippedItemSlot.Charm, item: defaultItem(ItemSubType.Lightning) }
-  ],
-  [CharacterClass.Magician]: [
-    { slot: EquippedItemSlot.Weapon, item: defaultItem(ItemSubType.Staff) },
-    { slot: EquippedItemSlot.Charm, item: defaultItem(ItemSubType.Fire) }
-  ],
-  [CharacterClass.Guardian]: [
-    { slot: EquippedItemSlot.Weapon, item: defaultItem(ItemSubType.Club) },
-    { slot: EquippedItemSlot.Charm, item: defaultItem(ItemSubType.Heal) }
-  ],
-  [CharacterClass.Samurai]: [], [CharacterClass.Paladin]: [], [CharacterClass.Monk]: [], [CharacterClass.Ninja]: [],
-  [CharacterClass.Warlock]: [], [CharacterClass.Headhunter]: [], [CharacterClass.Alchemist]: []
-}
-
-export { itemTypes, getItemType, itemIcons, itemTiers, itemMagicPrefixes, itemNames, classWeapons, classArmors, classCharms, defaultEquippedItems, defaultItem }
+export { itemTypes, getItemType, itemIcons, itemTiers, itemMagicPrefixes, itemNames, classWeapons, classArmors, classCharms, defaultItem }
 export default Item;

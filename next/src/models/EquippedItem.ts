@@ -1,15 +1,17 @@
-import Item, { ItemType } from "./Item";
+import Item from "./Item";
 
 export enum EquippedItemSlot {
-  Weapon = "Weapon",
-  Armor = "Armor",
-  Charm = "Charm",
-  AccCharm = "Acc. Charm"
+  Weapon,
+  Armor,
+  Charm,
+  AccCharm
 }
 
-type EquippedItem = {
-  item: Item;
-  slot: EquippedItemSlot;
+const slotNames: Record<EquippedItemSlot, string> = {
+  [EquippedItemSlot.Weapon]: "Weapon",
+  [EquippedItemSlot.Armor]: "Armor",
+  [EquippedItemSlot.Charm]: "Charm",
+  [EquippedItemSlot.AccCharm]: "Acc. Charm"
 }
 
-export default EquippedItem;
+export { slotNames };

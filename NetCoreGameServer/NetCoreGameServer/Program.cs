@@ -10,6 +10,7 @@ using MySql.Data.MySqlClient;
 using NetCoreGameServer.Data.Network.Characters;
 using NetCoreGameServer.Extension;
 using NetCoreGameServer.Helper;
+using NetCoreGameServer.Serialization;
 using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 using Newtonsoft.Json;
@@ -72,7 +73,7 @@ internal class Program
 
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            ContractResolver = new CustomResolver(),
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
 

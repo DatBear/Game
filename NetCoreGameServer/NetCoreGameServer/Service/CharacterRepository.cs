@@ -20,7 +20,7 @@ public class CharacterRepository
         return result;
     }
 
-    public async Task<int> CreateCharacter(Character character)
+    public async Task<bool> CreateCharacter(Character character)
     {
 
         var statId = await _db.QueryFirstAsync<int>($@"
@@ -28,8 +28,10 @@ public class CharacterRepository
                 VALUES (0, @Strength, @Dexterity, @Vitality, @Intelligence, @MaxLife, @MaxMana);            
             SELECT LAST_INSERT_ID();
         ", character.Stats);
-
         character.StatsId = character.Stats.Id = statId;
+
+        var classId = await _db.QueryFirstAsync<int>($@"SELECT Id FROM CharacterClass WHERE LOWER(Name) = LOWER(@Class)", character);
+        character.ClassId = classId;
 
         var charId = await _db.QueryFirstAsync<int>($@"
             INSERT INTO `Character` (
@@ -53,7 +55,7 @@ public class CharacterRepository
                 @UserId, 
                 @Name,
                 @Level, 
-                (SELECT Id FROM CharacterClass WHERE LOWER(Name) = LOWER(@Class)),
+                @ClassId,
                 @Gender, 
                 @Core, 
                 @Life, 
@@ -70,6 +72,6 @@ public class CharacterRepository
         ", character);
 
         character.Id = charId;
-        return charId;
+        return true;
     }
 }
