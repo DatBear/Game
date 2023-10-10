@@ -68,6 +68,11 @@ public class GameManager
         return _groups.FirstOrDefault(x => x.Id == groupId);
     }
 
+    public Character? FindCharacter(int characterId)
+    {
+        return _sessions.Values.Select(x => x.User).Where(x => x != null).SelectMany(x => x.Characters).FirstOrDefault(x => x.Id == characterId);
+    }
+
     public List<Group> GetGroups()
     {
         return _groups;

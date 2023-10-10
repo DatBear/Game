@@ -11,6 +11,10 @@ enum RequestPacketType {
   LeaveGroup,
   GetUser,
   SetGroupLeader,
+  UpdateCharacter,
+  EquipItem,
+  UnequipItem,
+  DeleteItem,
 }
 
 export default RequestPacketType;

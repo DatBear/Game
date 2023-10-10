@@ -11,6 +11,7 @@ enum ResponsePacketType {
   LeaveGroup,
   GetUser,
   SetGroupLeader,
+  UpdateCharacter,
 
   Error = 255
 }

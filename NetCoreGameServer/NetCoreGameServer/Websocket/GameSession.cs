@@ -31,7 +31,7 @@ public class GameSession : WsSession
     private readonly IServiceProvider _serviceProvider;
     private readonly IConfigurationRoot _config;
 
-    public User? User { get; set; }
+    public User User { get; set; }
 
     public GameSession(WsServer server, NextAuthHelper nextAuthHelper, UserRepository userRepository, IServiceCollection serviceCollection, IServiceProvider serviceProvider, IConfigurationRoot config) : base(server)
     {

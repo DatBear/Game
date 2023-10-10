@@ -32,7 +32,7 @@ public class SendChatMessageHandler : IRequestHandler<SendChatMessageRequest>
         switch (request.Data.Type)
         {
             case ChatMessageType.GlobalChat:
-                _gameManager.GetSession(_session.User!.Id)!.SendAll(new SendChatMessageResponse()
+                _gameManager.GetSession(_session.User.Id)!.SendAll(new SendChatMessageResponse()
                 {
                     Data = new ChatMessage
                     {

@@ -159,7 +159,7 @@ public class Init : Migration {
 
         alter table `Character`
             add constraint Character_Stats_Id_fk
-                foreign key (StatsId) references Stats (Id) ON DELETE CASCADE;
+                foreign key (StatsId) references Stats (Id);
 
         create table User
         (

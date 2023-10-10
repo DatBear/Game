@@ -52,10 +52,10 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
   }
 
   const updateCharacter = (character: Character) => {
-    setUser(user => ({
+    user.characters.splice(user.characters.findIndex(x => x.id === character.id), 1, character);
+    setUser(_ => ({
       ...user,
-      selectedCharacter: { ...character },
-      characters: user.characters.splice(user.characters.findIndex(x => x.id === character.id), 1, character)
+      selectedCharacter: { ...character }
     }));
   }
 
@@ -164,12 +164,13 @@ export function useCharacter() {
     [SkillType.Glyphing]: useWindow<UISkillWindowState>(UIWindow.Glyphing),
     [SkillType.Transmuting]: useWindow<UISkillWindowState>(UIWindow.Transmuting)
   }
-  const { windowState: fishingWindowState, setWindowState: setFishingWindowState } = useWindow<UISkillWindowState>(UIWindow.Fishing);
   const character = user.selectedCharacter!
 
   function equipItem(item: Item, slot: EquippedItemSlot) {
     if (!canEquipItem(item, slot)) return;
+    send(RequestPacketType.EquipItem, { itemId: item.id, equippedItemSlot: slot }, true);
     //console.log('equip to ', slot, ' item', item);
+    //this is client side and gets updated by the updatecharacter packet later
     var currentItem = character.equippedItems.find(x => x.equippedItemSlot === slot);
     if (currentItem != null) {
       const oldItem = { ...currentItem };
@@ -181,13 +182,14 @@ export function useCharacter() {
         ...item, equippedItemSlot: slot
       });
     }
-
     character.equipment = character.equipment.filter(x => x.id !== item.id);
     updateCharacter(character);
   }
 
   function unequipItem(slot: EquippedItemSlot) {
     if (!canUnequipItem()) return;
+    send(RequestPacketType.UnequipItem, slot, true);
+    //this is client side and gets updated by the updatecharacter packet later
     var currentItem = character.equippedItems.find(x => x.equippedItemSlot === slot);
     if (currentItem) {
       character.equipment.push(currentItem);
@@ -198,22 +200,12 @@ export function useCharacter() {
 
   const canEquipItem = useCallback((item: Item, slot: EquippedItemSlot): boolean => {
     if (item == null || character.equipment.find(x => x?.id === item.id) == undefined) return false;
-    let canEquip = true;
     let maxTier = Math.floor(3 + character.level / 5);
     let subTypes = slot == EquippedItemSlot.Armor ? classArmors[character.class] : slot == EquippedItemSlot.Weapon ? classWeapons[character.class] : classCharms[character.class];
 
-    if (canEquip && (subTypes?.length ?? 0) > 0) {
-      let canEquipSubType = subTypes!.find(x => x == item.subType) !== undefined;
-      //console.log('canEquip', canEquipSubType, 'dragSubType', item.subType, subTypes);
-      canEquip &&= canEquipSubType;
-    }
-    if (canEquip && maxTier >= 0) {
-      let canEquipTier = maxTier >= item.tier;
-      //console.log('canEquip', canEquipTier, 'dragTier', item.tier, 'max tier', maxTier);
-      canEquip &&= canEquipTier;
-    }
-    //console.log('canEquip', canEquip, draggedItem);
-    return canEquip;
+    let canEquipSubType = subTypes!.find(x => x == item.subType) !== undefined;
+    let canEquipTier = maxTier >= item.tier;
+    return canEquipSubType && canEquipTier;
   }, [character]);
 
   const canUnequipItem = useCallback((): boolean => {
@@ -275,6 +267,8 @@ export function useCharacter() {
         skillWindows[skill].windowState!.items[action == ItemAction.SetSkill ? 0 : 1] = item;
         skillWindows[skill].setWindowState(skillWindows[skill].windowState!);
         break;
+      case ItemAction.Delete:
+        send(RequestPacketType.DeleteItem, item.id);
     }
   }
 
@@ -338,6 +332,14 @@ export function useCharacter() {
     }
     updateCharacter(character);
   }
+
+  useEffect(() => {
+    return listen(ResponsePacketType.UpdateCharacter, (e: Character) => {
+      if (e.id === character.id) {
+        updateCharacter(e);
+      }
+    });
+  }, [character]);
 
   return {
     character,

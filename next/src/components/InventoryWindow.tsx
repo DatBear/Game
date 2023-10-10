@@ -4,6 +4,7 @@ import { UIWindow, UIWindowState, useWindow } from "./contexts/UIContext";
 import { useCharacter, useUser } from "./contexts/UserContext";
 import ItemSlot from "./ItemSlot";
 import Window from "./Window";
+import { ItemAction } from "@/models/ItemAction";
 
 const itemSlots = 16;
 
@@ -43,12 +44,16 @@ function InventoryWindow() {
       </div>
       <div>
         <span>Items</span>
-        <div className="flex flex-wrap place-content-center gap-x-2 gap-y-3">
+        <div className="flex flex-wrap place-content-center gap-x-2 gap-y-3 items-center">
+          <ItemSlot medium hotkey="Use Item" action={ItemAction.Use} />
           <div className="grid grid-cols-8 gap-x-2 gap-y-2">
             {character.items.concat([...Array(itemSlots - character.items.length)]).map((x, idx) => {
               return <ItemSlot key={x?.id ?? idx - itemSlots} item={x} small />
             })}
           </div>
+          <ItemSlot medium action={ItemAction.Delete}>
+            <img className="absolute inset-0 p-1 mx-auto w-full h-full" src="svg/iconTrash.svg" />
+          </ItemSlot>
         </div>
       </div>
     </Window>

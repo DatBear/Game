@@ -14,4 +14,8 @@ public enum RequestPacketType
     LeaveGroup = 9,
     GetUser = 10,
     SetGroupLeader = 11,
+    UpdateCharacter = 12,
+    EquipItem = 13,
+    UnequipItem = 14,
+    DeleteItem = 15,
 }

@@ -41,4 +41,28 @@ public class Stats
     public int PowerShot { get; set; }
     public int GlancingBlow { get; set; }
     public int Jubilance { get; set; }
+
+    public static Stats operator +(Stats a, Stats b)
+    {
+        a.Strength += b.Strength;
+        a.Dexterity += b.Dexterity;
+        a.Vitality += b.Vitality;
+        a.Intelligence += b.Intelligence;
+        a.MaxLife += b.MaxLife;
+        a.MaxMana += b.MaxMana;
+        //todo implement the rest
+        return a;
+    }
+
+    public static Stats operator -(Stats a, Stats b)
+    {
+        a.Strength -= b.Strength;
+        a.Dexterity -= b.Dexterity;
+        a.Vitality -= b.Vitality;
+        a.Intelligence -= b.Intelligence;
+        a.MaxLife -= b.MaxLife;
+        a.MaxMana -= b.MaxMana;
+        //todo implement the rest
+        return a;
+    }
 }

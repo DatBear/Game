@@ -51,4 +51,10 @@ public class ItemRepository
         return item;
     }
 
+    public async Task DeleteItem(Item itemToDelete)
+    {
+        await _db.ExecuteAsync($@"DELETE FROM {TableNames.Stats} WHERE Id = @ItemStatsId;
+            DELETE FROM {TableNames.Item} WHERE Id = @Id;
+        ", itemToDelete);
+    }
 }

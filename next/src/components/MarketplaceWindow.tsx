@@ -221,7 +221,7 @@ export default function MarketplaceWindow() {
             <ItemSlot className="flex justify-center place-items-center">
               <span className="text-2xl">?</span>
             </ItemSlot>
-            <ItemSlot>
+            <ItemSlot action={ItemAction.Delete}>
               <img className="absolute inset-0 p-1 mx-auto w-full h-full" src="svg/iconTrash.svg" />
             </ItemSlot>
           </div>
@@ -278,5 +278,5 @@ export default function MarketplaceWindow() {
         </div>
       </Window.TabPanel>
     </Window.TabPanels>
-  </Window>;
+  </Window>
 }

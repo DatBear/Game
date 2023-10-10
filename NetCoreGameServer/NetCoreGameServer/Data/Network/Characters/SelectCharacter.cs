@@ -25,7 +25,7 @@ public class SelectCharacterHandler : IRequestHandler<SelectCharacterRequest>
 
     public async Task Handle(SelectCharacterRequest request, CancellationToken cancellationToken)
     {
-        _session.User!.SelectedCharacter = _session.User!.Characters.FirstOrDefault(x => x.Id == request.Data);
+        _session.User!.SelectedCharacter = _session.User.Characters.FirstOrDefault(x => x.Id == request.Data);
 
         if (_session.User.SelectedCharacter != null)
         {
