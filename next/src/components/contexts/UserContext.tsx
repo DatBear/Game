@@ -59,12 +59,12 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     }));
   }
 
-  const updateGroup = useCallback((group: Group | null) => {
+  const updateGroup = (group: Group | null) => {
     setUser(user => ({
       ...user,
       group: group
     }))
-  }, [setUser]);
+  };
 
   const listMarketItem = (item: MarketItem) => {
     if (user.marketItems.length < 16 && item.price > 0 && user.selectedCharacter) {

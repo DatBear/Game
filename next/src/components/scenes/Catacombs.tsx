@@ -248,7 +248,7 @@ function MazeRenderer({ maze }: { maze: Maze }) {
   const className = clsx(`grid w-fit h-fit`);
   const gridTemplateColumns = `repeat(${maze.cells.length}, minmax(0,1fr))`;
   return <div className={className} style={{ gridTemplateColumns: gridTemplateColumns }}>
-    {maze.cells.reverse().map(x => x.map(c => {
+    {maze.cells.map(x => x.map(c => {
       let visitedBorder = c.visited ? "border-green-600" : "border-red-600";
       let visitedBg = !c.visited ? "bg-stone-900" : "bg-black";
       let className = clsx(`x-${c.x}`, `y-${c.y}`, 'w-5 h-5', getWallClasses(c.walls), visitedBorder, visitedBg);
