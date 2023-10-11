@@ -7,7 +7,7 @@ import { SkillType } from "@/models/Skill";
 import { CharacterStats } from "@/models/Stats";
 import User from "@/models/User";
 import { Zone } from "@/models/Zone";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, createRef, useCallback, useContext, useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { UIMarketplaceWindowState, UIShrineWindowState, UISkillWindowState, UIWindow, useUI, useWindow } from "./UIContext";
 import { listen, send } from "@/network/Socket";
@@ -146,6 +146,8 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
 
   useEffect(() => {
     listen(ResponsePacketType.UpdateMaze, (e: Maze) => {
+      e.mobs = e.mobs.map(x => ({ ...x, ref: createRef<HTMLImageElement>() }));
+
       if (user.group) {
         user.group.maze = e;
       } else {

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using NetCoreGameServer.Data.Model;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Data.Network.Catacombs;
@@ -44,7 +45,7 @@ public class MoveDirectionHandler : IRequestHandler<MoveDirectionRequest>
             MoveForward(maze);
         }
         
-        //todo spawn enemy %
+        maze.Mobs = MobGenerator.GenerateMobs(_session.User);
 
         var movePacket = new UpdateMazeResponse
         {

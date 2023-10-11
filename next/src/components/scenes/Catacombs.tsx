@@ -3,7 +3,6 @@ import clsx from "clsx";
 import { createRef, RefObject, useCallback, useEffect, useRef, useState } from "react";
 import { useCharacter, useUser } from "../contexts/UserContext"
 import { useHotkeys, isHotkeyPressed } from "react-hotkeys-hook"
-import Mob, { generateMobs } from "@/models/Mob";
 import ProgressBar from "../ProgressBar";
 import Item, { ItemSubType } from "@/models/Item";
 import { EquippedItemSlot } from "@/models/EquippedItem";
@@ -28,17 +27,16 @@ type Attack = {
   isPlayer: boolean;
 }
 
-
 export function Catacombs() {
   const attackInterval = useRef<NodeJS.Timer>();
   const { user } = useUser();
   const { character, goToZone, addExperience, addKill, addDeath } = useCharacter();
   const [areHotkeysEnabled, setAreHotkeysEnabled] = useState(true);
-  const [mobs, setMobs] = useState<Mob[]>([]);
-  const [target, setTarget] = useState<string>();
+  const [target, setTarget] = useState<number>();
   const [attacks, setAttacks] = useState<Attack[]>([]);
 
   const maze = user.group?.maze ?? user.maze!;
+  const mobs = maze?.mobs;
 
   useHotkeys('d', () => turnRight(), { enabled: areHotkeysEnabled, keyup: false });
   useHotkeys('a', () => turnLeft(), { enabled: areHotkeysEnabled, keyup: false });
@@ -47,32 +45,21 @@ export function Catacombs() {
 
   const turnRight = () => {
     send(RequestPacketType.MoveDirection, MovementDirection.Right);
-    maybeSpawnEnemy();
   }
 
   const turnLeft = () => {
     send(RequestPacketType.MoveDirection, MovementDirection.Left);
-    maybeSpawnEnemy();
   }
 
   const turnAround = () => {
     send(RequestPacketType.MoveDirection, MovementDirection.TurnAround);
-    maybeSpawnEnemy();
   }
 
   const moveForward = () => {
     send(RequestPacketType.MoveDirection, MovementDirection.Forward);
-    maybeSpawnEnemy();
   }
 
-  const maybeSpawnEnemy = () => {
-    if (Math.random() > .75) {
-      const mobs = generateMobs(character);
-      setMobs(mobs);
-    }
-  }
-
-  const targetEnemy = (id: string) => {
+  const targetEnemy = (id: number) => {
     //console.log('set target ', id);
     setTarget(id);
     if (!attackInterval.current) {
@@ -101,7 +88,7 @@ export function Catacombs() {
     goToZone(Zone.Town);
   }
 
-  const attack = useCallback((forceTarget?: string) => {
+  const attack = useCallback((forceTarget?: number) => {
     //console.log('attack ', target);
     const targetId = forceTarget ?? target;
     if (!targetId) return;
@@ -116,7 +103,8 @@ export function Catacombs() {
       addKill();
       setTarget(undefined);
       setTimeout(() => {
-        setMobs(mobs.filter(x => x.id !== mobTarget.id))
+        //setMobs(mobs.filter(x => x.id !== mobTarget.id))
+        maze.mobs = mobs.filter(x => x.id !== mobTarget.id);
       }, 250);
     }
 
@@ -152,16 +140,16 @@ export function Catacombs() {
       setAttacks(a => {
         return a.filter(x => new Date().getTime() < x.created + 800);
       });
-    }, 50);
+    }, 500);
 
     return () => {
       if (attackInterval.current) {
         clearInterval(attackInterval.current);
-        attackInterval.current = undefined;
+        //attackInterval.current = undefined;
       }
       clearInterval(removeAttacksInterval);
     }
-  }, [setAttacks]);
+  }, []);
 
   return <>
     <div className="p-4 flex flex-col gap-3">
@@ -174,9 +162,9 @@ export function Catacombs() {
           {[...Array(9)].map((_, idx) => {
             const mob = mobs.find(x => x.position === idx)
             if (!mob) return <div key={idx} className="w-48 h-48"></div>
-            return mob && <div key={mob.id} className="w-48 h-48 flex flex-col gap-5" onClick={_ => targetEnemy(mob.id)}>
+            return mob && <div key={idx} className="w-48 h-48 flex flex-col gap-5" onClick={_ => targetEnemy(mob.id)}>
               <ProgressBar color="red" current={mob.life} max={mob.maxLife} text="Sweet Name" />
-              <img src={`svg/mob${mob.img}.svg`} className="w-full h-full img-drop-shadow" ref={mob.ref} alt={"monster: Sweet Name"} />
+              <img src={`svg/mob${mob.image}.svg`} className="w-full h-full img-drop-shadow" ref={mob.ref} alt={"monster: Sweet Name"} />
             </div>
           })}
         </div>}
