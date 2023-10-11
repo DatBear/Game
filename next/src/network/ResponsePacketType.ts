@@ -12,6 +12,7 @@ enum ResponsePacketType {
   GetUser,
   SetGroupLeader,
   UpdateCharacter,
+  UpdateMaze,
 
   Error = 255
 }

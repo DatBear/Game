@@ -19,7 +19,7 @@ public class GameManager
         _sessions[userId] = session;
     }
 
-    public void RemoveSession(int userId)
+    public bool RemoveSession(int userId)
     {
         try
         {
@@ -30,13 +30,15 @@ public class GameManager
                     RemoveUserFromGroup(session.User.Group, session.User);
                 }
 
-                _sessions.Remove(userId);
+                return _sessions.Remove(userId);
             }
         }
         catch
         {
             //do nothing
         }
+
+        return false;
     }
 
     public GameSession? GetSession(int userId)

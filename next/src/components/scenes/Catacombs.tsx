@@ -1,14 +1,18 @@
 import { Zone } from "@/models/Zone";
-import { Cell, generateMaze, Direction, Maze } from "@/utils/MazeGenerator";
 import clsx from "clsx";
 import { createRef, RefObject, useCallback, useEffect, useRef, useState } from "react";
-import { useCharacter } from "../contexts/UserContext"
+import { useCharacter, useUser } from "../contexts/UserContext"
 import { useHotkeys, isHotkeyPressed } from "react-hotkeys-hook"
 import Mob, { generateMobs } from "@/models/Mob";
 import ProgressBar from "../ProgressBar";
 import Item, { ItemSubType } from "@/models/Item";
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import ItemSlot from "../ItemSlot";
+import { listen, send } from "@/network/Socket";
+import RequestPacketType from "@/network/RequestPacketType";
+import { Direction } from "@/models/Direction";
+import { Maze } from "@/models/Maze";
+import { MovementDirection } from "@/models/MovementDirection";
 
 const directions: Direction[] = [Direction.North, Direction.East, Direction.South, Direction.West];
 
@@ -24,14 +28,17 @@ type Attack = {
   isPlayer: boolean;
 }
 
+
 export function Catacombs() {
   const attackInterval = useRef<NodeJS.Timer>();
+  const { user } = useUser();
   const { character, goToZone, addExperience, addKill, addDeath } = useCharacter();
-  const [maze, setMaze] = useState<Maze>(generateMaze(30));
   const [areHotkeysEnabled, setAreHotkeysEnabled] = useState(true);
   const [mobs, setMobs] = useState<Mob[]>([]);
   const [target, setTarget] = useState<string>();
   const [attacks, setAttacks] = useState<Attack[]>([]);
+
+  const maze = user.group?.maze ?? user.maze!;
 
   useHotkeys('d', () => turnRight(), { enabled: areHotkeysEnabled, keyup: false });
   useHotkeys('a', () => turnLeft(), { enabled: areHotkeysEnabled, keyup: false });
@@ -39,54 +46,22 @@ export function Catacombs() {
   useHotkeys('w', () => moveForward(), { enabled: areHotkeysEnabled, keyup: false });
 
   const turnRight = () => {
-    if (!maze.position || (canMoveForward() && isHotkeyPressed('w'))) return;
-    let currDir = directions.indexOf(maze.position.direction);
-    maze.position.direction = currDir >= directions.length - 1 ? directions[0] : directions[currDir + 1];
-    setMaze({ ...maze });
+    send(RequestPacketType.MoveDirection, MovementDirection.Right);
     maybeSpawnEnemy();
   }
 
   const turnLeft = () => {
-    if (!maze.position || (canMoveForward() && isHotkeyPressed('w'))) return;
-    let currDir = directions.indexOf(maze.position.direction);
-    maze.position.direction = currDir <= 0 ? directions[directions.length - 1] : directions[currDir - 1];
-    setMaze({ ...maze });
+    send(RequestPacketType.MoveDirection, MovementDirection.Left);
     maybeSpawnEnemy();
   }
 
   const turnAround = () => {
-    if (!maze.position || (canMoveForward() && isHotkeyPressed('w'))) return;
-    let currDir = directions.indexOf(maze.position.direction);
-    maze.position.direction = currDir <= 1 ? maze.position.direction << 2 : maze.position.direction >> 2;
-    setMaze({ ...maze });
+    send(RequestPacketType.MoveDirection, MovementDirection.TurnAround);
     maybeSpawnEnemy();
   }
 
-  const canMoveForward = () => {
-    if (!maze.position || !maze.cells) return false;
-    let cell = maze.cells[maze.position.y][maze.position.x];
-    if ((cell.walls & maze.position.direction) > 0) return false;
-    return true;
-  }
-
   const moveForward = () => {
-    if (!canMoveForward()) return;
-    switch (maze.position.direction) {
-      case Direction.North:
-        maze.position.y -= 1;
-        break;
-      case Direction.East:
-        maze.position.x += 1;
-        break;
-      case Direction.South:
-        maze.position.y += 1;
-        break;
-      case Direction.West:
-        maze.position.x -= 1;
-        break;
-    }
-    maze.cells[maze.position.y][maze.position.x].visited = true;
-    setMaze({ ...maze });
+    send(RequestPacketType.MoveDirection, MovementDirection.Forward);
     maybeSpawnEnemy();
   }
 
@@ -119,11 +94,6 @@ export function Catacombs() {
       xPlayer, yPlayer, xMob, yMob,
       damage, isCritical, weapon, isPlayer
     };
-  }
-
-  const regenerate = () => {
-    const maze = generateMaze(30);
-    setMaze(maze);
   }
 
   const goToTown = () => {
@@ -197,7 +167,6 @@ export function Catacombs() {
     <div className="p-4 flex flex-col gap-3">
       <div className="flex flex-row gap-3">
         <button onClick={_ => goToTown()}>Back to Town</button>
-        <button onClick={_ => regenerate()}>Refresh</button>
       </div>
 
       <div className="flex flex-row">
@@ -211,7 +180,7 @@ export function Catacombs() {
             </div>
           })}
         </div>}
-        {mobs.length == 0 && maze.cells && maze.cells.length > 0 && <MazeRenderer maze={maze} />}
+        {mobs.length == 0 && maze && maze.cells && maze.cells.length > 0 && <MazeRenderer maze={maze} />}
       </div>
     </div>
     <div className="absolute w-full h-full left-0 top-0" style={{ pointerEvents: "none" }}>

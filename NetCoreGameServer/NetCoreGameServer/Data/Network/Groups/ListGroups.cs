@@ -30,7 +30,7 @@ public class ListGroupHandler : IRequestHandler<ListGroupsRequest>
         var groups = _gameManager.GetGroups();
         _session.Send(new ListGroupsResponse
         {
-            Data = groups.ToArray()
+            Data = groups.Select(x => x.ToListResponse()).ToArray()
         });
     }
 }

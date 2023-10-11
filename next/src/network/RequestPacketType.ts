@@ -15,6 +15,8 @@ enum RequestPacketType {
   EquipItem,
   UnequipItem,
   DeleteItem,
+  UpdateMaze,
+  MoveDirection,
 }
 
 export default RequestPacketType;

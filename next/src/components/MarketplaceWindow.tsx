@@ -64,7 +64,7 @@ export default function MarketplaceWindow() {
 
   useEffect(() => {
     setWindowState({ ...windowState, isVisible: windowState?.isVisible ?? false, searchResults: marketItems });
-  }, [windowState, setWindowState]);
+  }, []);
 
   const search = () => {
 

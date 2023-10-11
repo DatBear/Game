@@ -15,6 +15,7 @@ import RequestPacketType from "@/network/RequestPacketType";
 import ResponsePacketType from "@/network/ResponsePacketType";
 import Group from "@/models/Group";
 import GroupUser from "@/models/GroupUser";
+import { Maze } from "@/models/Maze";
 
 type UserContextData = {
   user: User;
@@ -141,6 +142,17 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
       user.group!.leaderId = e;
       setUser({ ...user });
     });
+  }, [user, setUser]);
+
+  useEffect(() => {
+    listen(ResponsePacketType.UpdateMaze, (e: Maze) => {
+      if (user.group) {
+        user.group.maze = e;
+      } else {
+        user.maze = e;
+      }
+      setUser({ ...user });
+    }, true);
   }, [user, setUser]);
 
   return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>

@@ -18,4 +18,6 @@ public enum RequestPacketType
     EquipItem = 13,
     UnequipItem = 14,
     DeleteItem = 15,
+    UpdateMaze = 16,
+    MoveDirection = 17,
 }

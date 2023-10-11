@@ -74,7 +74,12 @@ public class GameSession : WsSession
 
         User = _userRepository.GetUserDetails(user.Id)!;
         Console.WriteLine($"WebSocket session with Id {Id} connected!");
-        _serviceProvider.GetService<GameManager>()!.SetSession(User.Id, this);
+        var gameManager = _serviceProvider.GetService<GameManager>()!;
+        if (gameManager.RemoveSession(User.Id))
+        {
+            CloseUnauthorized();
+        }
+        gameManager!.SetSession(User.Id, this);
     }
 
     public bool Send<T>(T obj) where T : IResponsePacket

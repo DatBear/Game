@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using NetCoreGameServer.Data.Model;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Data.Network.Groups;
@@ -40,7 +41,8 @@ public class CreateGroupHandler : IRequestHandler<CreateGroupRequest>
             Users = new List<GroupUser>
             {
                 _session.User.AsGroupUser()
-            }
+            },
+            Maze = MazeGenerator.Generate(10)//todo base on char level
         });
         
         _session.User.Group = group;
