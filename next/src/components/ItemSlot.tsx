@@ -6,7 +6,7 @@ import { useId, useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useCharacter } from "./contexts/UserContext";
 import { Tooltip } from "react-tooltip"
-import { CharacterStats, itemSpecificStatNames, statNames } from "@/models/Stats";
+import { itemSpecificStatNames, statNames } from "@/models/Stats";
 import calculatedItemStats from "@/models/CalculatedItemStat";
 import { recordKeys } from "@/utils/RecordUtils";
 import { EquippedItemSlot } from "@/models/EquippedItem";
@@ -41,7 +41,7 @@ const typeSlots: Partial<Record<ItemType, EquippedItemSlot>> = {
   [ItemType.Charm]: EquippedItemSlot.Charm,
 }
 
-export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTypes, acceptMaxTier, slot: slot, action, skill, noDrag, noTooltip, hotkey, borderless, noBackground, children, className, ...props }: ItemProps) {
+export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, skill, noDrag, noTooltip, hotkey, borderless, noBackground, children, className, ...props }: ItemProps) {
   const prefix = itemMagicPrefixes[Object.keys(item?.stats ?? 0).length];
   const type = item && getItemType(item.subType);
   const iconPath = !item ? '' : `svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`;

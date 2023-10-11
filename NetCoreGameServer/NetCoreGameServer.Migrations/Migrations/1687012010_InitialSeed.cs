@@ -6,7 +6,7 @@ namespace NetCoreGameServer.Migrations.Migrations;
 public class InitialSeed : Migration {
     public override void Up()
     {
-        //user: test//test
+        //user: test//test, datbear//test
         Execute.Sql(@"
         INSERT INTO User (Id, Email, Password, Username) VALUES (1, 'test@test.com', '$2b$12$5KX9VWgIOovEM5nxFAR3j.E6BeZ2xs3gRISS92pRPtBtXwKcnDYV2', 'test');
         INSERT INTO User (Id, Email, Password, Username) VALUES (2, 'whocare@datbear.com', '$2b$12$5KX9VWgIOovEM5nxFAR3j.E6BeZ2xs3gRISS92pRPtBtXwKcnDYV2', 'datbear');

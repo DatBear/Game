@@ -29,7 +29,8 @@ function InventoryWindow() {
             let itemSlot = character?.equippedItems.find(x => x.equippedItemSlot == s);
             return <div key={itemSlot?.id ?? idx - 5} className="flex flex-col items-center">
               <span className="block text-center w-max">{slotNames[s]}</span>
-              <ItemSlot item={itemSlot} slot={s} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + character.level / 5)} />
+              {/*@ts-ignore*/}
+              <ItemSlot item={itemSlot} acceptSubTypes={equippableGear[s]} acceptMaxTier={Math.floor(3 + character.level / 5)} slot={s} />
             </div>
           })}
         </div>
@@ -52,7 +53,7 @@ function InventoryWindow() {
             })}
           </div>
           <ItemSlot medium action={ItemAction.Delete}>
-            <img className="absolute inset-0 p-1 mx-auto w-full h-full" src="svg/iconTrash.svg" />
+            <img className="absolute inset-0 p-1 mx-auto w-full h-full" src="svg/iconTrash.svg" alt="delete item" />
           </ItemSlot>
         </div>
       </div>

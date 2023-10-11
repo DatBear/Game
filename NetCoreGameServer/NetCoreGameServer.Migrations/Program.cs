@@ -8,9 +8,17 @@ namespace NetCoreGameServer.Migrations
 {
     internal class Program
     {
+        private static string _connectionString;
+
         static void Main(string[] args)
         {
             DotEnv.Load(new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5));
+            var connStringArg = args.Where(x => x.ToLower().Contains("db"))
+                                    .Select(x => Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__" + x))
+                                    .FirstOrDefault(x => !string.IsNullOrEmpty(x));
+            
+            _connectionString = connStringArg ?? Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DB");
+            //Console.WriteLine("Using connection string: " + _connectionString);
 
             var serviceProvider = CreateServices();
             using var scope = serviceProvider.CreateScope();
@@ -40,7 +48,7 @@ namespace NetCoreGameServer.Migrations
             var services = new ServiceCollection();
             services.AddFluentMigratorCore();
             services.ConfigureRunner(rb => rb.AddMySql5()
-                                             .WithGlobalConnectionString(Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DB"))
+                                             .WithGlobalConnectionString(_connectionString)
                                              .ScanIn(typeof(Program).Assembly).For.Migrations()
                                              .WithGlobalCommandTimeout(Timeout.InfiniteTimeSpan)
             );

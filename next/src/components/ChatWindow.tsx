@@ -33,7 +33,7 @@ export default function ChatWindow() {
 
       setWindowState({ ...windowState!, messages: [...windowState?.messages!, msg] })
     });
-  }, [windowState, setWindowState]);
+  }, [windowState, setWindowState, user.id]);
 
   useEffect(() => {
     return listen(ResponsePacketType.JoinGroup, (e: GroupUser) => {
@@ -44,7 +44,7 @@ export default function ChatWindow() {
 
       setWindowState({ ...windowState!, messages: [...windowState?.messages!, msg] })
     });
-  }, [windowState, setWindowState]);
+  }, [windowState, setWindowState, user.id]);
 
   useEffect(() => {
     return listen(ResponsePacketType.CreateGroup, (e: Group) => {
@@ -55,7 +55,7 @@ export default function ChatWindow() {
 
       setWindowState({ ...windowState!, messages: [...windowState?.messages!, msg] })
     });
-  }, [windowState, setWindowState]);
+  }, [windowState, setWindowState, user.id]);
 
 
 

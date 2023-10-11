@@ -64,7 +64,7 @@ export default function MarketplaceWindow() {
 
   useEffect(() => {
     setWindowState({ ...windowState, isVisible: windowState?.isVisible ?? false, searchResults: marketItems });
-  }, []);
+  }, [windowState, setWindowState]);
 
   const search = () => {
 
@@ -222,7 +222,7 @@ export default function MarketplaceWindow() {
               <span className="text-2xl">?</span>
             </ItemSlot>
             <ItemSlot action={ItemAction.Delete}>
-              <img className="absolute inset-0 p-1 mx-auto w-full h-full" src="svg/iconTrash.svg" />
+              <img className="absolute inset-0 p-1 mx-auto w-full h-full" src="svg/iconTrash.svg" alt="delete item" />
             </ItemSlot>
           </div>
           <div className="basis-4/5 flex flex-col gap-y-4">

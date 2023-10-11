@@ -59,12 +59,12 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     }));
   }
 
-  const updateGroup = (group: Group | null) => {
+  const updateGroup = useCallback((group: Group | null) => {
     setUser(user => ({
       ...user,
       group: group
     }))
-  }
+  }, [setUser]);
 
   const listMarketItem = (item: MarketItem) => {
     if (user.marketItems.length < 16 && item.price > 0 && user.selectedCharacter) {
@@ -125,7 +125,7 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
         }
       }
     }, true);
-  }, [user, setUser]);
+  }, [user, setUser, updateGroup]);
 
   useEffect(() => {
     return listen(ResponsePacketType.JoinGroup, (e: GroupUser) => {
@@ -339,7 +339,7 @@ export function useCharacter() {
         updateCharacter(e);
       }
     });
-  }, [character]);
+  }, [character, updateCharacter]);
 
   return {
     character,

@@ -38,22 +38,6 @@ export function Catacombs() {
   useHotkeys('s', () => turnAround(), { enabled: areHotkeysEnabled, keyup: false });
   useHotkeys('w', () => moveForward(), { enabled: areHotkeysEnabled, keyup: false });
 
-  useEffect(() => {
-    const removeAttacksInterval = setInterval(() => {
-      setAttacks(a => {
-        return a.filter(x => new Date().getTime() < x.created + 800);
-      });
-    }, 50);
-
-    return () => {
-      if (attackInterval.current) {
-        clearInterval(attackInterval.current);
-        attackInterval.current = undefined;
-      }
-      clearInterval(removeAttacksInterval);
-    }
-  }, [setAttacks]);
-
   const turnRight = () => {
     if (!maze.position || (canMoveForward() && isHotkeyPressed('w'))) return;
     let currDir = directions.indexOf(maze.position.direction);
@@ -113,16 +97,38 @@ export function Catacombs() {
     }
   }
 
-  useEffect(() => {
-    setAreHotkeysEnabled(mobs.length === 0);
-  }, [mobs, setAreHotkeysEnabled]);
-
   const targetEnemy = (id: string) => {
     //console.log('set target ', id);
     setTarget(id);
     if (!attackInterval.current) {
       attack(id);
     }
+  }
+
+  const getAttack = (player: RefObject<HTMLElement>, mob: RefObject<HTMLElement>, damage: number, isCritical: boolean, weapon: Item | undefined, isPlayer: boolean): Attack | null => {
+    if (player.current == null || mob.current == null) return null;
+    const xPlayer = player.current.offsetLeft + player.current.offsetWidth * .8;
+    const yPlayer = player.current.offsetTop + player.current.offsetHeight * .5;
+
+    const xOffset = rnd((mob.current.offsetWidth ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
+    const yOffset = rnd((mob.current.offsetHeight ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
+    const xMob = mob.current.offsetLeft + mob.current.offsetWidth * .5 + xOffset;
+    const yMob = mob.current.offsetTop + mob.current.offsetHeight * .5 + yOffset;
+    return {
+      created: new Date().getTime(),
+      xPlayer, yPlayer, xMob, yMob,
+      damage, isCritical, weapon, isPlayer
+    };
+  }
+
+  const regenerate = () => {
+    const maze = generateMaze(30);
+    setMaze(maze);
+  }
+
+  const goToTown = () => {
+    setTarget(undefined);
+    goToZone(Zone.Town);
   }
 
   const attack = useCallback((forceTarget?: string) => {
@@ -152,6 +158,10 @@ export function Catacombs() {
   }, [target, mobs]);
 
   useEffect(() => {
+    setAreHotkeysEnabled(mobs.length === 0);
+  }, [mobs, setAreHotkeysEnabled]);
+
+  useEffect(() => {
     if (target) {
       attackInterval.current = setInterval(attack, 1000);//todo attack speed
     } else {
@@ -167,31 +177,21 @@ export function Catacombs() {
     }
   }, [attack, target]);
 
-  const getAttack = (player: RefObject<HTMLElement>, mob: RefObject<HTMLElement>, damage: number, isCritical: boolean, weapon: Item | undefined, isPlayer: boolean): Attack | null => {
-    if (player.current == null || mob.current == null) return null;
-    const xPlayer = player.current.offsetLeft + player.current.offsetWidth * .8;
-    const yPlayer = player.current.offsetTop + player.current.offsetHeight * .5;
+  useEffect(() => {
+    const removeAttacksInterval = setInterval(() => {
+      setAttacks(a => {
+        return a.filter(x => new Date().getTime() < x.created + 800);
+      });
+    }, 50);
 
-    const xOffset = rnd((mob.current.offsetWidth ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
-    const yOffset = rnd((mob.current.offsetHeight ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
-    const xMob = mob.current.offsetLeft + mob.current.offsetWidth * .5 + xOffset;
-    const yMob = mob.current.offsetTop + mob.current.offsetHeight * .5 + yOffset;
-    return {
-      created: new Date().getTime(),
-      xPlayer, yPlayer, xMob, yMob,
-      damage, isCritical, weapon, isPlayer
-    };
-  }
-
-  const regenerate = () => {
-    const maze = generateMaze(30);
-    setMaze(maze);
-  }
-
-  const goToTown = () => {
-    setTarget(undefined);
-    goToZone(Zone.Town);
-  }
+    return () => {
+      if (attackInterval.current) {
+        clearInterval(attackInterval.current);
+        attackInterval.current = undefined;
+      }
+      clearInterval(removeAttacksInterval);
+    }
+  }, [setAttacks]);
 
   return <>
     <div className="p-4 flex flex-col gap-3">
@@ -207,7 +207,7 @@ export function Catacombs() {
             if (!mob) return <div key={idx} className="w-48 h-48"></div>
             return mob && <div key={mob.id} className="w-48 h-48 flex flex-col gap-5" onClick={_ => targetEnemy(mob.id)}>
               <ProgressBar color="red" current={mob.life} max={mob.maxLife} text="Sweet Name" />
-              <img src={`svg/mob${mob.img}.svg`} className="w-full h-full img-drop-shadow" ref={mob.ref} />
+              <img src={`svg/mob${mob.img}.svg`} className="w-full h-full img-drop-shadow" ref={mob.ref} alt={"monster: Sweet Name"} />
             </div>
           })}
         </div>}

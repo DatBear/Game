@@ -3,9 +3,9 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: false,//this being true (default) breaks react-tooltip in static exports
   experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'bcrypt'],
-    outputStandalone: true,
-  }
+    serverComponentsExternalPackages: ['@prisma/client', 'bcrypt']
+  },
+  output: 'standalone'
 }
 
 module.exports = nextConfig
