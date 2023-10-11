@@ -37,7 +37,7 @@ public class MazeGenerator
             var neighbors = GetNeighbors(current, cells);
             if (neighbors.Length > 0)
             {
-                var neighbor = neighbors[r.Next(neighbors.Length-1)];
+                var neighbor = neighbors[r.Next(neighbors.Length)];
                 stack.Push(current);
                 if (neighbor.X > current.X)
                 {
