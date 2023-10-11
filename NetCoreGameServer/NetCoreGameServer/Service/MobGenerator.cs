@@ -4,16 +4,16 @@ namespace NetCoreGameServer.Service;
 
 public class MobGenerator
 {
+    private static int NextMobId = 1;
     private static readonly Random r = new();
     public static List<Mob> GenerateMobs(User user)
     {
-        var maxMobs = Math.Max(3, user.Group?.Users.Count ?? 2 * 2 - 1);
-        var numMobs = r.Next(maxMobs + 1);
-        if (r.Next(100) < 75 || numMobs == 0)
+        if (r.Next(100) < 75)
         {
             return new List<Mob>();
         }
-
+        var maxMobs = Math.Max(3, user.Group?.Users.Count ?? 2 * 2 - 1);
+        var numMobs = r.Next(maxMobs)+1;
         var positions = Enumerable.Range(0, 9).ToList();
         return Enumerable.Range(0, numMobs).Select(x =>
         {
@@ -21,7 +21,7 @@ public class MobGenerator
             positions.Remove(pos);
             return new Mob
             {
-                Id = x + 1,
+                Id = NextMobId++,
                 Position = pos,
                 Image = r.Next(101),
                 Damage = new[] { 0, 0 },

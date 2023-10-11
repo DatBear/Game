@@ -4,7 +4,7 @@ import { createRef, RefObject, useCallback, useEffect, useRef, useState } from "
 import { useCharacter, useUser } from "../contexts/UserContext"
 import { useHotkeys, isHotkeyPressed } from "react-hotkeys-hook"
 import ProgressBar from "../ProgressBar";
-import Item, { ItemSubType } from "@/models/Item";
+import Item, { defaultItem, ItemSubType } from "@/models/Item";
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import ItemSlot from "../ItemSlot";
 import { listen, send } from "@/network/Socket";
@@ -12,23 +12,40 @@ import RequestPacketType from "@/network/RequestPacketType";
 import { Direction } from "@/models/Direction";
 import { Maze } from "@/models/Maze";
 import { MovementDirection } from "@/models/MovementDirection";
+import { HotkeysEvent } from "react-hotkeys-hook/dist/types";
+import { AttackType } from "@/models/AttackType";
+import ResponsePacketType from "@/network/ResponsePacketType";
 
 const directions: Direction[] = [Direction.North, Direction.East, Direction.South, Direction.West];
 
 type Attack = {
-  created: number;
+  timestamp: number;
+  sourceId: number;
+  targetId: number;
+  type: AttackType;
+  damage: number;
+  isCritical: boolean;
+  targetHealthResult: number;
+  weaponType: ItemSubType;
+
+  weapon?: Item;
   xPlayer: number;
   yPlayer: number;
   xMob: number;
   yMob: number;
-  damage: number;
-  isCritical: boolean;
-  weapon?: Item;
+
   isPlayer: boolean;
 }
 
+type AttackRequest = {
+  sourceId: number;
+  targetId: number;
+  type: AttackType;
+  equippedItemSlot: EquippedItemSlot;
+}
+
 export function Catacombs() {
-  const attackInterval = useRef<NodeJS.Timer>();
+  const attackInterval = useRef<number>();
   const { user } = useUser();
   const { character, goToZone, addExperience, addKill, addDeath } = useCharacter();
   const [areHotkeysEnabled, setAreHotkeysEnabled] = useState(true);
@@ -38,10 +55,10 @@ export function Catacombs() {
   const maze = user.group?.maze ?? user.maze!;
   const mobs = maze?.mobs;
 
-  useHotkeys('d', () => turnRight(), { enabled: areHotkeysEnabled, keyup: false });
-  useHotkeys('a', () => turnLeft(), { enabled: areHotkeysEnabled, keyup: false });
-  useHotkeys('s', () => turnAround(), { enabled: areHotkeysEnabled, keyup: false });
-  useHotkeys('w', () => moveForward(), { enabled: areHotkeysEnabled, keyup: false });
+  useHotkeys('d', e => !e.repeat && turnRight(), { enabled: areHotkeysEnabled, keyup: false });
+  useHotkeys('a', e => !e.repeat && turnLeft(), { enabled: areHotkeysEnabled, keyup: false });
+  useHotkeys('s', e => !e.repeat && turnAround(), { enabled: areHotkeysEnabled, keyup: false });
+  useHotkeys('w', e => !e.repeat && moveForward(), { enabled: areHotkeysEnabled, keyup: false });
 
   const turnRight = () => {
     send(RequestPacketType.MoveDirection, MovementDirection.Right);
@@ -59,6 +76,15 @@ export function Catacombs() {
     send(RequestPacketType.MoveDirection, MovementDirection.Forward);
   }
 
+  const goToTown = () => {
+    setTarget(undefined);
+    goToZone(Zone.Town);
+  }
+
+  useEffect(() => {
+    setAreHotkeysEnabled(mobs.length === 0);
+  }, [mobs, setAreHotkeysEnabled]);
+
   const targetEnemy = (id: number) => {
     //console.log('set target ', id);
     setTarget(id);
@@ -67,61 +93,26 @@ export function Catacombs() {
     }
   }
 
-  const getAttack = (player: RefObject<HTMLElement>, mob: RefObject<HTMLElement>, damage: number, isCritical: boolean, weapon: Item | undefined, isPlayer: boolean): Attack | null => {
-    if (player.current == null || mob.current == null) return null;
-    const xPlayer = player.current.offsetLeft + player.current.offsetWidth * .8;
-    const yPlayer = player.current.offsetTop + player.current.offsetHeight * .5;
-
-    const xOffset = rnd((mob.current.offsetWidth ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
-    const yOffset = rnd((mob.current.offsetHeight ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
-    const xMob = mob.current.offsetLeft + mob.current.offsetWidth * .5 + xOffset;
-    const yMob = mob.current.offsetTop + mob.current.offsetHeight * .5 + yOffset;
-    return {
-      created: new Date().getTime(),
-      xPlayer, yPlayer, xMob, yMob,
-      damage, isCritical, weapon, isPlayer
-    };
-  }
-
-  const goToTown = () => {
-    setTarget(undefined);
-    goToZone(Zone.Town);
-  }
-
-  const attack = useCallback((forceTarget?: number) => {
-    //console.log('attack ', target);
+  const attack = (forceTarget: number) => {
     const targetId = forceTarget ?? target;
     if (!targetId) return;
-    const mobTarget = mobs.find(x => x.id === targetId);
 
+    const mobTarget = mobs.find(x => x.id === targetId);
     if (!mobTarget) return;
 
-    var dmg = 25;//todo calc
-    mobTarget.life = Math.max(0, mobTarget.life - dmg);
-    if (mobTarget.life === 0) {
-      addExperience(100000);//todo calc
-      addKill();
-      setTarget(undefined);
-      setTimeout(() => {
-        //setMobs(mobs.filter(x => x.id !== mobTarget.id))
-        maze.mobs = mobs.filter(x => x.id !== mobTarget.id);
-      }, 250);
+    let attack: AttackRequest = {
+      sourceId: user.selectedCharacter?.id!,
+      targetId: targetId,
+      type: AttackType.PlayerAttack,
+      equippedItemSlot: EquippedItemSlot.Weapon,//todo change
     }
+    send(RequestPacketType.AttackTarget, attack, true);
+  };
 
-    const item = character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon);
-    const attack = getAttack(character.imageRef, mobTarget.ref, dmg, Math.random() > .5, item, true);
-    if (attack != null) {
-      setAttacks(a => [...a, attack])
-    }
-  }, [target, mobs]);
-
-  useEffect(() => {
-    setAreHotkeysEnabled(mobs.length === 0);
-  }, [mobs, setAreHotkeysEnabled]);
 
   useEffect(() => {
     if (target) {
-      attackInterval.current = setInterval(attack, 1000);//todo attack speed
+      attackInterval.current = setInterval(attack, 1000);
     } else {
       clearInterval(attackInterval.current);
       attackInterval.current = undefined;
@@ -136,20 +127,34 @@ export function Catacombs() {
   }, [attack, target]);
 
   useEffect(() => {
-    const removeAttacksInterval = setInterval(() => {
-      setAttacks(a => {
-        return a.filter(x => new Date().getTime() < x.created + 800);
-      });
-    }, 500);
+    return listen(ResponsePacketType.AttackTarget, (e: Attack) => {
+      let source = user.group?.users.map(x => x.user?.selectedCharacter).find(x => x?.id === e.sourceId && x.imageRef) ?? user.selectedCharacter;
+      let target = mobs.find(x => x.id === e.targetId);
 
-    return () => {
-      if (attackInterval.current) {
-        clearInterval(attackInterval.current);
-        //attackInterval.current = undefined;
+      if (!source || !target) return;
+
+      target.life = e.targetHealthResult;
+      if (target.life <= 0) {
+        maze.mobs = mobs.filter(x => x.id !== target!.id);
       }
-      clearInterval(removeAttacksInterval);
-    }
-  }, []);
+
+      e.xPlayer = source?.imageRef.current?.offsetLeft! + source?.imageRef.current?.offsetWidth! * .8;
+      e.yPlayer = source?.imageRef.current?.offsetTop! + source?.imageRef.current?.offsetHeight! * .5;
+
+      [e.xMob, e.yMob] = randomPos(target?.ref.current!);
+      e.weapon = defaultItem(e.weaponType);
+      e.isPlayer = true;
+
+
+      setAttacks([...attacks.filter(x => new Date().getTime() < x.timestamp + 800), e]);
+    });
+  });
+
+  const randomPos = (el: HTMLElement) => {
+    let x = el.offsetLeft + el.offsetWidth / 2 + rnd((el.offsetWidth ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
+    let y = el.offsetTop + el.offsetHeight / 2 + rnd((el.offsetHeight ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
+    return [x, y];
+  };
 
   return <>
     <div className="p-4 flex flex-col gap-3">
@@ -175,7 +180,7 @@ export function Catacombs() {
       {attacks.length > 0 && attacks.map(x => {
         const left = (x.isPlayer ? x.xMob : x.xPlayer) + 'px';
         const top = (x.isPlayer ? x.yMob : x.yPlayer) + 'px';
-        return x.isPlayer ? <div key={x.created} className="absolute w-10 h-10" style={{ left, top }}>
+        return x.isPlayer ? <div key={x.timestamp} className="absolute w-10 h-10" style={{ left, top }}>
           <div className="flex flex-row items-center move-up fade-out">
             {x.weapon && <ItemSlot medium noDrag noTooltip borderless noBackground item={x.weapon} />}
             <div className="text-shadow text-2xl">{x.damage}{x.isCritical ? '!' : ''}</div>
@@ -185,7 +190,7 @@ export function Catacombs() {
     </div>
     <svg style={{ pointerEvents: "none", zIndex: -1 }} className="absolute w-full h-full left-0 top-0">
       {attacks.length > 0 && attacks.map(x => {
-        return <line style={{ zIndex: -1 }} key={x.created} x1={x.xPlayer} y1={x.yPlayer}
+        return <line style={{ zIndex: -1 }} key={x.timestamp} x1={x.xPlayer} y1={x.yPlayer}
           x2={x.xMob} y2={x.yMob} stroke={"#FF0000"} strokeWidth="3" className="fade-out" />
       })}
     </svg>

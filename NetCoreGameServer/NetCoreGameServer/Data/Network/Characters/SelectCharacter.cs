@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using NetCoreGameServer.Data.Model;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Data.Network.Characters;

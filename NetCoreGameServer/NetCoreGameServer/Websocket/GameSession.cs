@@ -75,10 +75,7 @@ public class GameSession : WsSession
         User = _userRepository.GetUserDetails(user.Id)!;
         Console.WriteLine($"WebSocket session with Id {Id} connected!");
         var gameManager = _serviceProvider.GetService<GameManager>()!;
-        if (gameManager.RemoveSession(User.Id))
-        {
-            CloseUnauthorized();
-        }
+        gameManager.RemoveSession(User.Id);
         gameManager!.SetSession(User.Id, this);
     }
 

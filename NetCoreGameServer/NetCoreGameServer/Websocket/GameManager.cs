@@ -1,4 +1,5 @@
-﻿using NetCoreGameServer.Data.Model;
+﻿using System.Net;
+using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Data.Network;
 using NetCoreGameServer.Data.Network.Groups;
 
@@ -30,7 +31,11 @@ public class GameManager
                     RemoveUserFromGroup(session.User.Group, session.User);
                 }
 
-                return _sessions.Remove(userId);
+                if (_sessions.Remove(userId))
+                {
+                    session.Close((int)HttpStatusCode.Unauthorized);
+                    return true;
+                }
             }
         }
         catch
@@ -80,9 +85,17 @@ public class GameManager
         return _groups;
     }
 
-    public void GroupBroadcast(Group? group, IResponsePacket packet)
+    public void GroupBroadcast(Group? group, IResponsePacket packet, User? fromUser = null)
     {
-        if (group == null) return;
+        if (group == null)
+        {
+            if (fromUser != null)
+            {
+                GetSession(fromUser.Id)?.Send(packet);
+                
+            }
+            return;
+        }
         var userIds = group.Users.Select(x => x.User.Id);
         foreach (var user in userIds)
         {

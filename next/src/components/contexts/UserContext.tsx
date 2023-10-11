@@ -145,9 +145,8 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
   }, [user, setUser]);
 
   useEffect(() => {
-    listen(ResponsePacketType.UpdateMaze, (e: Maze) => {
+    return listen(ResponsePacketType.UpdateMaze, (e: Maze) => {
       e.mobs = e.mobs.map(x => ({ ...x, ref: createRef<HTMLImageElement>() }));
-
       if (user.group) {
         user.group.maze = e;
       } else {

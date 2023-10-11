@@ -13,6 +13,7 @@ enum ResponsePacketType {
   SetGroupLeader,
   UpdateCharacter,
   UpdateMaze,
+  AttackTarget,
 
   Error = 255
 }

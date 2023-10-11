@@ -20,4 +20,5 @@ public enum RequestPacketType
     DeleteItem = 15,
     UpdateMaze = 16,
     MoveDirection = 17,
+    AttackTarget = 18,
 }
