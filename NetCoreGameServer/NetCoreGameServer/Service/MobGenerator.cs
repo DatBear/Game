@@ -12,7 +12,7 @@ public class MobGenerator
         {
             return new List<Mob>();
         }
-        var maxMobs = Math.Max(3, user.Group?.Users.Count ?? 2 * 2 - 1);
+        var maxMobs = Math.Max(3, (user.Group?.Users.Count ?? 2) * 2 - 1);
         var numMobs = r.Next(maxMobs)+1;
         var positions = Enumerable.Range(0, 9).ToList();
         return Enumerable.Range(0, numMobs).Select(x =>

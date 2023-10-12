@@ -17,7 +17,8 @@ enum RequestPacketType {
   DeleteItem,
   UpdateMaze,
   MoveDirection,
-  AttackTarget
+  AttackTarget,
+  ChangeZone
 }
 
 export default RequestPacketType;

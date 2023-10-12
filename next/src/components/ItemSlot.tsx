@@ -144,7 +144,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
       {item && !isDragging && <>
         <img src={iconPath} className="absolute inset-0 p-1 mx-auto w-full h-full" alt={itemNames[item.subType]} />
         {!small && !medium && <>
-          {Object.keys(item.stats).length > 0 && <span className="absolute top-0 left-0 px-1">+{Object.keys(item.stats).length - 1}</span>}
+          {Object.keys(item.stats).filter(x => x !== "id").length > 0 && <span className="absolute top-0 left-0 px-1">+{Object.keys(item.stats).length - 1}</span>}
           {item.tier > 0 && <span className="absolute top-0 right-0 px-1">{itemTiers[item.tier]}</span>}
         </>}
         {item.quantity && <span className={clsx(small && "text-2xs", "absolute bottom-0 left-0 px-px")}>{item.quantity}</span>}

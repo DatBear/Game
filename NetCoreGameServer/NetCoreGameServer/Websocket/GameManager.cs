@@ -85,13 +85,13 @@ public class GameManager
         return _groups;
     }
 
-    public void GroupBroadcast(Group? group, IResponsePacket packet, User? fromUser = null)
+    public void GroupBroadcast(Group? group, IResponsePacket packet, User? orUser = null)
     {
         if (group == null)
         {
-            if (fromUser != null)
+            if (orUser != null)
             {
-                GetSession(fromUser.Id)?.Send(packet);
+                GetSession(orUser.Id)?.Send(packet);
                 
             }
             return;

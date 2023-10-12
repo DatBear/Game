@@ -14,9 +14,9 @@ export default function GroupDisplay() {
   const { user } = useUser();
 
   return <div className="flex flex-col gap-y-12 pt-12">
-    <CharacterDisplay character={user.selectedCharacter} />
+    {!user.group && <CharacterDisplay character={user.selectedCharacter} />}
     {user.group && user.group.users
-      .filter(x => x && x.user?.id !== user.id && x.user?.selectedCharacter?.id !== user.selectedCharacter?.id)
+      .sort(x => x && x.user?.id == user.id ? -1 : 1)
       .map(x => x.user?.selectedCharacter)
       .map(x => <CharacterDisplay key={x?.id} character={x} />)}
   </div>

@@ -21,4 +21,5 @@ public enum RequestPacketType
     UpdateMaze = 16,
     MoveDirection = 17,
     AttackTarget = 18,
+    ChangeZone = 19,
 }

@@ -156,6 +156,20 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     }, true);
   }, [user, setUser]);
 
+  useEffect(() => {
+    return listen(ResponsePacketType.UpdateCharacter, (e: Character) => {
+      if (e.id === user.selectedCharacter?.id) {
+        updateCharacter(e);
+      } else {
+        let existingUser = user.group?.users?.find(x => x.user?.selectedCharacter?.id == e.id);
+        if (existingUser) {
+          existingUser.user!.selectedCharacter = e;
+        }
+        setUser({ ...user });
+      }
+    });
+  }, [user.selectedCharacter, updateCharacter, setUser]);
+
   return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>
     {children}
   </UserContext.Provider>
@@ -318,8 +332,7 @@ export function useCharacter() {
   }
 
   const goToZone = (zone: Zone) => {
-    character.zone = zone;
-    updateCharacter(character);
+    send(RequestPacketType.ChangeZone, zone);
   }
 
   const addKill = () => {
@@ -346,13 +359,6 @@ export function useCharacter() {
     updateCharacter(character);
   }
 
-  useEffect(() => {
-    return listen(ResponsePacketType.UpdateCharacter, (e: Character) => {
-      if (e.id === character.id) {
-        updateCharacter(e);
-      }
-    });
-  }, [character, updateCharacter]);
 
   return {
     character,

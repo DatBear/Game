@@ -131,7 +131,7 @@ export function Catacombs() {
       let source = user.group?.users.map(x => x.user?.selectedCharacter).find(x => x?.id === e.sourceId && x.imageRef) ?? user.selectedCharacter;
       let target = mobs.find(x => x.id === e.targetId);
 
-      if (!source || !target) return;
+      if (!source || !target || !target.ref) return;
 
       target.life = e.targetHealthResult;
       if (target.life <= 0) {
@@ -142,11 +142,11 @@ export function Catacombs() {
       e.yPlayer = source?.imageRef.current?.offsetTop! + source?.imageRef.current?.offsetHeight! * .5;
 
       [e.xMob, e.yMob] = randomPos(target?.ref.current!);
-      e.weapon = defaultItem(e.weaponType);
+      e.weapon = e.weaponType != undefined ? defaultItem(e.weaponType) : undefined;
       e.isPlayer = true;
 
-
-      setAttacks([...attacks.filter(x => new Date().getTime() < x.timestamp + 800), e]);
+      console.log('attack', e);
+      setAttacks([...attacks.filter(x => new Date().getTime() < x.timestamp + 800 && x.timestamp != e.timestamp), e]);
     });
   });
 
@@ -169,7 +169,7 @@ export function Catacombs() {
             if (!mob) return <div key={idx} className="w-48 h-48"></div>
             return mob && <div key={idx} className="w-48 h-48 flex flex-col gap-5" onClick={_ => targetEnemy(mob.id)}>
               <ProgressBar color="red" current={mob.life} max={mob.maxLife} text="Sweet Name" />
-              <img src={`svg/mob${mob.image}.svg`} className="w-full h-full img-drop-shadow" ref={mob.ref} alt={"monster: Sweet Name"} />
+              <img src={`svg/mob${mob.image}.svg`} className="w-48 h-36 img-drop-shadow" ref={mob.ref} alt={"monster: Sweet Name"} />
             </div>
           })}
         </div>}
