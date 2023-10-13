@@ -17,6 +17,8 @@ public enum ResponsePacketType
     UpdateCharacter = 12,
     UpdateMaze = 13,
     AttackTarget = 14,
+    AddGroundItem = 15,
+    UpdateGroundItem = 16,
 
     Error = 255,
 }

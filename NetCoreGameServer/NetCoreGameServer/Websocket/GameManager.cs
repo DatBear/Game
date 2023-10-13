@@ -1,7 +1,9 @@
 ﻿using System.Net;
+using System.Net.Sockets;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Data.Network;
 using NetCoreGameServer.Data.Network.Groups;
+using Org.BouncyCastle.Bcpg;
 
 namespace NetCoreGameServer.Websocket;
 
@@ -85,24 +87,43 @@ public class GameManager
         return _groups;
     }
 
-    public void GroupBroadcast(Group? group, IResponsePacket packet, User? orUser = null)
+    public void GroupBroadcast(GameSession session, IResponsePacket packet, bool excludeSender = false)
     {
-        if (group == null)
+        if (session.User.Group == null)
         {
-            if (orUser != null)
+            if (session.User != null)
             {
-                GetSession(orUser.Id)?.Send(packet);
-                
+                GetSession(session.User.Id)?.Send(packet);
             }
             return;
         }
-        var userIds = group.Users.Select(x => x.User.Id);
+
+        var userIds = session.User.Group.Users.Select(x => x.User.Id);//.Where(x => !excludeSender || x != session.User.Id);
         foreach (var user in userIds)
         {
-            var session = GetSession(user);
-            if (session != null)
+            var groupSession = GetSession(user);
+            if (groupSession != null)
             {
-                session.Send(packet);
+                groupSession.Send(packet);
+            }
+        }
+    }
+
+    public void GroupBroadcast(GameSession session, Func<User, IResponsePacket?> packetResolver)
+    {
+        if (session.User.Group == null)
+        {
+            var packet = packetResolver(session.User);
+            GetSession(session.User.Id)?.Send(packet);
+            return;
+        }
+        var userIds = session.User.Group.Users.Select(x => x.User.Id);//.Where(x => !excludeSender || x != session.User.Id);
+        foreach (var user in userIds)
+        {
+            var groupSession = GetSession(user);
+            if (groupSession != null)
+            {
+                groupSession.Send(packetResolver(groupSession.User));
             }
         }
     }
@@ -123,7 +144,7 @@ public class GameManager
                 return;
             }
 
-            GroupBroadcast(group, new JoinGroupResponse
+            GroupBroadcast(GetSession(group.Users.FirstOrDefault().User.Id), new JoinGroupResponse
             {
                 Data = session.User.AsGroupUser()
             });
@@ -157,7 +178,7 @@ public class GameManager
             RemoveGroup(group);
         }
 
-        GroupBroadcast(group, new LeaveGroupResponse
+        GroupBroadcast(GetSession(user.Id)!, new LeaveGroupResponse
         {
             Data = user.AsGroupUser().User
         });
@@ -167,14 +188,15 @@ public class GameManager
 
         if (user.Id == group.LeaderId && group.Users.Count(x => x.User.Id != group.LeaderId) > 0)
         {
-            SetGroupLeader(group, group.Users.FirstOrDefault().User.Id);
+            SetGroupLeader(GetSession(group.Users.FirstOrDefault().User.Id), group.Users.FirstOrDefault().User.Id);
         }
     }
 
-    public void SetGroupLeader(Group group, int id)
+    public void SetGroupLeader(GameSession session, int id)
     {
-        group.LeaderId = id;
-        GroupBroadcast(group, new SetGroupLeader.SetGroupLeaderResponse()
+        
+        session.User.Group.LeaderId = id;
+        GroupBroadcast(session, new SetGroupLeader.SetGroupLeaderResponse()
         {
             Data = id
         });

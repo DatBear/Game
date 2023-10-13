@@ -38,7 +38,7 @@ public class SetGroupLeader
                 return;
             }
             
-            _gameManager.SetGroupLeader(group, request.Data);
+            _gameManager.SetGroupLeader(_session, request.Data);
         }
     }
 }

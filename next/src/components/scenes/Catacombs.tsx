@@ -1,8 +1,8 @@
 import { Zone } from "@/models/Zone";
 import clsx from "clsx";
-import { createRef, RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCharacter, useUser } from "../contexts/UserContext"
-import { useHotkeys, isHotkeyPressed } from "react-hotkeys-hook"
+import { useHotkeys } from "react-hotkeys-hook"
 import ProgressBar from "../ProgressBar";
 import Item, { defaultItem, ItemSubType } from "@/models/Item";
 import { EquippedItemSlot } from "@/models/EquippedItem";
@@ -12,7 +12,6 @@ import RequestPacketType from "@/network/RequestPacketType";
 import { Direction } from "@/models/Direction";
 import { Maze } from "@/models/Maze";
 import { MovementDirection } from "@/models/MovementDirection";
-import { HotkeysEvent } from "react-hotkeys-hook/dist/types";
 import { AttackType } from "@/models/AttackType";
 import ResponsePacketType from "@/network/ResponsePacketType";
 
@@ -145,7 +144,7 @@ export function Catacombs() {
       e.weapon = e.weaponType != undefined ? defaultItem(e.weaponType) : undefined;
       e.isPlayer = true;
 
-      console.log('attack', e);
+      //console.log('attack', e);
       setAttacks([...attacks.filter(x => new Date().getTime() < x.timestamp + 800 && x.timestamp != e.timestamp), e]);
     });
   });

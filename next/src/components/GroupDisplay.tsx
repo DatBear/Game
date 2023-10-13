@@ -1,9 +1,4 @@
-import Character from "@/models/Character"
-import Group from "@/models/Group"
-import ProgressBar from "./ProgressBar"
-import CharacterImage from "./CharacterImage"
-import { useCharacter, useUser } from "./contexts/UserContext"
-import { createRef } from "react"
+import { useUser } from "./contexts/UserContext"
 import CharacterDisplay from "./CharacterDisplay"
 
 
@@ -14,10 +9,9 @@ export default function GroupDisplay() {
   const { user } = useUser();
 
   return <div className="flex flex-col gap-y-12 pt-12">
-    {!user.group && <CharacterDisplay character={user.selectedCharacter} />}
+    {!user.group && <CharacterDisplay character={user.selectedCharacter} isGroupLeader={false} />}
     {user.group && user.group.users
       .sort(x => x && x.user?.id == user.id ? -1 : 1)
-      .map(x => x.user?.selectedCharacter)
-      .map(x => <CharacterDisplay key={x?.id} character={x} />)}
+      .map(x => <CharacterDisplay key={x.user?.selectedCharacter?.id} character={x.user?.selectedCharacter} isGroupLeader={x.user?.id === user.group?.leaderId} />)}
   </div>
 }

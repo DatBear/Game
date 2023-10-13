@@ -18,7 +18,8 @@ enum RequestPacketType {
   UpdateMaze,
   MoveDirection,
   AttackTarget,
-  ChangeZone
+  ChangeZone,
+  PickGroundItem,
 }
 
 export default RequestPacketType;

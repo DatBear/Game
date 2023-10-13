@@ -47,19 +47,10 @@ public class MoveDirectionHandler : IRequestHandler<MoveDirectionRequest>
         
         maze.Mobs = MobGenerator.GenerateMobs(_session.User);
 
-        var movePacket = new UpdateMazeResponse
+        _gameManager.GroupBroadcast(_session, new UpdateMazeResponse
         {
             Data = maze
-        };
-
-        if (_session.User.Group != null)
-        {
-            _gameManager.GroupBroadcast(_session.User.Group, movePacket);
-        }
-        else
-        {
-            _session.Send(movePacket);
-        }
+        });
     }
 
     private bool CanMoveForward(Maze maze)

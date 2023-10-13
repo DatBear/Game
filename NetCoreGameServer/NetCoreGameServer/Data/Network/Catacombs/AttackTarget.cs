@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using NetCoreGameServer.Data.Model;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Data.Network.Catacombs;
@@ -43,17 +44,32 @@ public class AttackTargetHandler : IRequestHandler<AttackTargetRequest>
                 var target = maze.Mobs.FirstOrDefault(x => x.Id == attack.TargetId);
                 if (target is { Life: > 0 })
                 {
-                    attack.TargetHealthResult = target.Life -= 25;
+                    target.Life -= 25;
+                    attack.TargetHealthResult = target.Life;
 
                     if (target.Life <= 0)
                     {
                         maze.Mobs.Remove(target);
+                        var item = ItemGenerator.Generate(_session.User.Group!, _session.User.SelectedCharacter, target);
+                        if (item != null)
+                        {
+                            var groundItem = new GroundItem
+                            {
+                                Item = item,
+                                ExpiresTimestamp = DateTimeOffset.UtcNow.AddSeconds(10).ToUnixTimeMilliseconds(),
+                            };
+                            maze.Items.Add(groundItem);
+                            _gameManager.GroupBroadcast(_session, new AddGroundItemResponse()
+                            {
+                                Data = groundItem
+                            });
+                        }
                     }
 
-                    _gameManager.GroupBroadcast(_session.User.Group, new AttackTargetResponse()
+                    _gameManager.GroupBroadcast(_session, new AttackTargetResponse()
                     {
                         Data = attack
-                    }, _session.User);
+                    });
                 }
                 break;
         }

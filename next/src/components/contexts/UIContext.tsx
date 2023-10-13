@@ -18,6 +18,7 @@ import ChatMessage from "@/models/ChatMessage";
 import ChatWindow from "../ChatWindow";
 import ErrorWindow from "../ErrorWindow";
 import GroupDisplay from "../GroupDisplay";
+import GroundItemsWindow from "../GroundItemsWindow";
 
 export enum UIWindow {
   Inventory,
@@ -31,6 +32,7 @@ export enum UIWindow {
   Glyphing,
   Stats,
   Chat,
+  GroundItems,
   Error
 }
 
@@ -53,10 +55,6 @@ export type UISkillWindowState = UIWindowState & {
   items: Item[];
 }
 
-export type UIChatWindowState = UIWindowState & {
-  messages: ChatMessage[];
-}
-
 type WindowRecord<T> = Record<UIWindow, T & UIWindowState>;
 
 type UIContextProps = {
@@ -74,7 +72,8 @@ let defaultWindowState: WindowRecord<any> = {
   [UIWindow.Transmuting]: { isVisible: false, items: Array(2) } as UISkillWindowState,
   [UIWindow.Suffusencing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
   [UIWindow.Glyphing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
-  [UIWindow.Chat]: { isVisible: false, messages: [] } as UIChatWindowState,
+  [UIWindow.Chat]: { isVisible: false },
+  [UIWindow.GroundItems]: { isVisible: true },
   [UIWindow.Stats]: { isVisible: false },
   [UIWindow.Error]: { isVisible: false }
 }
@@ -132,6 +131,7 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
           {renderWindow(UIWindow.Glyphing, <SkillingWindow skillType={SkillType.Glyphing} window={UIWindow.Glyphing} />)}
           {renderWindow(UIWindow.Suffusencing, <SkillingWindow skillType={SkillType.Suffusencing} window={UIWindow.Suffusencing} />)}
           {renderWindow(UIWindow.Chat, <ChatWindow />)}
+          {renderWindow(UIWindow.GroundItems, <GroundItemsWindow />)}
           {renderWindow(UIWindow.Stats, <StatsWindow />)}
           {renderWindow(UIWindow.Error, <ErrorWindow />)}
         </div>

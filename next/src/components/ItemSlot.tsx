@@ -41,7 +41,7 @@ const typeSlots: Partial<Record<ItemType, EquippedItemSlot>> = {
   [ItemType.Charm]: EquippedItemSlot.Charm,
 }
 
-export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action, skill, noDrag, noTooltip, hotkey, borderless, noBackground, children, className, ...props }: ItemProps) {
+export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action: action, skill, noDrag, noTooltip, hotkey, borderless, noBackground, children, className, ...props }: ItemProps) {
   const prefix = itemMagicPrefixes[Object.keys(item?.stats ?? 0).length];
   const type = item && getItemType(item.subType);
   const iconPath = !item ? '' : `svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`;
@@ -53,6 +53,14 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
     canUnequipItem, unequipItem,
     canDoItemAction, doItemAction
   } = useCharacter();
+
+  const onClick = () => {
+    if ((noDrag ?? false) && item && action) {
+      if (canDoItemAction(item, action, skill)) {
+        doItemAction(item, action, skill);
+      }
+    }
+  };
 
   const [{ canDrop, isOver }, drop] = useDrop({
     accept: dragType,
@@ -138,18 +146,21 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
     }
   }
 
+  const numStats = item ? Object.keys(item.stats).filter(x => x !== "id").length : 0;
   return (<>
-    <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, equippableClass, borderClass, bgClass, "flex-none relative", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} {...props}>
-      {children}
+    <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, equippableClass, borderClass, bgClass, "flex-none relative", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} onClick={onClick} {...props}>
       {item && !isDragging && <>
         <img src={iconPath} className="absolute inset-0 p-1 mx-auto w-full h-full" alt={itemNames[item.subType]} />
         {!small && !medium && <>
-          {Object.keys(item.stats).filter(x => x !== "id").length > 0 && <span className="absolute top-0 left-0 px-1">+{Object.keys(item.stats).length - 1}</span>}
+          {numStats > 0 && <span className="absolute top-0 left-0 px-1">+{numStats}</span>}
           {item.tier > 0 && <span className="absolute top-0 right-0 px-1">{itemTiers[item.tier]}</span>}
         </>}
         {item.quantity && <span className={clsx(small && "text-2xs", "absolute bottom-0 left-0 px-px")}>{item.quantity}</span>}
       </>}
       {hotkey && <span className="absolute top-0 left-0 px-1 text-sm">{hotkey}</span>}
+      <div className="absolute inset-0">
+        {children}
+      </div>
     </div>
     {!noTooltip && item && item.tier > 0 && !isDragging && <Tooltip anchorSelect={`#${id}`} className="absolute item-tooltip" positionStrategy="fixed" delayShow={1} style={{ zIndex: 1 }}>
       <div className="flex flex-row gap-2">

@@ -79,13 +79,15 @@ public class GameSession : WsSession
         gameManager!.SetSession(User.Id, this);
     }
 
-    public bool Send<T>(T obj) where T : IResponsePacket
+    public bool Send<T>(T? obj) where T : IResponsePacket
     {
+        if (obj == null) return false;
         return SendTextAsync(JsonConvert.SerializeObject(obj));
     }
 
-    public bool SendAll<T>(T obj) where T : IResponsePacket
+    public bool SendAll<T>(T? obj) where T : IResponsePacket
     {
+        if(obj == null) return false;
         return _wsServer.MulticastText(JsonConvert.SerializeObject(obj));
     }
 

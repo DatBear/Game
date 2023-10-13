@@ -26,9 +26,9 @@ public class ChangeZoneHandler : IRequestHandler<ChangeZoneRequest>
         if (_session.User.SelectedCharacter == null) return;
 
         _session.User.SelectedCharacter.Zone = request.Data;
-        _gameManager.GroupBroadcast(_session.User.Group, new UpdateCharacterResponse
+        _gameManager.GroupBroadcast(_session, new UpdateCharacterResponse
         {
             Data = _session.User.SelectedCharacter
-        }, _session.User);
+        });
     }
 }

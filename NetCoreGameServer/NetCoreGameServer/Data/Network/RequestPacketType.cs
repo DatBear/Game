@@ -22,4 +22,5 @@ public enum RequestPacketType
     MoveDirection = 17,
     AttackTarget = 18,
     ChangeZone = 19,
+    PickGroundItem = 20,
 }

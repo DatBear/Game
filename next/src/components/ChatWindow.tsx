@@ -1,6 +1,6 @@
-import { useState, KeyboardEvent, useEffect, useCallback, useRef, LegacyRef } from "react";
+import { useState, KeyboardEvent, useEffect, useRef } from "react";
 import Window from "./Window";
-import { UIChatWindowState, UIWindow, useWindow } from "./contexts/UIContext";
+import { UIWindow, UIWindowState, useWindow } from "./contexts/UIContext";
 import { listen, send } from "@/network/Socket";
 import RequestPacketType from "@/network/RequestPacketType";
 import ChatMessage, { ChatMessageType } from "@/models/ChatMessage";
@@ -12,15 +12,16 @@ import Group from "@/models/Group";
 
 export default function ChatWindow() {
   const { user } = useUser();
-  const { closeWindow, windowState, setWindowState } = useWindow<UIChatWindowState>(UIWindow.Chat);
+  const { closeWindow, windowState, setWindowState } = useWindow<UIWindowState>(UIWindow.Chat);
   const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView();
     return listen(ResponsePacketType.SendChatMessage, (e: ChatMessage) => {
-      setWindowState({ ...windowState!, messages: [...windowState?.messages!, e] });
+      setMessages([...messages, e]);
     });
   }, [windowState, setWindowState]);
 
@@ -31,7 +32,7 @@ export default function ChatWindow() {
         timestamp: Date.now()
       } as ChatMessage;
 
-      setWindowState({ ...windowState!, messages: [...windowState?.messages!, msg] })
+      setMessages([...messages, msg]);
     });
   }, [windowState, setWindowState, user.id]);
 
@@ -42,7 +43,7 @@ export default function ChatWindow() {
         timestamp: Date.now()
       } as ChatMessage;
 
-      setWindowState({ ...windowState!, messages: [...windowState?.messages!, msg] })
+      setMessages([...messages, msg]);
     });
   }, [windowState, setWindowState, user.id]);
 
@@ -53,7 +54,7 @@ export default function ChatWindow() {
         timestamp: Date.now()
       } as ChatMessage;
 
-      setWindowState({ ...windowState!, messages: [...windowState?.messages!, msg] })
+      setMessages([...messages, msg]);
     });
   }, [windowState, setWindowState, user.id]);
 
@@ -70,7 +71,7 @@ export default function ChatWindow() {
     <Window.Title>Chat</Window.Title>
     <div className="flex flex-col gap-y-1 h-60 w-96 border border-white overflow-y-scroll wrap">
       <div className="flex-grow"></div>
-      {windowState?.messages.map(x => {
+      {messages.map(x => {
         var message = x.from ? `${x.from}: ${x.message}` : x.to ? `To ${x.to}: ${x.message}` : x.message;
         return <div key={`${x.timestamp}${x.from}`} className="px-2">
           {message}

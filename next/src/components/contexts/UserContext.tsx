@@ -296,6 +296,8 @@ export function useCharacter() {
         break;
       case ItemAction.Delete:
         send(RequestPacketType.DeleteItem, item.id);
+      case ItemAction.PickUp:
+        send(RequestPacketType.PickGroundItem, item.id);
     }
   }
 
