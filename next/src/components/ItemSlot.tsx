@@ -171,7 +171,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
 
           <div className="relative flex flex-col">
             <div className="w-max"><b>{prefix} {itemNames[item.subType]} {itemTiers[item.tier]}</b></div>
-            {calculatedItemStats.filter(x => x.hasStat(item, character)).map(x => <div key={x.name} className={x.class && x.class(item, character)}>{x.name}: {x.value(item, character)}</div>)}
+            {calculatedItemStats.filter(x => x.hasStat(item, character)).map(x => <div key={x.name} className={clsx(x.class && x.class(item, character), "w-max")}>{x.name}: {x.value(item, character)}</div>)}
             {recordKeys(item.stats).map(k => {
               const statNamesRecord = type === ItemType.Item ? itemSpecificStatNames : statNames;
               const statName = statNamesRecord[k];
@@ -181,7 +181,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
               const value = item.stats[k]?.toString() ?? '';
               const isReplace = statName.indexOf('{x}') > -1;
               const replaced = `${isReplace ? '' : '+'}${isReplace ? '' : value}${(statName.startsWith('%') ? '' : ' ')}${statName.replaceAll('{x}', value)}`
-              return <div key={k}>{replaced}</div>
+              return <div key={k} className="w-max">{replaced}</div>
             })}
             {item.quantity && <div>Quantity: {item.quantity}</div>}
           </div>
