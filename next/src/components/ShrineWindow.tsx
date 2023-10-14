@@ -1,11 +1,12 @@
 import { ItemAction } from "@/models/ItemAction";
 import { CharacterStats } from "@/models/Stats";
 import { useCallback } from "react";
-import { useWindow, UIWindow, UIShrineWindowState } from "./contexts/UIContext";
+import { useWindow, UIShrineWindowState } from "./contexts/UIContext";
 import { useCharacter } from "./contexts/UserContext";
 import ItemSlot from "./ItemSlot";
 import ProgressBar from "./ProgressBar";
 import Window from "./Window";
+import { UIWindow } from "@/models/UIWindow";
 
 export default function ShrineWindow() {
   const { closeWindow, windowState, setWindowState } = useWindow<UIShrineWindowState>(UIWindow.Shrine);
@@ -18,7 +19,7 @@ export default function ShrineWindow() {
     }
   }
 
-  return <Window className="!w-80" isVisible={windowState!.isVisible} close={() => closeWindow()}>
+  return <Window className="!w-80" isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>Shrine</Window.Title>
     <div className="flex flex-col h-full relative">
       <div className="flex flex-col gap-y-3">

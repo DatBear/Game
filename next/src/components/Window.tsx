@@ -4,11 +4,15 @@ import { Tab } from "@headlessui/react";
 import { ButtonHTMLAttributes, createContext, MutableRefObject, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import WindowDataContextProvider, { useWindowData } from "./contexts/WindowDataContext";
 import { useDrag, useDragDropManager, useDragLayer, useDrop, XYCoord } from "react-dnd";
+import { UIWindow } from "@/models/UIWindow";
+import { UIWindowState, useWindow, windowLocalStorageKey } from "./contexts/UIContext";
 
 type WindowProps = {
   isVisible: boolean;
+  coords?: XYCoord;
   className?: string;
   tabbed?: boolean;
+  type?: UIWindow;
   close?: () => void;
 } & React.PropsWithChildren
   & Partial<React.HTMLAttributes<HTMLDivElement>>;
@@ -17,17 +21,23 @@ type _Data = ReturnType<typeof useWindowData>;
 
 let type = "Window";
 
-export default function Window({ children, isVisible, className, tabbed, close, ...props }: WindowProps) {
+export default function Window({ children, isVisible, coords, className, tabbed, type, close, ...props }: WindowProps) {
   tabbed = tabbed ?? false;
 
   const windowRef = useRef<HTMLDivElement>(null);
-  const [coords, setCoords] = useState<XYCoord>();
+  const [_coords, setCoords] = useState<XYCoord>();
 
   const [show, setShow] = useState(isVisible);
 
+  const { windowState, setWindowState } = useWindow<UIWindowState>(type ?? UIWindow.None);
+
   useEffect(() => {
     setShow(isVisible);
-  }, [isVisible])
+  }, [isVisible]);
+
+  useEffect(() => {
+    setCoords(coords);
+  }, [coords]);
 
   const handleClose = useCallback(() => {
     if (close) {
@@ -40,6 +50,10 @@ export default function Window({ children, isVisible, className, tabbed, close, 
   const onDragEnd = (coords: XYCoord | null) => {
     if (windowRef.current !== null && coords !== null) {
       setCoords(coords);
+      if (type === undefined) return;
+      var newState = { ...windowState!, coords };
+      setWindowState(newState);
+      localStorage.setItem(windowLocalStorageKey(type), JSON.stringify(newState));
     }
   }
 
@@ -51,7 +65,7 @@ export default function Window({ children, isVisible, className, tabbed, close, 
     return tabbed ? <Tab.Group>{children}</Tab.Group> : children;
   })()
 
-  let positionStyle = coords ? { ...props.style, left: coords.x - 20, top: coords.y - 20 } : props.style
+  let positionStyle = _coords ? { ...props.style, left: _coords.x - 20, top: _coords.y - 20 } : props.style
   return <WindowDataContextProvider {...windowData}>
     {show && <div ref={windowRef} style={positionStyle} className={clsx(gs.window, className, "bg-stone-800 p-3 text-red-50 border w-fit h-min", "absolute")}>
       {tabbedChildren}

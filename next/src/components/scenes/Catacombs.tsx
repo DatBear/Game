@@ -14,27 +14,9 @@ import { Maze } from "@/models/Maze";
 import { MovementDirection } from "@/models/MovementDirection";
 import { AttackType } from "@/models/AttackType";
 import ResponsePacketType from "@/network/ResponsePacketType";
+import { Attack } from "@/models/Attack";
 
 const directions: Direction[] = [Direction.North, Direction.East, Direction.South, Direction.West];
-
-type Attack = {
-  timestamp: number;
-  sourceId: number;
-  targetId: number;
-  type: AttackType;
-  damage: number;
-  isCritical: boolean;
-  targetHealthResult: number;
-  weaponType: ItemSubType;
-
-  weapon?: Item;
-  xPlayer: number;
-  yPlayer: number;
-  xMob: number;
-  yMob: number;
-
-  isPlayer: boolean;
-}
 
 type AttackRequest = {
   sourceId: number;
@@ -80,10 +62,6 @@ export function Catacombs() {
     goToZone(Zone.Town);
   }
 
-  useEffect(() => {
-    setAreHotkeysEnabled(mobs.length === 0);
-  }, [mobs, setAreHotkeysEnabled]);
-
   const targetEnemy = (id: number) => {
     //console.log('set target ', id);
     setTarget(id);
@@ -108,6 +86,15 @@ export function Catacombs() {
     send(RequestPacketType.AttackTarget, attack, true);
   };
 
+  const randomPos = (el: HTMLElement) => {
+    let x = el.offsetLeft + el.offsetWidth / 2 + rnd((el.offsetWidth ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
+    let y = el.offsetTop + el.offsetHeight / 2 + rnd((el.offsetHeight ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
+    return [x, y];
+  };
+
+  useEffect(() => {
+    setAreHotkeysEnabled(mobs.length === 0);
+  }, [mobs, setAreHotkeysEnabled]);
 
   useEffect(() => {
     if (target) {
@@ -132,11 +119,6 @@ export function Catacombs() {
 
       if (!source || !target || !target.ref) return;
 
-      target.life = e.targetHealthResult;
-      if (target.life <= 0) {
-        maze.mobs = mobs.filter(x => x.id !== target!.id);
-      }
-
       e.xPlayer = source?.imageRef.current?.offsetLeft! + source?.imageRef.current?.offsetWidth! * .8;
       e.yPlayer = source?.imageRef.current?.offsetTop! + source?.imageRef.current?.offsetHeight! * .5;
 
@@ -147,13 +129,7 @@ export function Catacombs() {
       //console.log('attack', e);
       setAttacks([...attacks.filter(x => new Date().getTime() < x.timestamp + 800 && x.timestamp != e.timestamp), e]);
     });
-  });
-
-  const randomPos = (el: HTMLElement) => {
-    let x = el.offsetLeft + el.offsetWidth / 2 + rnd((el.offsetWidth ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
-    let y = el.offsetTop + el.offsetHeight / 2 + rnd((el.offsetHeight ?? 0) * .3) * (rnd(1) == 1 ? -1 : 1);
-    return [x, y];
-  };
+  }, [user]);
 
   return <>
     <div className="p-4 flex flex-col gap-3">

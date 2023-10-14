@@ -2,7 +2,7 @@ import Window from '@/components/Window';
 import Item, { ItemSubType } from "@/models/Item";
 import MarketItem from "@/models/MarketItem";
 import ItemSlot from "./ItemSlot";
-import { useWindow, UIWindow, UIMarketplaceWindowState } from "./contexts/UIContext";
+import { useWindow, UIMarketplaceWindowState } from "./contexts/UIContext";
 import { v4 as uuid } from "uuid";
 import { ItemAction } from "@/models/ItemAction";
 import { useEffect, useState } from "react";
@@ -10,6 +10,7 @@ import { useCharacter, useUser } from "./contexts/UserContext";
 import Character from "@/models/Character";
 import clsx from "clsx";
 import { CharacterStats } from "@/models/Stats";
+import { UIWindow } from "@/models/UIWindow";
 
 
 const marketItems: MarketItem[] = [
@@ -63,7 +64,7 @@ export default function MarketplaceWindow() {
 
 
   useEffect(() => {
-    setWindowState({ ...windowState, isVisible: windowState?.isVisible ?? false, searchResults: marketItems });
+    setWindowState({ ...windowState!, isVisible: windowState?.isVisible ?? false, searchResults: marketItems });
   }, []);
 
   const search = () => {
@@ -109,7 +110,7 @@ export default function MarketplaceWindow() {
     }
   }
 
-  return <Window tabbed isVisible={windowState!.isVisible} close={() => closeWindow()}>
+  return <Window tabbed isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>
       <Window.TabList>
         <Window.Tab>Market Search</Window.Tab>

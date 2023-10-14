@@ -1,6 +1,6 @@
 import { useState, KeyboardEvent, useEffect, useRef } from "react";
 import Window from "./Window";
-import { UIWindow, UIWindowState, useWindow } from "./contexts/UIContext";
+import { UIWindowState, useWindow } from "./contexts/UIContext";
 import { listen, send } from "@/network/Socket";
 import RequestPacketType from "@/network/RequestPacketType";
 import ChatMessage, { ChatMessageType } from "@/models/ChatMessage";
@@ -9,6 +9,7 @@ import User from "@/models/User";
 import { useUser } from "./contexts/UserContext";
 import GroupUser from "@/models/GroupUser";
 import Group from "@/models/Group";
+import { UIWindow } from "@/models/UIWindow";
 
 export default function ChatWindow() {
   const { user } = useUser();
@@ -67,7 +68,7 @@ export default function ChatWindow() {
     }
   }
 
-  return <Window className="" isVisible={windowState!.isVisible} close={() => closeWindow()}>
+  return <Window isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>Chat</Window.Title>
     <div className="flex flex-col gap-y-1 h-60 w-96 border border-white overflow-y-scroll wrap">
       <div className="flex-grow"></div>

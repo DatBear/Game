@@ -9,13 +9,15 @@ import User from "@/models/User";
 import { Zone } from "@/models/Zone";
 import { createContext, createRef, useCallback, useContext, useEffect, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { UIMarketplaceWindowState, UIShrineWindowState, UISkillWindowState, UIWindow, useUI, useWindow } from "./UIContext";
+import { UIMarketplaceWindowState, UIShrineWindowState, UISkillWindowState, useUI, useWindow } from "./UIContext";
 import { listen, send } from "@/network/Socket";
 import RequestPacketType from "@/network/RequestPacketType";
 import ResponsePacketType from "@/network/ResponsePacketType";
 import Group from "@/models/Group";
 import GroupUser from "@/models/GroupUser";
 import { Maze } from "@/models/Maze";
+import { Attack } from "@/models/Attack";
+import { UIWindow } from "@/models/UIWindow";
 
 type UserContextData = {
   user: User;
@@ -169,6 +171,22 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
       }
     });
   }, [user.selectedCharacter, updateCharacter, setUser]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.AttackTarget, (e: Attack) => {
+      const maze = user.group?.maze ?? user.maze!;
+      const mobs = maze?.mobs;
+      let target = mobs.find(x => x.id === e.targetId);
+
+      if (!target) return;
+
+      target.life = e.targetHealthResult;
+      if (target.life <= 0) {
+        maze.mobs = mobs.filter(x => x.id !== target!.id);
+      }
+      setUser({ ...user });
+    }, true);
+  }, [user])
 
   return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>
     {children}

@@ -1,43 +1,27 @@
 import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item from "@/models/Item";
 import MarketItem from "@/models/MarketItem";
-import { Cooking, Transmuting, Suffusencing, Fishing, Glyphing, SkillType } from "@/models/Skill";
-import { CharacterStats } from "@/models/Stats";
-import { createContext, createRef, ReactNode, useCallback, useContext, useState } from "react";
-import CharacterImage from "../CharacterImage";
+import { SkillType } from "@/models/Skill";
+import { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import GroupsWindow from "../GroupsWindow";
 import InventoryWindow from "../InventoryWindow";
 import ItemSlot from "../ItemSlot";
 import MarketplaceWindow from "../MarketplaceWindow";
-import ProgressBar from "../ProgressBar";
 import ShrineWindow from "../ShrineWindow";
 import SkillingWindow from "../SkillingWindow";
 import StatsWindow from "../StatsWindow";
 import { useCharacter, useUser } from "./UserContext";
-import ChatMessage from "@/models/ChatMessage";
 import ChatWindow from "../ChatWindow";
 import ErrorWindow from "../ErrorWindow";
 import GroupDisplay from "../GroupDisplay";
 import GroundItemsWindow from "../GroundItemsWindow";
-
-export enum UIWindow {
-  Inventory,
-  Groups,
-  Shrine,
-  Marketplace,
-  Cooking,
-  Transmuting,
-  Suffusencing,
-  Fishing,
-  Glyphing,
-  Stats,
-  Chat,
-  GroundItems,
-  Error
-}
+import { UIWindow } from "@/models/UIWindow";
+import { XYCoord } from "react-dnd";
 
 export type UIWindowState = {
   isVisible: boolean;
+  coords?: XYCoord;
+  type: UIWindow;
 }
 
 export type UIMarketplaceWindowState = UIWindowState & {
@@ -62,26 +46,46 @@ type UIContextProps = {
   setWindowState: (window: UIWindow, state: UIWindowState) => void;
 };
 
-let defaultWindowState: WindowRecord<any> = {
-  [UIWindow.Inventory]: { isVisible: false },
-  [UIWindow.Groups]: { isVisible: false },
-  [UIWindow.Shrine]: { isVisible: false } as UIShrineWindowState,
-  [UIWindow.Marketplace]: { isVisible: false, searchResults: [] } as UIMarketplaceWindowState,
-  [UIWindow.Fishing]: { isVisible: false, items: Array(1) } as UISkillWindowState,
-  [UIWindow.Cooking]: { isVisible: false, items: Array(1) } as UISkillWindowState,
-  [UIWindow.Transmuting]: { isVisible: false, items: Array(2) } as UISkillWindowState,
-  [UIWindow.Suffusencing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
-  [UIWindow.Glyphing]: { isVisible: false, items: Array(2) } as UISkillWindowState,
-  [UIWindow.Chat]: { isVisible: false },
-  [UIWindow.GroundItems]: { isVisible: true },
-  [UIWindow.Stats]: { isVisible: false },
-  [UIWindow.Error]: { isVisible: false }
+export const windowLocalStorageKey = (window: UIWindow) => {
+  return "windowState:" + UIWindow[window];
+}
+
+const defaultWindowState = (type: UIWindow) => {
+  if (typeof window !== "undefined") {
+    let storageItem = localStorage.getItem(windowLocalStorageKey(type));
+    if (storageItem) {
+      let parsed = JSON.parse(storageItem);
+      return parsed;
+    }
+  }
+
+  return {
+    type,
+    isVisible: false
+  } as UIWindowState;
+}
+
+let defaultWindowStates: WindowRecord<any> = {
+  [UIWindow.None]: { ...defaultWindowState(UIWindow.None) },
+  [UIWindow.Inventory]: { ...defaultWindowState(UIWindow.Inventory) },
+  [UIWindow.Groups]: { ...defaultWindowState(UIWindow.Groups) },
+  [UIWindow.Shrine]: { ...defaultWindowState(UIWindow.Shrine) } as UIShrineWindowState,
+  [UIWindow.Marketplace]: { ...defaultWindowState(UIWindow.Marketplace), searchResults: [], type: UIWindow.Marketplace } as UIMarketplaceWindowState,
+  [UIWindow.Fishing]: { ...defaultWindowState(UIWindow.Fishing), items: Array(1) } as UISkillWindowState,
+  [UIWindow.Cooking]: { ...defaultWindowState(UIWindow.Cooking), items: Array(1) } as UISkillWindowState,
+  [UIWindow.Transmuting]: { ...defaultWindowState(UIWindow.Transmuting), items: Array(2) } as UISkillWindowState,
+  [UIWindow.Suffusencing]: { ...defaultWindowState(UIWindow.Suffusencing), items: Array(2) } as UISkillWindowState,
+  [UIWindow.Glyphing]: { ...defaultWindowState(UIWindow.Glyphing), items: Array(2) } as UISkillWindowState,
+  [UIWindow.Chat]: { ...defaultWindowState(UIWindow.Chat) },
+  [UIWindow.GroundItems]: { ...defaultWindowState(UIWindow.GroundItems) },
+  [UIWindow.Stats]: { ...defaultWindowState(UIWindow.Stats) },
+  [UIWindow.Error]: { ...defaultWindowState(UIWindow.Error) }
 }
 
 const UIContext = createContext({} as UIContextProps);
 
 export default function UIContextProvider({ children }: React.PropsWithChildren) {
-  const [windowStates, setWindowStates] = useState(defaultWindowState);
+  const [windowStates, setWindowStates] = useState(defaultWindowStates);
   const { user } = useUser();
   const { character } = useCharacter();
 
@@ -161,7 +165,9 @@ export function useWindow<T>(window: UIWindow) {
   }, [setWindowsState, window]);
 
   const closeWindow = useCallback(() => {
-    setWindowState({ ...windowState, isVisible: false } as UIWindowState & T);
+    let newState = { ...windowState, isVisible: false } as UIWindowState & T;
+    setWindowState(newState);
+    localStorage.setItem(windowLocalStorageKey(newState.type), JSON.stringify(newState));
   }, [setWindowState, windowState]);
 
   return {

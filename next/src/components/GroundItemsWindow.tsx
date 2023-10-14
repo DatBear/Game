@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "./contexts/UserContext";
-import { UIWindow, UIWindowState, useWindow } from "./contexts/UIContext";
+import { UIWindowState, useWindow } from "./contexts/UIContext";
 import Window from "./Window";
 import { listen } from "@/network/Socket";
 import ResponsePacketType from "@/network/ResponsePacketType";
@@ -9,8 +9,7 @@ import ItemSlot from "./ItemSlot";
 import { Zone } from "@/models/Zone";
 import clsx from "clsx";
 import { ItemAction } from "@/models/ItemAction";
-
-
+import { UIWindow } from "@/models/UIWindow";
 
 export default function GroundItemsWindow() {
   const { user } = useUser();
@@ -28,10 +27,10 @@ export default function GroundItemsWindow() {
 
   useEffect(() => {
     if (!user.selectedCharacter || user.selectedCharacter.zone != Zone.Catacombs) {
-      setWindowState({ isVisible: false });
+      setWindowState({ ...windowState!, isVisible: false });
     } else {
       if (groundItems.length > 0) {
-        setWindowState({ isVisible: true });
+        setWindowState({ ...windowState!, isVisible: true });
       }
     }
   }, [user]);
@@ -39,7 +38,7 @@ export default function GroundItemsWindow() {
   useEffect(() => {
     return listen(ResponsePacketType.AddGroundItem, (e: GroundItem) => {
       if (user.selectedCharacter?.zone == Zone.Catacombs) {
-        setWindowState({ isVisible: true });
+        setWindowState({ ...windowState!, isVisible: true });
       }
       setGroundItems([...groundItems, e]);
     }, true);
@@ -51,7 +50,7 @@ export default function GroundItemsWindow() {
     }, true);
   }, [groundItems, setGroundItems]);
 
-  return <Window className="" isVisible={windowState!.isVisible} close={() => closeWindow()}>
+  return <Window isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>Drops</Window.Title>
     <div className="flex flex-row gap-x-1 h-16 w-[40rem] overflow-y-auto wrap">
       {groundItems.map(x => {

@@ -1,7 +1,7 @@
 import Character, { CharacterClass } from "@/models/Character";
 import Group from "@/models/Group";
 import { useCallback, useEffect, useState } from "react";
-import { useWindow, UIWindow, UIWindowState } from "./contexts/UIContext";
+import { useWindow, UIWindowState } from "./contexts/UIContext";
 import Window from "./Window";
 import User from "@/models/User";
 import RequestPacketType from "@/network/RequestPacketType";
@@ -11,6 +11,7 @@ import { useUser } from "./contexts/UserContext";
 import GroupOptions from "@/models/GroupOptions";
 import ResponsePacketType from "@/network/ResponsePacketType";
 import clsx from "clsx";
+import { UIWindow } from "@/models/UIWindow";
 
 let chars: Partial<Character>[] = [
   { name: 'randPlayer', level: 1, class: CharacterClass.Warlock, guild: 'Slashers of the Night' },
@@ -112,7 +113,7 @@ export default function GroupsWindow() {
   }, [windowState]);
 
 
-  return <Window tabbed isVisible={windowState!.isVisible} close={() => closeWindow()}>
+  return <Window tabbed isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>
       <Window.TabList>
         <Window.Tab>Group List</Window.Tab>

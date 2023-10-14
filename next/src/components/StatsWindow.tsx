@@ -1,8 +1,9 @@
 import { CharacterStats } from "@/models/Stats";
 import clsx from "clsx";
-import { UIWindow, UIWindowState, useWindow } from "./contexts/UIContext";
+import { UIWindowState, useWindow } from "./contexts/UIContext";
 import { useCharacter } from "./contexts/UserContext";
 import Window from "./Window";
+import { UIWindow } from "@/models/UIWindow";
 
 function StatsWindow() {
   const { closeWindow, windowState } = useWindow<UIWindowState>(UIWindow.Stats);
@@ -16,7 +17,7 @@ function StatsWindow() {
 
   const canAddStat = character.statPoints > 0;
 
-  return <Window className="w-max" isVisible={windowState!.isVisible} close={() => closeWindow()}>
+  return <Window className="w-max" isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>Player Stats</Window.Title>
     <div className="flex flex-col gap-y-3">
       <div className="">{character.name}</div>

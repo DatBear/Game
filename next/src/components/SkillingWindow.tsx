@@ -1,9 +1,10 @@
 import Skill, { allSkills, SkillType } from "@/models/Skill";
 import Window from "./Window";
 import ItemSlot from "./ItemSlot";
-import { UISkillWindowState, UIWindow, useWindow } from "./contexts/UIContext";
-import { useCallback } from "react";
+import { UISkillWindowState, useWindow } from "./contexts/UIContext";
+import { useCallback, useState } from "react";
 import { ItemAction } from "@/models/ItemAction";
+import { UIWindow } from "@/models/UIWindow";
 
 type SkillingWindowProps = {
   skillType: SkillType;
@@ -15,7 +16,9 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
   let minSkillUpTier = skillType !== SkillType.Fishing ? 'Tier I' : '';//todo implement
   const { closeWindow, windowState, setWindowState } = useWindow<UISkillWindowState>(window);
 
-  return <Window className="!w-96" isVisible={windowState!.isVisible} close={() => closeWindow()}>
+  const [items, setItems] = useState([]);
+
+  return <Window className="!w-96" isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>{skill.name}</Window.Title>
     <div className="flex flex-col gap-y-3 items-center">
       <div className="text-center">{skill.directions}</div>

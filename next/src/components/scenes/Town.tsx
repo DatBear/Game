@@ -1,15 +1,16 @@
 import { Zone } from "@/models/Zone";
 import CharacterImage from "../CharacterImage";
-import { UIWindow, useUI, useWindow } from "../contexts/UIContext";
+import { useUI, useWindow } from "../contexts/UIContext";
 import { useCharacter, useUser } from "../contexts/UserContext";
+import { UIWindow } from "@/models/UIWindow";
 
 export default function Town() {
   const { user, selectCharacter } = useUser();
   const { character, goToZone } = useCharacter();
-  const { setWindowState } = useUI();
+  const { windowStates, setWindowState } = useUI();
 
   const showWindow = (window: UIWindow) => {
-    setWindowState(window, { isVisible: true });
+    setWindowState(window, { ...windowStates[window]!, isVisible: true });
   }
 
   const goToCharacterSelect = () => {
