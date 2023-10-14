@@ -2,7 +2,7 @@ import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item from "@/models/Item";
 import MarketItem from "@/models/MarketItem";
 import { SkillType } from "@/models/Skill";
-import { createContext, ReactNode, useCallback, useContext, useState } from "react";
+import { createContext, Fragment, ReactNode, useCallback, useContext, useState } from "react";
 import GroupsWindow from "../GroupsWindow";
 import InventoryWindow from "../InventoryWindow";
 import ItemSlot from "../ItemSlot";
@@ -22,6 +22,7 @@ export type UIWindowState = {
   isVisible: boolean;
   coords?: XYCoord;
   type: UIWindow;
+  order: number;
 }
 
 export type UIMarketplaceWindowState = UIWindowState & {
@@ -50,18 +51,25 @@ export const windowLocalStorageKey = (window: UIWindow) => {
   return "windowState:" + UIWindow[window];
 }
 
+export const saveWindowState = (type: UIWindow, state: UIWindowState) => {
+  localStorage.setItem(windowLocalStorageKey(type), JSON.stringify(state));
+}
+
+let order = 0;
 const defaultWindowState = (type: UIWindow) => {
   if (typeof window !== "undefined") {
     let storageItem = localStorage.getItem(windowLocalStorageKey(type));
     if (storageItem) {
       let parsed = JSON.parse(storageItem);
+      parsed.order = parsed.order ?? order++;
       return parsed;
     }
   }
 
   return {
     type,
-    isVisible: false
+    isVisible: false,
+    order: order++,
   } as UIWindowState;
 }
 
@@ -80,6 +88,23 @@ let defaultWindowStates: WindowRecord<any> = {
   [UIWindow.GroundItems]: { ...defaultWindowState(UIWindow.GroundItems) },
   [UIWindow.Stats]: { ...defaultWindowState(UIWindow.Stats) },
   [UIWindow.Error]: { ...defaultWindowState(UIWindow.Error) }
+}
+
+let windowComponents: Record<UIWindow, ReactNode> = {
+  [UIWindow.None]: undefined,
+  [UIWindow.Inventory]: <InventoryWindow />,
+  [UIWindow.Groups]: <GroupsWindow />,
+  [UIWindow.Shrine]: <ShrineWindow />,
+  [UIWindow.Marketplace]: <MarketplaceWindow />,
+  [UIWindow.Cooking]: <SkillingWindow skillType={SkillType.Cooking} window={UIWindow.Cooking} />,
+  [UIWindow.Transmuting]: <SkillingWindow skillType={SkillType.Transmuting} window={UIWindow.Transmuting} />,
+  [UIWindow.Suffusencing]: <SkillingWindow skillType={SkillType.Suffusencing} window={UIWindow.Suffusencing} />,
+  [UIWindow.Fishing]: <SkillingWindow skillType={SkillType.Fishing} window={UIWindow.Fishing} />,
+  [UIWindow.Glyphing]: <SkillingWindow skillType={SkillType.Glyphing} window={UIWindow.Glyphing} />,
+  [UIWindow.Stats]: <StatsWindow />,
+  [UIWindow.Chat]: <ChatWindow />,
+  [UIWindow.GroundItems]: <GroundItemsWindow />,
+  [UIWindow.Error]: <ErrorWindow />
 }
 
 const UIContext = createContext({} as UIContextProps);
@@ -127,32 +152,26 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
           </div>
         </div>
         <div>
-          <div className="flex flex-row gap-1">
-            <button onClick={_ => toggleWindow(UIWindow.Chat)} className="!px-2 h-8"><img src="svg/iconChat.svg" alt="chat window" className="w-6 h-6" /></button>
-            <button onClick={_ => toggleWindow(UIWindow.Inventory)} className="!px-2 h-8"><img src="svg/iconInventory.svg" alt="inventory window" className="w-6 h-6" /></button>
-            <button onClick={_ => toggleWindow(UIWindow.Groups)} className="!px-2 h-8"><img src="svg/iconGroup.svg" alt="groups window" className="w-6 h-6" /></button>
-            <button onClick={_ => toggleWindow(UIWindow.Stats)} className="!px-2 h-8"><img src="svg/iconStats.svg" alt="stats window" className="w-6 h-6" /></button>
-            <button onClick={_ => goToCharacterSelect()} className="!px-2 h-8"><img src="svg/iconLogOut.svg" alt="stats window" className="w-6 h-6" /></button>
+          <div className="flex justify-between">
+            <div className="flex flex-row gap-1">
+              <button onClick={_ => toggleWindow(UIWindow.Chat)} className="!px-2 h-8"><img src="svg/iconChat.svg" alt="chat window" className="w-6 h-6" /></button>
+              <button onClick={_ => toggleWindow(UIWindow.Inventory)} className="!px-2 h-8"><img src="svg/iconInventory.svg" alt="inventory window" className="w-6 h-6" /></button>
+              <button onClick={_ => toggleWindow(UIWindow.Groups)} className="!px-2 h-8"><img src="svg/iconGroup.svg" alt="groups window" className="w-6 h-6" /></button>
+              <button onClick={_ => toggleWindow(UIWindow.Stats)} className="!px-2 h-8"><img src="svg/iconStats.svg" alt="stats window" className="w-6 h-6" /></button>
+            </div>
+            <div className="flex flex-row gap-1">
+              <button onClick={_ => goToCharacterSelect()} className="!px-2 h-8"><img src="svg/iconLogOut.svg" alt="stats window" className="w-6 h-6" /></button>
+            </div>
           </div>
         </div>
       </div>
 
-
       <div className="flex flex-row flex-wrap gap-3 p-5 absolute left-0 top-0">
         <div className="relative">
-          <InventoryWindow />
-          <GroupsWindow />
-          <ShrineWindow />
-          <MarketplaceWindow />
-          <SkillingWindow skillType={SkillType.Cooking} window={UIWindow.Cooking} />
-          <SkillingWindow skillType={SkillType.Fishing} window={UIWindow.Fishing} />
-          <SkillingWindow skillType={SkillType.Transmuting} window={UIWindow.Transmuting} />
-          <SkillingWindow skillType={SkillType.Glyphing} window={UIWindow.Glyphing} />
-          <SkillingWindow skillType={SkillType.Suffusencing} window={UIWindow.Suffusencing} />
-          <ChatWindow />
-          <GroundItemsWindow />
-          <StatsWindow />
-          <ErrorWindow />
+          {Object.entries(windowComponents)
+            .map(e => [e[0] as unknown as UIWindow, e[1]] as [UIWindow, ReactNode])
+            .sort((a, b) => windowStates[a[0]]?.order < windowStates[b[0]]?.order ? 1 : -1)
+            .map((e: [UIWindow, ReactNode]) => <Fragment key={e[0]}>{e[1]}</Fragment>)}
         </div>
       </div>
     </>}

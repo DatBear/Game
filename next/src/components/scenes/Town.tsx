@@ -1,12 +1,11 @@
 import { Zone } from "@/models/Zone";
-import CharacterImage from "../CharacterImage";
-import { useUI, useWindow } from "../contexts/UIContext";
+import { useUI } from "../contexts/UIContext";
 import { useCharacter, useUser } from "../contexts/UserContext";
 import { UIWindow } from "@/models/UIWindow";
 
 export default function Town() {
-  const { user, selectCharacter } = useUser();
-  const { character, goToZone } = useCharacter();
+  const { user } = useUser();
+  const { goToZone } = useCharacter();
   const { windowStates, setWindowState } = useUI();
 
   const showWindow = (window: UIWindow) => {
@@ -19,7 +18,6 @@ export default function Town() {
 
   return <>
     {user.selectedCharacter && <div className="m-10 flex flex-col gap-5">
-
       <div className="flex flex-row flex-wrap gap-x-4 gap-y-8 h-full w-full">
         <div className="w-36 h-36 flex flex-col items-center" onClick={_ => showWindow(UIWindow.Marketplace)}>
           <img src="svg/iconMarket.svg" className="w-full h-full" alt="market" />

@@ -1,18 +1,18 @@
 import gs from "@/styles/game.module.css"
 import clsx from "clsx";
 import { Tab } from "@headlessui/react";
-import { ButtonHTMLAttributes, createContext, MutableRefObject, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WindowDataContextProvider, { useWindowData } from "./contexts/WindowDataContext";
-import { useDrag, useDragDropManager, useDragLayer, useDrop, XYCoord } from "react-dnd";
+import { useDrag, XYCoord } from "react-dnd";
 import { UIWindow } from "@/models/UIWindow";
-import { UIWindowState, useWindow, windowLocalStorageKey } from "./contexts/UIContext";
+import { UIWindowState, saveWindowState, useUI, useWindow } from "./contexts/UIContext";
 
 type WindowProps = {
   isVisible: boolean;
   coords?: XYCoord;
   className?: string;
   tabbed?: boolean;
-  type?: UIWindow;
+  type: UIWindow;
   close?: () => void;
 } & React.PropsWithChildren
   & Partial<React.HTMLAttributes<HTMLDivElement>>;
@@ -29,7 +29,8 @@ export default function Window({ children, isVisible, coords, className, tabbed,
 
   const [show, setShow] = useState(isVisible);
 
-  const { windowState, setWindowState } = useWindow<UIWindowState>(type ?? UIWindow.None);
+  const { windowState } = useWindow<UIWindowState>(type);
+  const { setWindowState, windowStates } = useUI();
 
   useEffect(() => {
     setShow(isVisible);
@@ -51,10 +52,30 @@ export default function Window({ children, isVisible, coords, className, tabbed,
     if (windowRef.current !== null && coords !== null) {
       setCoords(coords);
       if (type === undefined) return;
-      var newState = { ...windowState!, coords };
-      setWindowState(newState);
-      localStorage.setItem(windowLocalStorageKey(type), JSON.stringify(newState));
+      let newState = { ...windowState!, coords };
+      setWindowState(type, newState);
+      saveWindowState(type, newState);
     }
+  };
+
+  const onClick = (e: React.MouseEvent<HTMLElement>) => {
+    if ((e.target as HTMLDivElement)?.classList.contains("close-window")) {
+      return;
+    }
+    let types = Object.values(UIWindow).filter((v) => !isNaN(Number(v))).map(x => x as UIWindow);
+    let oldOrder = windowStates[type]!.order;
+    for (let winType of types) {
+      let state = windowStates[winType];
+      if (state.order < oldOrder) {
+        let newState = { ...state, order: ++state.order };
+        setWindowState(winType, newState);
+        saveWindowState(winType, newState);
+      }
+    }
+
+    let newState = { ...windowState!, order: 0 };
+    setWindowState(type, newState);
+    saveWindowState(type, newState);
   }
 
   let windowData = useMemo<_Data>(() => {
@@ -67,7 +88,7 @@ export default function Window({ children, isVisible, coords, className, tabbed,
 
   let positionStyle = _coords ? { ...props.style, left: _coords.x - 20, top: _coords.y - 20 } : props.style
   return <WindowDataContextProvider {...windowData}>
-    {show && <div ref={windowRef} style={positionStyle} className={clsx(gs.window, className, "bg-stone-800 p-3 text-red-50 border w-fit h-min", "absolute")}>
+    {show && <div ref={windowRef} style={positionStyle} className={clsx(gs.window, className, "bg-stone-800 p-3 text-red-50 border w-fit h-min", "absolute")} onClick={e => onClick(e)}>
       {tabbedChildren}
     </div>}
   </WindowDataContextProvider>
@@ -119,7 +140,7 @@ Window.Title = Title;
 
 const CloseButton = function () {
   const { closeWindow } = useWindowData('CloseButton');
-  return (<div onClick={() => closeWindow()} className="flex-none w-4 h-4 cursor-pointer"><img src="svg/iconClose.svg" alt="close" /></div>);
+  return (<div onClick={() => { closeWindow() }} className="flex-none w-4 h-4 cursor-pointer close-window"><img src="svg/iconClose.svg" alt="close" /></div>);
 };
 
 const DragHandle = function () {

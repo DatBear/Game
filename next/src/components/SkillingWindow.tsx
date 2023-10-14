@@ -18,6 +18,10 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
 
   const [items, setItems] = useState([]);
 
+  const startAction = () => {
+    console.log(skill.startAction);
+  }
+
   return <Window className="!w-96" isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>{skill.name}</Window.Title>
     <div className="flex flex-col gap-y-3 items-center">
@@ -33,7 +37,7 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
         </label>
       })}
       <div>
-        <button>{skill.startAction}</button>
+        <button onClick={startAction}>{skill.startAction}</button>
       </div>
     </div>
   </Window>
