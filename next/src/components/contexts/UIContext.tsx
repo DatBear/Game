@@ -86,7 +86,7 @@ const UIContext = createContext({} as UIContextProps);
 
 export default function UIContextProvider({ children }: React.PropsWithChildren) {
   const [windowStates, setWindowStates] = useState(defaultWindowStates);
-  const { user } = useUser();
+  const { user, selectCharacter } = useUser();
   const { character } = useCharacter();
 
 
@@ -97,14 +97,19 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
     }));
   }
 
-  const renderWindow = (window: UIWindow, component: ReactNode) => {
-    return component;
+  const toggleWindow = (window: UIWindow) => {
+    const state = windowStates[window] as UIWindowState;
+    setWindowState(window, { ...windowStates[window]!, isVisible: !state!.isVisible });
+  }
+
+  const goToCharacterSelect = () => {
+    selectCharacter(null);
   }
 
   return (<UIContext.Provider value={{ setWindowState, windowStates }}>
     {!user.selectedCharacter && children}
     {user.selectedCharacter && <>
-      <div className="flex flex-col gap-3 p-2">
+      <div className="flex flex-col gap-3 p-2 h-full">
         {character && <div className="flex flex-row gap-2">
           <ItemSlot medium noDrag noTooltip hotkey="Q" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon)} />
           <ItemSlot medium noDrag noTooltip hotkey="E" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Charm)} />
@@ -115,36 +120,46 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
           <ItemSlot medium noDrag noTooltip hotkey="4" />
           <ItemSlot medium noDrag noTooltip hotkey="5" />
         </div>}
-        <div className="flex flex-row">
+        <div className="flex flex-row flex-grow">
           <GroupDisplay />
           <div>
             {children}
           </div>
         </div>
+        <div>
+          <div className="flex flex-row gap-1">
+            <button onClick={_ => toggleWindow(UIWindow.Chat)} className="!px-2 h-8"><img src="svg/iconChat.svg" alt="chat window" className="w-6 h-6" /></button>
+            <button onClick={_ => toggleWindow(UIWindow.Inventory)} className="!px-2 h-8"><img src="svg/iconInventory.svg" alt="inventory window" className="w-6 h-6" /></button>
+            <button onClick={_ => toggleWindow(UIWindow.Groups)} className="!px-2 h-8"><img src="svg/iconGroup.svg" alt="groups window" className="w-6 h-6" /></button>
+            <button onClick={_ => toggleWindow(UIWindow.Stats)} className="!px-2 h-8"><img src="svg/iconStats.svg" alt="stats window" className="w-6 h-6" /></button>
+            <button onClick={_ => goToCharacterSelect()} className="!px-2 h-8"><img src="svg/iconLogOut.svg" alt="stats window" className="w-6 h-6" /></button>
+          </div>
+        </div>
       </div>
+
 
       <div className="flex flex-row flex-wrap gap-3 p-5 absolute left-0 top-0">
         <div className="relative">
-          {renderWindow(UIWindow.Inventory, <InventoryWindow />)}
-          {renderWindow(UIWindow.Groups, <GroupsWindow />)}
-          {renderWindow(UIWindow.Shrine, <ShrineWindow />)}
-          {renderWindow(UIWindow.Marketplace, <MarketplaceWindow />)}
-          {renderWindow(UIWindow.Cooking, <SkillingWindow skillType={SkillType.Cooking} window={UIWindow.Cooking} />)}
-          {renderWindow(UIWindow.Fishing, <SkillingWindow skillType={SkillType.Fishing} window={UIWindow.Fishing} />)}
-          {renderWindow(UIWindow.Transmuting, <SkillingWindow skillType={SkillType.Transmuting} window={UIWindow.Transmuting} />)}
-          {renderWindow(UIWindow.Glyphing, <SkillingWindow skillType={SkillType.Glyphing} window={UIWindow.Glyphing} />)}
-          {renderWindow(UIWindow.Suffusencing, <SkillingWindow skillType={SkillType.Suffusencing} window={UIWindow.Suffusencing} />)}
-          {renderWindow(UIWindow.Chat, <ChatWindow />)}
-          {renderWindow(UIWindow.GroundItems, <GroundItemsWindow />)}
-          {renderWindow(UIWindow.Stats, <StatsWindow />)}
-          {renderWindow(UIWindow.Error, <ErrorWindow />)}
+          <InventoryWindow />
+          <GroupsWindow />
+          <ShrineWindow />
+          <MarketplaceWindow />
+          <SkillingWindow skillType={SkillType.Cooking} window={UIWindow.Cooking} />
+          <SkillingWindow skillType={SkillType.Fishing} window={UIWindow.Fishing} />
+          <SkillingWindow skillType={SkillType.Transmuting} window={UIWindow.Transmuting} />
+          <SkillingWindow skillType={SkillType.Glyphing} window={UIWindow.Glyphing} />
+          <SkillingWindow skillType={SkillType.Suffusencing} window={UIWindow.Suffusencing} />
+          <ChatWindow />
+          <GroundItemsWindow />
+          <StatsWindow />
+          <ErrorWindow />
         </div>
       </div>
     </>}
     {!user.selectedCharacter && <>
       <div className="flex flex-row flex-wrap gap-3 p-5 absolute left-0 top-0">
         <div className="relative">
-          {renderWindow(UIWindow.Error, <ErrorWindow />)}
+          <ErrorWindow />
         </div>
       </div>
     </>}

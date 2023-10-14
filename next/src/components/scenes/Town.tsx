@@ -13,23 +13,13 @@ export default function Town() {
     setWindowState(window, { ...windowStates[window]!, isVisible: true });
   }
 
-  const goToCharacterSelect = () => {
-    selectCharacter(null);
-  }
-
   const goToCatacombs = () => {
     goToZone(Zone.Catacombs);
   }
 
   return <>
     {user.selectedCharacter && <div className="m-10 flex flex-col gap-5">
-      <div className="flex flex-row gap-5">
-        <button onClick={_ => showWindow(UIWindow.Inventory)}>Inventory</button>
-        <button onClick={_ => showWindow(UIWindow.Groups)}>Groups</button>
-        <button onClick={_ => showWindow(UIWindow.Stats)}>Stats</button>
-        <button onClick={_ => showWindow(UIWindow.Chat)}>Chat</button>
-        <button onClick={_ => goToCharacterSelect()}>Character Select</button>
-      </div>
+
       <div className="flex flex-row flex-wrap gap-x-4 gap-y-8 h-full w-full">
         <div className="w-36 h-36 flex flex-col items-center" onClick={_ => showWindow(UIWindow.Marketplace)}>
           <img src="svg/iconMarket.svg" className="w-full h-full" alt="market" />
