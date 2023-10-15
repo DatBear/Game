@@ -27,22 +27,23 @@ export default function GroundItemsWindow() {
 
   useEffect(() => {
     if (!user.selectedCharacter || user.selectedCharacter.zone != Zone.Catacombs) {
+      if (!windowState?.isVisible) return;
       setWindowState({ ...windowState!, isVisible: false });
     } else {
-      if (groundItems.length > 0) {
+      if (groundItems.length > 0 && !windowState?.isVisible) {
         setWindowState({ ...windowState!, isVisible: true });
       }
     }
-  }, [user]);
+  }, [user, setWindowState]);
 
   useEffect(() => {
     return listen(ResponsePacketType.AddGroundItem, (e: GroundItem) => {
-      if (user.selectedCharacter?.zone == Zone.Catacombs) {
+      if (user.selectedCharacter?.zone == Zone.Catacombs && !windowState?.isVisible) {
         setWindowState({ ...windowState!, isVisible: true });
       }
       setGroundItems([...groundItems, e]);
     });
-  }, [setWindowState, groundItems, setGroundItems]);
+  }, [groundItems, setGroundItems, setWindowState]);
 
   useEffect(() => {
     return listen(ResponsePacketType.UpdateGroundItem, (e: GroundItem) => {

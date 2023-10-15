@@ -2,7 +2,7 @@ import { EquippedItemSlot } from "@/models/EquippedItem";
 import Item from "@/models/Item";
 import MarketItem from "@/models/MarketItem";
 import { SkillType } from "@/models/Skill";
-import { createContext, Fragment, ReactNode, useCallback, useContext, useState } from "react";
+import { createContext, Fragment, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import GroupsWindow from "../GroupsWindow";
 import InventoryWindow from "../InventoryWindow";
 import ItemSlot from "../ItemSlot";
@@ -20,7 +20,7 @@ import { XYCoord } from "react-dnd";
 
 export type UIWindowState = {
   isVisible: boolean;
-  coords?: XYCoord;
+  coords: XYCoord;
   type: UIWindow;
   order: number;
 }
@@ -62,6 +62,8 @@ const defaultWindowState = (type: UIWindow) => {
     if (storageItem) {
       let parsed = JSON.parse(storageItem);
       parsed.order = parsed.order ?? order++;
+      parsed.type = parsed.type ?? type;
+      parsed.coords = parsed.coords ?? { x: 0, y: 0 };
       return parsed;
     }
   }
@@ -70,6 +72,7 @@ const defaultWindowState = (type: UIWindow) => {
     type,
     isVisible: false,
     order: order++,
+    coords: { x: 50, y: 50 }
   } as UIWindowState;
 }
 
@@ -78,7 +81,7 @@ let defaultWindowStates: WindowRecord<any> = {
   [UIWindow.Inventory]: { ...defaultWindowState(UIWindow.Inventory) },
   [UIWindow.Groups]: { ...defaultWindowState(UIWindow.Groups) },
   [UIWindow.Shrine]: { ...defaultWindowState(UIWindow.Shrine) } as UIShrineWindowState,
-  [UIWindow.Marketplace]: { ...defaultWindowState(UIWindow.Marketplace), searchResults: [], type: UIWindow.Marketplace } as UIMarketplaceWindowState,
+  [UIWindow.Marketplace]: { ...defaultWindowState(UIWindow.Marketplace), searchResults: [] } as UIMarketplaceWindowState,
   [UIWindow.Fishing]: { ...defaultWindowState(UIWindow.Fishing), items: Array(1) } as UISkillWindowState,
   [UIWindow.Cooking]: { ...defaultWindowState(UIWindow.Cooking), items: Array(1) } as UISkillWindowState,
   [UIWindow.Transmuting]: { ...defaultWindowState(UIWindow.Transmuting), items: Array(2) } as UISkillWindowState,
@@ -114,17 +117,18 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
   const { user, selectCharacter } = useUser();
   const { character } = useCharacter();
 
-
-  const setWindowState = (window: UIWindow, state: UIWindowState) => {
+  const setWindowState = (type: UIWindow, state: UIWindowState) => {
+    //console.log('saving window state', UIWindow[type], state);
+    saveWindowState(type, state);
     setWindowStates(x => ({
       ...x,
-      [window]: { ...windowStates[window], ...state }
+      [type]: { ...windowStates[type], ...state }
     }));
-  }
+  };
 
-  const toggleWindow = (window: UIWindow) => {
-    const state = windowStates[window] as UIWindowState;
-    setWindowState(window, { ...windowStates[window]!, isVisible: !state!.isVisible });
+  const toggleWindow = (type: UIWindow) => {
+    const state = windowStates[type] as UIWindowState;
+    setWindowState(type, { ...windowStates[type]!, isVisible: !state!.isVisible });
   }
 
   const goToCharacterSelect = () => {

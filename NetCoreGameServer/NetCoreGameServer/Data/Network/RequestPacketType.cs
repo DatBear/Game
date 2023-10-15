@@ -23,4 +23,5 @@ public enum RequestPacketType
     AttackTarget = 18,
     ChangeZone = 19,
     PickGroundItem = 20,
+    ShrineItem = 21,
 }

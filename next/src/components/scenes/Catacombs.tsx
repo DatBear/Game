@@ -126,7 +126,7 @@ export function Catacombs() {
         case AttackType.PlayerAttack:
           let source = user.group?.users.map(x => x.user?.selectedCharacter).find(x => x?.id === e.sourceId && x.imageRef) ?? user.selectedCharacter;
           let target = mobs.find(x => x.id === e.targetId);
-          if (!source || !target || !target.ref) return;
+          if (!source || !target || !target.ref.current) return;
 
           e.xSource = source?.imageRef.current?.offsetLeft! + source?.imageRef.current?.offsetWidth! * .8;
           e.ySource = source?.imageRef.current?.offsetTop! + source?.imageRef.current?.offsetHeight! * .5;
@@ -141,7 +141,7 @@ export function Catacombs() {
           {
             let source = mobs.find(x => x.id === e.sourceId);
             let target = user.group?.users.map(x => x.user?.selectedCharacter).find(x => x?.id === e.targetId && x.imageRef) ?? user.selectedCharacter;
-            if (!source || !target || !source.ref) return;
+            if (!source || !target || !source.ref.current) return;
             e.xTarget = target?.imageRef.current?.offsetLeft! + target?.imageRef.current?.offsetWidth! * .8;
             e.yTarget = target?.imageRef.current?.offsetTop! + target?.imageRef.current?.offsetHeight! * .5;
 

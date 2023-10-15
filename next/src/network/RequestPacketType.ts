@@ -20,6 +20,7 @@ enum RequestPacketType {
   AttackTarget,
   ChangeZone,
   PickGroundItem,
+  ShrineItem,
 }
 
 export default RequestPacketType;

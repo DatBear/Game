@@ -378,10 +378,7 @@ export function useCharacter() {
   const shrineItem = (item: Item) => {
     const invItem = character.equipment.find(x => x.id === item.id);
     if (!invItem) return false;
-    character.equipment = character.equipment.filter(x => x.id !== item.id);
-    character.life = Math.min(character.stats.maxLife!, character.life - 10);
-    character.mana = Math.min(character.stats.maxMana!, character.mana - 20);
-    updateCharacter(character);
+    send(RequestPacketType.ShrineItem, invItem.id);
     return true;
   }
 

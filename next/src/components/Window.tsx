@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WindowDataContextProvider, { useWindowData } from "./contexts/WindowDataContext";
 import { DragSourceMonitor, useDrag, XYCoord } from "react-dnd";
 import { UIWindow } from "@/models/UIWindow";
-import { UIWindowState, saveWindowState, useUI, useWindow } from "./contexts/UIContext";
+import { useUI } from "./contexts/UIContext";
 
 type WindowProps = {
   isVisible: boolean;
@@ -25,20 +25,12 @@ export default function Window({ children, isVisible, coords, className, tabbed,
   tabbed = tabbed ?? false;
 
   const windowRef = useRef<HTMLDivElement>(null);
-  const [_coords, setCoords] = useState<XYCoord>();
-
   const [show, setShow] = useState(isVisible);
-
-  const { windowState } = useWindow<UIWindowState>(type);
   const { setWindowState, windowStates } = useUI();
 
   useEffect(() => {
     setShow(isVisible);
   }, [isVisible]);
-
-  useEffect(() => {
-    setCoords(coords);
-  }, [coords]);
 
   const handleClose = useCallback(() => {
     if (close) {
@@ -50,21 +42,25 @@ export default function Window({ children, isVisible, coords, className, tabbed,
 
   const onDragEnd = (monitor: DragSourceMonitor<unknown, unknown>) => {
     if (windowRef.current !== null && monitor !== null) {
-      let prevCoords = windowState!.coords ?? { x: 0, y: 0 } as XYCoord;
+      let prevCoords = windowStates[type]?.coords ?? { x: 0, y: 0 } as XYCoord;
+      //console.log('prev coords', UIWindow[type], prevCoords, windowStates[type]?.coords, windowStates[type]?.coords);
       prevCoords.x += monitor.getClientOffset()?.x! - monitor.getInitialClientOffset()?.x!;
       prevCoords.y += monitor.getClientOffset()?.y! - monitor.getInitialClientOffset()?.y!;
-      setCoords(prevCoords);
+      prevCoords.x = Math.max(0, prevCoords.x);
+      prevCoords.y = Math.max(0, prevCoords.y);
+      //console.log('new coords', prevCoords);
       if (type === undefined) return;
-      let newState = { ...windowState!, coords: prevCoords };
+      let newState = { ...windowStates[type]!, coords: prevCoords };
       setWindowState(type, newState);
-      saveWindowState(type, newState);
     }
   };
 
   const onClick = (e: React.MouseEvent<HTMLElement>) => {
-    if ((e.target as HTMLDivElement)?.classList.contains("close-window")) {
+    let classes = (e.target as HTMLDivElement)?.classList;
+    if (classes.contains("close-window") || classes.contains("ignore-reorder")) {
       return;
     }
+    console.log('onclick');
     let types = Object.values(UIWindow).filter((v) => !isNaN(Number(v))).map(x => x as UIWindow);
     let oldOrder = windowStates[type]!.order;
     for (let winType of types) {
@@ -72,24 +68,22 @@ export default function Window({ children, isVisible, coords, className, tabbed,
       if (state.order < oldOrder) {
         let newState = { ...state, order: ++state.order };
         setWindowState(winType, newState);
-        saveWindowState(winType, newState);
       }
     }
 
-    let newState = { ...windowState!, order: 0 };
+    let newState = { ...windowStates[type]!, order: 0 };
     setWindowState(type, newState);
-    saveWindowState(type, newState);
   }
-
-  let windowData = useMemo<_Data>(() => {
-    return { closeWindow: handleClose, tabbed: tabbed ?? false, windowRef, onDragEnd };
-  }, [tabbed, handleClose]);
 
   const tabbedChildren = (() => {
     return tabbed ? <Tab.Group>{children}</Tab.Group> : children;
   })()
 
-  let positionStyle = _coords ? { ...props.style, left: _coords.x - 30, top: _coords.y - 30 } : props.style
+  let windowData = useMemo<_Data>(() => {
+    return { closeWindow: handleClose, tabbed: tabbed ?? false, windowRef, onDragEnd };
+  }, [windowRef.current, onDragEnd, tabbed, handleClose, windowStates, windowStates[type], windowStates[type].coords]);
+
+  let positionStyle = windowStates[type]!.coords ? { ...props.style, left: windowStates[type]!.coords.x - 30, top: windowStates[type]!.coords.y - 30 } : props.style
   return <WindowDataContextProvider {...windowData}>
     {show && <div ref={windowRef} style={positionStyle} className={clsx(gs.window, className, "bg-stone-800 p-3 text-red-50 border w-fit h-min", "absolute")} onClick={e => onClick(e)}>
       {tabbedChildren}

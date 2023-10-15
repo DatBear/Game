@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Reflection;
+using Newtonsoft.Json;
 
 namespace NetCoreGameServer.Data.Model;
 
@@ -16,4 +17,10 @@ public class ItemStats : Stats
     public int GuildPoints { get; set; }
     public int LevelUp { get; set; }
     public int LevelCap { get; set; }
+
+    public int NumStats()
+    {
+        var props = typeof(ItemStats).GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => x.Name != "Id");
+        return props.Count(x => x.PropertyType == typeof(int) && (int)x.GetValue(this) > 0);
+    }
 }

@@ -1,6 +1,4 @@
 import { ItemAction } from "@/models/ItemAction";
-import { CharacterStats } from "@/models/Stats";
-import { useCallback } from "react";
 import { useWindow, UIShrineWindowState } from "./contexts/UIContext";
 import { useCharacter } from "./contexts/UserContext";
 import ItemSlot from "./ItemSlot";
@@ -15,7 +13,7 @@ export default function ShrineWindow() {
   const sacrifice = () => {
     if (!windowState?.shrineItem) return;
     if (shrineItem(windowState?.shrineItem)) {
-      setWindowState({ ...windowState, shrineItem: undefined })
+      setWindowState({ ...windowState, shrineItem: undefined });
     }
   }
 
@@ -31,7 +29,7 @@ export default function ShrineWindow() {
         <div className="text-center">Drag and drop the Item you wish to sacrifice to the box below.</div>
         <ItemSlot action={ItemAction.Shrine} item={windowState?.shrineItem} />
         <div>
-          <button onClick={_ => sacrifice()}>Sacrifice Item</button>
+          <button onClick={_ => sacrifice()} className="ignore-reorder">Sacrifice Item</button>
         </div>
       </div>
     </div>
