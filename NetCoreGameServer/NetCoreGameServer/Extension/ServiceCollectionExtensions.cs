@@ -4,6 +4,7 @@ using MySql.Data.MySqlClient;
 using NetCoreGameServer.Data.Config;
 using NetCoreGameServer.Helper;
 using NetCoreGameServer.Service;
+using NetCoreGameServer.Websocket;
 using System.Configuration;
 using System.Data;
 
@@ -11,7 +12,7 @@ namespace NetCoreGameServer.Extension;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddServices(this IServiceCollection services, IConfigurationRoot config)
+    public static void AddSharedServices(this IServiceCollection services, IConfigurationRoot config)
     {
         services.AddLogging();
         services.AddSingleton<Program>();

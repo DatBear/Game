@@ -26,11 +26,12 @@ type AttackRequest = {
 }
 
 export function Catacombs() {
-  const attackInterval = useRef<number>();
+  const attackTimeout = useRef<NodeJS.Timer>();
   const { user } = useUser();
   const { character, goToZone, addExperience, addKill, addDeath } = useCharacter();
   const [areHotkeysEnabled, setAreHotkeysEnabled] = useState(true);
   const [target, setTarget] = useState<number>();
+  const [lastAction, setLastAction] = useState(0);
   const [attacks, setAttacks] = useState<Attack[]>([]);
 
   const maze = user.group?.maze ?? user.maze!;
@@ -65,12 +66,12 @@ export function Catacombs() {
   const targetEnemy = (id: number) => {
     //console.log('set target ', id);
     setTarget(id);
-    if (!attackInterval.current) {
+    if (!attackTimeout.current) {
       attack(id);
     }
   }
 
-  const attack = (forceTarget: number) => {
+  const attack = (forceTarget?: number) => {
     const targetId = forceTarget ?? target;
     if (!targetId) return;
 
@@ -83,7 +84,8 @@ export function Catacombs() {
       type: AttackType.PlayerAttack,
       equippedItemSlot: EquippedItemSlot.Weapon,//todo change
     }
-    send(RequestPacketType.AttackTarget, attack, true);
+    send(RequestPacketType.AttackTarget, attack);
+    setLastAction(new Date().getTime());
   };
 
   const randomPos = (el: HTMLElement) => {
@@ -97,40 +99,63 @@ export function Catacombs() {
   }, [mobs, setAreHotkeysEnabled]);
 
   useEffect(() => {
+    let nextAction = 1000 - (new Date().getTime() - lastAction);
+    //console.log('next', nextAction, lastAction);
     if (target) {
-      attackInterval.current = setInterval(attack, 1000);
+      if (nextAction < 0) {
+        attack();
+      } else {
+        attackTimeout.current = setTimeout(attack, nextAction);
+      }
     } else {
-      clearInterval(attackInterval.current);
-      attackInterval.current = undefined;
+      clearTimeout(attackTimeout.current);
+      attackTimeout.current = undefined;
     }
 
     return () => {
-      if (attackInterval.current) {
-        clearInterval(attackInterval.current);
-        attackInterval.current = undefined;
+      if (attackTimeout.current) {
+        clearTimeout(attackTimeout.current);
+        attackTimeout.current = undefined;
       }
     }
   }, [attack, target]);
 
   useEffect(() => {
     return listen(ResponsePacketType.AttackTarget, (e: Attack) => {
-      let source = user.group?.users.map(x => x.user?.selectedCharacter).find(x => x?.id === e.sourceId && x.imageRef) ?? user.selectedCharacter;
-      let target = mobs.find(x => x.id === e.targetId);
+      switch (e.type) {
+        case AttackType.PlayerAttack:
+          let source = user.group?.users.map(x => x.user?.selectedCharacter).find(x => x?.id === e.sourceId && x.imageRef) ?? user.selectedCharacter;
+          let target = mobs.find(x => x.id === e.targetId);
+          if (!source || !target || !target.ref) return;
 
-      if (!source || !target || !target.ref) return;
+          e.xSource = source?.imageRef.current?.offsetLeft! + source?.imageRef.current?.offsetWidth! * .8;
+          e.ySource = source?.imageRef.current?.offsetTop! + source?.imageRef.current?.offsetHeight! * .5;
 
-      e.xPlayer = source?.imageRef.current?.offsetLeft! + source?.imageRef.current?.offsetWidth! * .8;
-      e.yPlayer = source?.imageRef.current?.offsetTop! + source?.imageRef.current?.offsetHeight! * .5;
+          [e.xTarget, e.yTarget] = randomPos(target?.ref.current!);
+          e.weapon = e.weaponType != undefined ? defaultItem(e.weaponType) : undefined;
+          e.isPlayer = true;
 
-      [e.xMob, e.yMob] = randomPos(target?.ref.current!);
-      e.weapon = e.weaponType != undefined ? defaultItem(e.weaponType) : undefined;
-      e.isPlayer = true;
+          setAttacks([...attacks.filter(x => new Date().getTime() < x.timestamp + 800 && x.timestamp != e.timestamp), e]);
+          break;
+        case AttackType.MobAttack:
+          {
+            let source = mobs.find(x => x.id === e.sourceId);
+            let target = user.group?.users.map(x => x.user?.selectedCharacter).find(x => x?.id === e.targetId && x.imageRef) ?? user.selectedCharacter;
+            if (!source || !target || !source.ref) return;
+            e.xTarget = target?.imageRef.current?.offsetLeft! + target?.imageRef.current?.offsetWidth! * .8;
+            e.yTarget = target?.imageRef.current?.offsetTop! + target?.imageRef.current?.offsetHeight! * .5;
 
+            [e.xSource, e.ySource] = randomPos(source?.ref.current!);
+            e.isPlayer = false;
+            setAttacks([...attacks.filter(x => new Date().getTime() < x.timestamp + 800 && x.timestamp != e.timestamp), e]);
+          }
+
+      }
       //console.log('attack', e);
-      setAttacks([...attacks.filter(x => new Date().getTime() < x.timestamp + 800 && x.timestamp != e.timestamp), e]);
     });
   }, [user]);
 
+  //console.log('render');
   return <>
     <div className="p-4 flex flex-col gap-3">
       <div className="flex flex-row gap-3">
@@ -153,20 +178,37 @@ export function Catacombs() {
     </div>
     <div className="absolute w-full h-full left-0 top-0" style={{ pointerEvents: "none" }}>
       {attacks.length > 0 && attacks.map(x => {
-        const left = (x.isPlayer ? x.xMob : x.xPlayer) + 'px';
-        const top = (x.isPlayer ? x.yMob : x.yPlayer) + 'px';
-        return x.isPlayer ? <div key={x.timestamp} className="absolute w-10 h-10" style={{ left, top }}>
-          <div className="flex flex-row items-center move-up fade-out">
-            {x.weapon && <ItemSlot medium noDrag noTooltip borderless noBackground item={x.weapon} />}
-            <div className="text-shadow text-2xl">{x.damage}{x.isCritical ? '!' : ''}</div>
-          </div>
-        </div> : <></>
+        switch (x.type) {
+          case AttackType.PlayerAttack:
+            {
+              const left = x.xTarget + 'px';
+              const top = x.yTarget + 'px';
+              return <div key={x.timestamp} className="absolute w-10 h-10" style={{ left, top }}>
+                <div className="flex flex-row items-center move-up fade-out">
+                  {x.weapon && <ItemSlot medium noDrag noTooltip borderless noBackground item={x.weapon} />}
+                  <div className="text-shadow text-2xl">{x.damage}{x.isCritical ? '!' : ''}</div>
+                </div>
+              </div>
+            }
+          case AttackType.MobAttack:
+            {
+              const left = x.xTarget + 'px';
+              const top = x.yTarget + 'px';
+              return <div key={x.timestamp} className="absolute w-10 h-10" style={{ left, top }}>
+                <div className="flex flex-row items-center move-up fade-out">
+                  {x.weapon && <ItemSlot medium noDrag noTooltip borderless noBackground item={x.weapon} />}
+                  <div className="text-shadow text-2xl">{x.damage}{x.isCritical ? '!' : ''}</div>
+                </div>
+              </div>
+            }
+        }
+        return <></>
       })}
     </div>
     <svg style={{ pointerEvents: "none", zIndex: -1 }} className="absolute w-full h-full left-0 top-0">
       {attacks.length > 0 && attacks.map(x => {
-        return <line style={{ zIndex: -1 }} key={x.timestamp} x1={x.xPlayer} y1={x.yPlayer}
-          x2={x.xMob} y2={x.yMob} stroke={"#FF0000"} strokeWidth="3" className="fade-out" />
+        return <line style={{ zIndex: -1 }} key={x.timestamp} x1={x.xSource} y1={x.ySource}
+          x2={x.xTarget} y2={x.yTarget} stroke={"#FF0000"} strokeWidth="3" className="fade-out" />
       })}
     </svg>
   </>

@@ -2,7 +2,11 @@
 using System.Net.Sockets;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Data.Network;
+using NetCoreGameServer.Data.Network.Catacombs;
+using NetCoreGameServer.Data.Network.Characters;
 using NetCoreGameServer.Data.Network.Groups;
+using NetCoreGameServer.Service;
+using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Bcpg;
 
 namespace NetCoreGameServer.Websocket;
@@ -48,9 +52,15 @@ public class GameManager
         return false;
     }
 
-    public GameSession? GetSession(int userId)
+    public List<GameSession> GetSessions()
     {
-        _sessions.TryGetValue(userId, out var session);
+        return _sessions.Values.ToList();
+    }
+
+    public GameSession? GetSession(int? userId)
+    {
+        if (userId == null) return null;
+        _sessions.TryGetValue(userId.Value, out var session);
         return session;
     }
 
@@ -85,6 +95,11 @@ public class GameManager
     public List<Group> GetGroups()
     {
         return _groups;
+    }
+
+    public List<GameSession> GetUngroupedSessions()
+    {
+        return _sessions.Values.Where(x => x.User != null && x.IsConnected && x.User.Group == null).ToList();
     }
 
     public void GroupBroadcast(GameSession session, IResponsePacket packet, bool excludeSender = false)
@@ -202,5 +217,45 @@ public class GameManager
         });
     }
 
+    public void OnMobDeath(GameSession session, Mob mob)
+    {
+        //todo give xp/level up
+        var maze = session.User.Group?.Maze ?? session.User.Maze;
+        maze.Mobs.Remove(mob);
+        var item = ItemGenerator.Generate(session.User.Group!, session.User.SelectedCharacter, mob);
+        if (item != null)
+        {
+            var groundItem = new GroundItem
+            {
+                Item = item,
+                ExpiresTimestamp = DateTimeOffset.UtcNow.AddSeconds(10).ToUnixTimeMilliseconds(),
+            };
+            maze.Items.Add(groundItem);
+            GroupBroadcast(session, new AddGroundItemResponse
+            {
+                Data = groundItem
+            });
+        }
+    }
 
+    public void OnPlayerDeath(GameSession? session, Character character)
+    {
+        character.Deaths += 1;
+        if (character.Core == Core.SoftCore)
+        {
+            //todo remove exp
+            character.Zone = Zone.Town;
+            if (session != null)
+            {
+                session.Send(new UpdateCharacterResponse
+                {
+                    Data = character
+                });
+            }
+        }
+        else
+        {
+
+        }
+    }
 }

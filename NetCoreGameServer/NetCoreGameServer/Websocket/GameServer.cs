@@ -3,13 +3,14 @@ using System.Net.Sockets;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Helper;
 using NetCoreGameServer.Service;
 using NetCoreServer;
 
 namespace NetCoreGameServer.Websocket;
 
-class GameServer : WsServer
+public class GameServer : WsServer
 {
     private readonly NextAuthHelper _nextAuthHelper;
     private readonly UserRepository _userRepository;
@@ -31,6 +32,16 @@ class GameServer : WsServer
         var success = base.Start();
         if (success)
         {
+            Task.Factory.StartNew(async () =>
+            {
+                var mobActionThread = _serviceProvider.GetService<MobActionThread>();
+                await mobActionThread.Run();
+            });
+            Task.Factory.StartNew(async () =>
+            {
+                var charRegenThread = _serviceProvider.GetService<CharacterRegenThread>();
+                await charRegenThread.Run();
+            });
             Console.WriteLine($"Server started on {Address}:{Port}.");
         }
         else

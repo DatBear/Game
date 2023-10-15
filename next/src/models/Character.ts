@@ -44,6 +44,7 @@ type Character = {
   stats: CharacterStats;
   zone: Zone;
   imageRef: RefObject<HTMLDivElement>;
+  lastRegenAction: number;
 }
 
 export default Character;

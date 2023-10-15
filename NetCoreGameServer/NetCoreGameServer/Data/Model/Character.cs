@@ -35,6 +35,14 @@ public class Character
     public int UserId { get; set; }
 
     //not persisted
+    private const int ItemSlots = 16;
     public Zone? Zone { get; set; }
+    [JsonIgnore]
+    public long LastRegen { get; set; }
+
+    public bool CanPickItem(Item item)
+    {
+        return item.IsObject() ? Items.Count < ItemSlots : Equipment.Count < EquipmentSlots;
+    }
     
 }

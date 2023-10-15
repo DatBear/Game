@@ -12,4 +12,9 @@ public class Item
 
     public int ItemStatsId { get; set; }
     public ItemStats Stats { get; set; } = new();
+
+    public bool IsObject()
+    {
+        return SubType >= ItemSubType.Fish;
+    }
 }

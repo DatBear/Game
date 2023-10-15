@@ -29,6 +29,8 @@ public class CharacterRepository
         character.ClassId = classId;
 
         character.Stats = StartingStats.ForClass[(CharacterClasses)character.ClassId];
+        character.Stats.LifeRegen = 3;
+        character.Stats.ManaRegen = 2;
         character.Stats.MaxLife = character.Life = 100;
         character.Stats.MaxMana = character.Mana = 100;
 

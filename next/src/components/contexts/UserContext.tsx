@@ -18,6 +18,7 @@ import GroupUser from "@/models/GroupUser";
 import { Maze } from "@/models/Maze";
 import { Attack } from "@/models/Attack";
 import { UIWindow } from "@/models/UIWindow";
+import { AttackType } from "@/models/AttackType";
 
 type UserContextData = {
   user: User;
@@ -155,7 +156,7 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
         user.maze = e;
       }
       setUser({ ...user });
-    }, true);
+    });
   }, [user, setUser]);
 
   useEffect(() => {
@@ -176,17 +177,58 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     return listen(ResponsePacketType.AttackTarget, (e: Attack) => {
       const maze = user.group?.maze ?? user.maze!;
       const mobs = maze?.mobs;
-      let target = mobs.find(x => x.id === e.targetId);
+      switch (e.type) {
+        case AttackType.PlayerAttack:
 
-      if (!target) return;
+          let target = mobs.find(x => x.id === e.targetId);
+          if (!target) return;
 
-      target.life = e.targetHealthResult;
-      if (target.life <= 0) {
-        maze.mobs = mobs.filter(x => x.id !== target!.id);
+          target.life = e.targetHealthResult;
+          if (target.life <= 0) {
+            maze.mobs = mobs.filter(x => x.id !== target!.id);
+          }
+          setUser({ ...user });
+          break;
+
+        case AttackType.MobAttack:
+          let playerTarget = user.group?.users.find(x => x.user?.selectedCharacter?.id === e.targetId)?.user?.selectedCharacter ?? (user.selectedCharacter?.id == e.targetId ? user.selectedCharacter : null);
+          if (!playerTarget) return;
+
+          if (playerTarget.id === user.selectedCharacter?.id) {
+            user.selectedCharacter.life = e.targetHealthResult;
+          }
+
+          playerTarget.life = e.targetHealthResult;
+          if (playerTarget.life <= 0) {
+            //todo player death
+          }
+          setUser({ ...user });
+          break;
       }
-      setUser({ ...user });
-    }, true);
-  }, [user])
+    });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user.selectedCharacter) return;
+    var nextRegen = 1000 - (new Date().getTime() - user.selectedCharacter.lastRegenAction);
+    if (nextRegen < 0) {
+      regen();
+      return;
+    }
+
+    var timeout = setTimeout(regen, nextRegen);
+    return () => clearTimeout(timeout);
+  }, [user]);
+
+  const regen = () => {
+    if (!user.selectedCharacter) return;
+    var char = user.selectedCharacter!;
+    if (char.zone != Zone.Town) return;
+    char.lastRegenAction = new Date().getTime();
+    char.life += Math.min(char.stats.lifeRegen, char.stats.maxLife - char.life);
+    char.mana += Math.min(char.stats.manaRegen, char.stats.maxMana - char.mana);
+    setUser({ ...user });
+  }
 
   return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>
     {children}

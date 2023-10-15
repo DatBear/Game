@@ -91,7 +91,7 @@ let defaultWindowStates: WindowRecord<any> = {
 }
 
 let windowComponents: Record<UIWindow, ReactNode> = {
-  [UIWindow.None]: undefined,
+  [UIWindow.None]: <div></div>,
   [UIWindow.Inventory]: <InventoryWindow />,
   [UIWindow.Groups]: <GroupsWindow />,
   [UIWindow.Shrine]: <ShrineWindow />,
@@ -171,7 +171,7 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
           {Object.entries(windowComponents)
             .map(e => [e[0] as unknown as UIWindow, e[1]] as [UIWindow, ReactNode])
             .sort((a, b) => windowStates[a[0]]?.order < windowStates[b[0]]?.order ? 1 : -1)
-            .map((e: [UIWindow, ReactNode]) => <Fragment key={e[0]}>{e[1]}</Fragment>)}
+            .map((e: [UIWindow, ReactNode]) => <Fragment key={e[0]}>{(e && e[1]) ?? <></>}</Fragment>)}
         </div>
       </div>
     </>}

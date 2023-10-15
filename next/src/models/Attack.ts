@@ -12,10 +12,10 @@ export type Attack = {
   weaponType: ItemSubType;
 
   weapon?: Item;
-  xPlayer: number;
-  yPlayer: number;
-  xMob: number;
-  yMob: number;
+  xSource: number;
+  ySource: number;
+  xTarget: number;
+  yTarget: number;
 
   isPlayer: boolean;
 }

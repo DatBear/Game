@@ -150,7 +150,7 @@ public class GameSession : WsSession
     private ServiceCollection CreateServiceCollection()
     {
         var collection = new ServiceCollection();
-        collection.AddServices(_config);
+        collection.AddSharedServices(_config);
 
         collection.AddMediatR(x => x.RegisterServicesFromAssembly(typeof(ListCharactersHandler).Assembly));
         collection.AddSingleton(this);

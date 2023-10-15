@@ -41,13 +41,13 @@ export default function GroundItemsWindow() {
         setWindowState({ ...windowState!, isVisible: true });
       }
       setGroundItems([...groundItems, e]);
-    }, true);
+    });
   }, [setWindowState, groundItems, setGroundItems]);
 
   useEffect(() => {
     return listen(ResponsePacketType.UpdateGroundItem, (e: GroundItem) => {
       setGroundItems([...groundItems.filter(x => x.item.id != e.item.id), e]);
-    }, true);
+    });
   }, [groundItems, setGroundItems]);
 
   return <Window isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>

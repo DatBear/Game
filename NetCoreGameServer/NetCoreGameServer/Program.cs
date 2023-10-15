@@ -7,6 +7,7 @@ using NetCoreGameServer.Data.Config;
 using System.Net;
 using MediatR;
 using MySql.Data.MySqlClient;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.Network.Characters;
 using NetCoreGameServer.Extension;
 using NetCoreGameServer.Helper;
@@ -62,12 +63,14 @@ internal class Program
 
         var services = new ServiceCollection();
 
-        services.AddServices(configuration);
+        services.AddSingleton<GameManager>();
+        services.AddSingleton<MobActionThread>();
+        services.AddSingleton<CharacterRegenThread>();
 
+        services.AddSharedServices(configuration);
 
         services.AddSingleton<IServiceCollection>(services);
         services.AddSingleton(configuration);
-        services.AddSingleton<GameManager>();
 
         var serviceProvider = services.BuildServiceProvider();
 

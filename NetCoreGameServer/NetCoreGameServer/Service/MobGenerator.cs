@@ -22,12 +22,15 @@ public class MobGenerator
             return new Mob
             {
                 Id = NextMobId++,
+                Level = (int)Math.Round(user.Group?.Users.Average(x => x.User.SelectedCharacter.Level) ?? user.SelectedCharacter.Level),
                 Position = pos,
                 Image = r.Next(101),
-                Damage = new[] { 0, 0 },
+                Damage = new[] { 5, 7 },
+                AttackSpeed = r.Next(1000, 2000),
                 Life = 100,
                 MaxLife = 100,
-                Weapon = ItemSubType.Fire
+                Weapon = ItemSubType.Fire,
+                LastAction = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             };
         }).ToList();
     }
