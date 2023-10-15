@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { Tab } from "@headlessui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import WindowDataContextProvider, { useWindowData } from "./contexts/WindowDataContext";
-import { useDrag, XYCoord } from "react-dnd";
+import { DragSourceMonitor, useDrag, XYCoord } from "react-dnd";
 import { UIWindow } from "@/models/UIWindow";
 import { UIWindowState, saveWindowState, useUI, useWindow } from "./contexts/UIContext";
 
@@ -48,11 +48,14 @@ export default function Window({ children, isVisible, coords, className, tabbed,
     setShow(false);
   }, [setShow, close]);
 
-  const onDragEnd = (coords: XYCoord | null) => {
-    if (windowRef.current !== null && coords !== null) {
-      setCoords(coords);
+  const onDragEnd = (monitor: DragSourceMonitor<unknown, unknown>) => {
+    if (windowRef.current !== null && monitor !== null) {
+      let prevCoords = windowState!.coords ?? { x: 0, y: 0 } as XYCoord;
+      prevCoords.x += monitor.getClientOffset()?.x! - monitor.getInitialClientOffset()?.x!;
+      prevCoords.y += monitor.getClientOffset()?.y! - monitor.getInitialClientOffset()?.y!;
+      setCoords(prevCoords);
       if (type === undefined) return;
-      let newState = { ...windowState!, coords };
+      let newState = { ...windowState!, coords: prevCoords };
       setWindowState(type, newState);
       saveWindowState(type, newState);
     }
@@ -86,7 +89,7 @@ export default function Window({ children, isVisible, coords, className, tabbed,
     return tabbed ? <Tab.Group>{children}</Tab.Group> : children;
   })()
 
-  let positionStyle = _coords ? { ...props.style, left: _coords.x - 20, top: _coords.y - 20 } : props.style
+  let positionStyle = _coords ? { ...props.style, left: _coords.x - 30, top: _coords.y - 30 } : props.style
   return <WindowDataContextProvider {...windowData}>
     {show && <div ref={windowRef} style={positionStyle} className={clsx(gs.window, className, "bg-stone-800 p-3 text-red-50 border w-fit h-min", "absolute")} onClick={e => onClick(e)}>
       {tabbedChildren}
@@ -151,7 +154,7 @@ const DragHandle = function () {
     type: type,
     collect: (monitor) => ({}),
     end(draggedItem, monitor) {
-      onDragEnd(monitor.getClientOffset());
+      onDragEnd(monitor);
     }
   }));
 

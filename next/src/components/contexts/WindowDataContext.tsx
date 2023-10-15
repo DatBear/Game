@@ -1,11 +1,11 @@
-import { createContext, MutableRefObject, RefObject, useContext } from "react";
-import { XYCoord } from "react-dnd";
+import { createContext, RefObject, useContext } from "react";
+import { DragSourceMonitor } from "react-dnd";
 
 interface WindowDataContextProps {
   tabbed: boolean;
   closeWindow: () => void;
   windowRef: RefObject<HTMLDivElement>,
-  onDragEnd: (coords: XYCoord | null) => void;
+  onDragEnd: (monitor: DragSourceMonitor<unknown, unknown>) => void;
 }
 
 const WindowDataContext = createContext<WindowDataContextProps | null>(null);
