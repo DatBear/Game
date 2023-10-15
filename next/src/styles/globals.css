@@ -53,6 +53,10 @@ body {
   animation: moveUp 1s normal forwards;
 }
 
+.counter-anim{
+  animation: counterFadeOut 1.5s normal forwards, grow 1.5s normal forwards;
+}
+
 .groundItem:not(.groupClicked,.userClicked) {
   animation: semiFadeOut 10s normal forwards;
 }
@@ -70,7 +74,7 @@ body {
     opacity: 1;
   }
   100% {
-    opacity: .2;
+    opacity: .3;
     display: none;
   }
 }
@@ -89,15 +93,27 @@ body {
   }
 }
 
+@keyframes counterFadeOut{
+  0% {
+    opacity: 1;
+  }
+  80% { 
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 @keyframes grow{
   0% {
     transform: scale(1);
   }
-  50%{
-    transform: scale(2);
+  40% {
+    transform: scale(2) translateX(20%) translateY(-50px);
   }
   100% {
-    transform: scale(1);
+    transform: scale(2) translateX(20%) translateY(-50px);
   }
 }
 
@@ -107,6 +123,15 @@ body {
   }
   100% { 
     transform: translateY(-2rem);
+  }
+}
+
+@keyframes moveUpCounter{
+  0% { 
+    transform: translateY(0);
+  }
+  100% { 
+    transform: translateY(-1rem);
   }
 }
 

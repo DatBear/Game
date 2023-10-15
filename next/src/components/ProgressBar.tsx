@@ -1,6 +1,14 @@
 let supportedBgs = 'bg-red-800 bg-blue-800 bg-green-800 bg-red-600 bg-blue-600 bg-green-600';
 
-export default function ProgressBar({ current, max, color, text }: { current: number, max: number, color: string, text?: string }) {
+export type ProgressBarProps = {
+  current: number;
+  max: number;
+  color: string;
+  text?: string;
+  title?: string;
+}
+
+export default function ProgressBar({ current, max, color, text }: ProgressBarProps) {
   let bg = `bg-${color}-800`;
   let percent = Math.max(0, Math.min(100, Math.round(current / max * 100)));
   return <div className={`w-full h-fit bg-${color}-600 flex outline outline-2 outline-black relative text-shadow place-items-center`}>

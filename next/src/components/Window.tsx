@@ -60,7 +60,6 @@ export default function Window({ children, isVisible, coords, className, tabbed,
     if (classes.contains("close-window") || classes.contains("ignore-reorder")) {
       return;
     }
-    console.log('onclick');
     let types = Object.values(UIWindow).filter((v) => !isNaN(Number(v))).map(x => x as UIWindow);
     let oldOrder = windowStates[type]!.order;
     for (let winType of types) {
