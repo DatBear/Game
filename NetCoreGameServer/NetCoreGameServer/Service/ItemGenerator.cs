@@ -69,32 +69,58 @@ public class ItemGenerator
         };
     }
 
-    public static Item? GenerateSkillItem(Character character, SkillState state)
+    public static (Item? addItem, Item? removeItem) GenerateSkillItem(Character character, SkillState state)
     {
         switch (state.Type)
         {
             case SkillType.Fishing:
+            {
+                if (state.IsLost())
+                {
+                    return (null, state.InputItems.FirstOrDefault());
+                }
                 //todo use fish level/prof
                 var hasMana = r.Next(100) >= 75;
                 var hasLife = !hasMana || r.Next(100) >= 75;
-                var tier = (int)Math.Floor(state.Level!.Value / 5d)+1;
+                var tier = (int)Math.Floor(state.Level!.Value / 5d) + 1;
                 var item = new Item
                 {
                     Id = NextId++,
                     Stats = new ItemStats
                     {
-                        MaxLife = hasLife ? r.Next(100*tier) + 1 : 0,
-                        MaxMana = hasMana ? r.Next(100*tier) + 1 : 0,
+                        MaxLife = hasLife ? r.Next(100 * tier) + 1 : 0,
+                        MaxMana = hasMana ? r.Next(100 * tier) + 1 : 0,
                     },
                     SubType = ItemSubType.Fish,
                     Quantity = 1,
                     Tier = tier,
                     OwnerId = character.Id
                 };
-                return item;
-                break;
+                return (item, null);
+            }
+            case SkillType.Cooking:
+            {
+                var fish = state.InputItems.First();
+                var cooked = Math.Min(100, state.Progress[1]);
+                var multiplier = !state.IsLost() ? 1 + cooked / 100d : 1 - (100-state.Progress[0])/100d;//something like this...
+                var item = new Item
+                {
+                    Id = NextId++,
+                    Stats = new ItemStats
+                    {
+                        MaxLife = (int)Math.Floor(fish.Stats.MaxLife * multiplier),
+                        MaxMana = (int)Math.Floor(fish.Stats.MaxMana*multiplier),
+                        ExperienceGained = cooked,
+                    },
+                    Tier = fish.Tier,
+                    OwnerId = character.Id,
+                    Quantity = 1,
+                    SubType = fish.SubType,
+                };
+                return (item, fish);
+            }
         }
 
-        return null;
+        return (null, null);
     }
 }

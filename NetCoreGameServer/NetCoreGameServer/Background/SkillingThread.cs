@@ -24,10 +24,20 @@ public class SkillingThread : BaseBackgroundThread
             if (session.User.CurrentSkill is { IsCompleted: false })
             {
                 var update = session.User.CurrentSkill.Update(tick);
-                if (session.User.CurrentSkill.IsWon())
+                if (session.User.CurrentSkill.IsWon() || session.User.CurrentSkill.IsLost())
                 {
-                    session.User.CurrentSkill.CompletedItem = ItemGenerator.GenerateSkillItem(session.User.SelectedCharacter!, session.User.CurrentSkill);
-                    session.User.SelectedCharacter.AllItems.Add(session.User.CurrentSkill.CompletedItem);
+                    var (addItem, removeItem) = ItemGenerator.GenerateSkillItem(session.User.SelectedCharacter!, session.User.CurrentSkill);
+                    session.User.CurrentSkill.CompletedItem = addItem;
+                    if (addItem != null)
+                    {
+                        session.User.SelectedCharacter.AllItems.Add(addItem);
+                    }
+
+                    if (removeItem != null)
+                    {
+                        session.User.SelectedCharacter.AllItems.Remove(removeItem);
+                    }
+
                     session.Send(new UpdateCharacterResponse
                     {
                         Data = session.User.SelectedCharacter

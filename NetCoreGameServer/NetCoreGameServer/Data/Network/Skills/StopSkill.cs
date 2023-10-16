@@ -1,4 +1,7 @@
 ﻿using MediatR;
+using MySqlX.XDevAPI;
+using NetCoreGameServer.Data.Network.Characters;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Data.Network.Skills;
@@ -22,6 +25,24 @@ public class StopSkillHandler : IRequestHandler<StopSkillRequest>
         if (_session.User.CurrentSkill != null)
         {
             _session.User.CurrentSkill.Stop();
+
+            var (addItem, removeItem) = ItemGenerator.GenerateSkillItem(_session.User.SelectedCharacter!, _session.User.CurrentSkill);
+            _session.User.CurrentSkill.CompletedItem = addItem;
+            if (addItem != null)
+            {
+                _session.User.SelectedCharacter.AllItems.Add(addItem);
+            }
+
+            if (removeItem != null)
+            {
+                _session.User.SelectedCharacter.AllItems.Remove(removeItem);
+            }
+
+            _session.Send(new UpdateCharacterResponse
+            {
+                Data = _session.User.SelectedCharacter
+            });
+
             _session.Send(new UpdateSkillResponse
             {
                 Data = _session.User.CurrentSkill

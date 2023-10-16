@@ -35,18 +35,22 @@ const skillActionInterval = 1500;
 export default function SkillingWindow({ skillType, window }: SkillingWindowProps) {
   const skill = allSkills[skillType];
   let minSkillUpTier = skillType !== SkillType.Fishing ? 'Tier I' : '';//todo implement
-  const { closeWindow, windowState } = useWindow<UISkillWindowState>(window);
-  const [started, setStarted] = useState(false);//false
+  const { closeWindow, windowState, setWindowState } = useWindow<UISkillWindowState>(window);
+  const [started, setStarted] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [actionIndicatorOpacity, setActionIndicatorOpacity] = useState(0);
   const [skillState, setSkillState] = useState<SkillState>({} as SkillState);
 
   const startSkill = () => {
-    console.log(skill.startAction);
+    if (skill.itemsRequired > 0 && started) {
+      setStarted(false);
+      return;
+    }
+    let itemIds = windowState?.items.map(x => x.id).filter(x => x != null);
     send(RequestPacketType.StartSkill, {
       type: skillType,
       level: skill.levelInput ? inputValue : null,
-      itemIds: []//todo get itemids from windowState
+      itemIds: itemIds
     }, true);
   }
 
@@ -61,6 +65,7 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
   useEffect(() => {
     return listen(ResponsePacketType.StartSkill, (e: SkillState) => {
       if (e.type !== skillType) return;
+      setWindowState({ ...windowState!, items: Array(windowState!.items.length) })//todo only remove items with 1 or null quantity
       setStarted(true);
       setSkillState(e);
     }, true);
@@ -113,14 +118,14 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
       {skill.bars.map((x, idx) => <div key={idx} className="w-full flex flex-col gap-1 items-center">
         <div>{skill.labels[idx]}</div>
         <div className="flex flex-row w-full">
-          <ProgressBar text={x} current={skillState.progress[idx]} max={100} color="red" />
+          <ProgressBar text={x} current={skill.inverseBar && skill.inverseBar[idx] ? 100 - skillState.progress[idx] : skillState.progress[idx]} max={100} color="red" />
           {idx == 1 && <div style={{ opacity: actionIndicatorOpacity }} className="pl-1">!</div>}
         </div>
       </div>)}
       <div className={clsx("grid gap-3", skill.buttons.length == 2 ? "grid-cols-2" : "grid-cols-3")}>{skill.buttons.map((x, idx) => <button key={x} onClick={() => sendAction(idx)} className="!px-2">{x}</button>)}</div>
       {skillState.progress[0] === 0 || skillState.isCompleted ? <button onClick={startSkill}>{skill.again}</button> : <button onClick={stopSkill}>{skill.stop}</button>}
     </div>}
-    {skillState?.isCompleted && skillState?.completedItem && <div className="w-full flex flex-col items-center pt-2 gap-2">
+    {started && skillState?.isCompleted && skillState?.completedItem && <div className="w-full flex flex-col items-center pt-2 gap-2">
       Congratulations! You received:
       <ItemSlot item={skillState.completedItem} noDrag />
     </div>}

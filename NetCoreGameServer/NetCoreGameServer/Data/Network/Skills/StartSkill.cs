@@ -35,12 +35,19 @@ public class StartSkillHandler : IRequestHandler<StartSkillRequest>
 
     public async Task Handle(StartSkillRequest request, CancellationToken cancellationToken)
     {
+        if (_session.User.CurrentSkill is { IsCompleted: false })
+        {
+            _session.SendError("You can only start one skill at a time!");
+        }
+
         var state = new SkillState
         {
             Type = request.Data.Type,
             Level = request.Data.Level ?? 1,
-            //todo get inputItems from request
+            Progress = new[] { 100, 0 },
+            InputItems = request.Data.ItemIds.Select(x => _session.User.SelectedCharacter.AllItems.FirstOrDefault(item => item.Id == x)).Where(x => x != null).ToList()
         };
+        state.Update(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
         switch (request.Data.Type)
         {
@@ -50,9 +57,18 @@ public class StartSkillHandler : IRequestHandler<StartSkillRequest>
                     _session.SendError("Your inventory is full.");
                     return;
                 }
-
-                state.Progress = new[] { 100, 0 };
-                state.Update(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                break;
+            case SkillType.Cooking:
+                if (_session.User.SelectedCharacter.Items.Count >= 16)
+                {
+                    _session.SendError("Your inventory is full.");
+                    return;
+                }
+                if (state.InputItems.Count != 1 || !state.InputItems.All(x => x is { SubType: ItemSubType.Fish } && x.Stats.ExperienceGained == 0))
+                {
+                    _session.SendError("An uncooked fish is required for cooking.");
+                    return;
+                }
                 break;
         }
 

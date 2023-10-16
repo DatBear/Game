@@ -12,6 +12,7 @@ type Skill = {
   bars: string[];
   stop: string;
   again: string;
+  inverseBar?: boolean[];
 }
 
 let Cooking: Skill = {
@@ -19,12 +20,13 @@ let Cooking: Skill = {
   directions: 'Drop an item you wish to cook onto the box below.',
   startAction: 'Cook',
   itemsRequired: 1,
-  buttons: [],
-  counters: [],
-  bars: [],
-  labels: [],
-  stop: '',
-  again: '',
+  buttons: ['Flame Counter', 'Cook'],
+  counters: ['Flame!'],
+  bars: ['Temperature', 'ITEM0'],
+  labels: ['If the temperature gets too hot, your item will burn.', 'Click cook to season and cook your fish.'],
+  stop: 'Stop Cooking',
+  again: 'Cook More',
+  inverseBar: [true, false],
 }
 
 let Suffusencing: Skill = {
@@ -70,7 +72,7 @@ let Fishing: Skill = {
   name: 'Fishing',
   directions: 'Drop a fishing rod onto the box below to use it, or leave it blank to use a free loaner fishing rod.',
   startAction: 'Fish',
-  itemsRequired: 1,
+  itemsRequired: 0,
   levelInput: true,
   buttons: ['Snag Counter', 'Reel'],
   counters: ['Snag!'],

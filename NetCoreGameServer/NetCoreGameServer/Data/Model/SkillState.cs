@@ -8,13 +8,18 @@ public class SkillState
 {
     [JsonIgnore]
     private static Random r = new();
+
     [JsonIgnore]
     private const int SkillInterval = 1500;
+
     [JsonIgnore]
-    private Dictionary<SkillType, int> _skillCounters = new()
+    private Dictionary<SkillType, int?[]> _skillCounters = new()
     {
-        { SkillType.Fishing, 0 },
-        { SkillType.Cooking, 0 }
+        { SkillType.Fishing, new int?[] { null, 0 } },
+        { SkillType.Cooking, new int?[] { null, 0 } },
+        { SkillType.Glyphing, new int?[] { 0, 1, 2 } },
+        { SkillType.Suffusencing, new int?[] { null, 0 } },
+        { SkillType.Transmuting, new int?[] { null, 0 } }
     };
 
 
@@ -26,10 +31,13 @@ public class SkillState
 
     [JsonIgnore]
     public bool HasActioned { get; set; }
+
     [JsonIgnore]
     public int? Counter { get; set; }
+
     [JsonIgnore]
     public List<Item> InputItems { get; set; } = new();
+
     [JsonIgnore]
     public int? Level { get; set; }
 
@@ -42,44 +50,50 @@ public class SkillState
             return false;
         }
 
-        switch (Type)
+        if (NextAction != null)
         {
-            case SkillType.Fishing:
-                if (NextAction != null)
-                {
-                    //todo base difficulty on level / prof
-                    var successful = HasActioned && NextAction.Counter == Counter; 
-                    var isCounter = NextAction.Counter != null;
-                    if (successful)
-                    {
-                        Progress[0] -= 5;
-                        Progress[1] += isCounter ? 5 : 10;
-                    }
-                    else
-                    {
-                        Progress[0] -= isCounter ? 10 : 5;
-                    }
+            //todo base difficulty on level / prof / item tier
+            var successful = HasActioned && NextAction.Counter == Counter;
+            var isCounter = NextAction.Counter != null;
+            if (successful)
+            {
+                Progress[0] -= 5;
+                Progress[1] += isCounter ? 5 : 10;
+            }
+            else
+            {
+                Progress[0] -= isCounter ? 10 : 5;
+            }
 
-                    HasActioned = false;
-                    Counter = null;
-                }
-
-                if (IsWon() || IsLost())
-                {
-                    IsCompleted = true;
-                    return true;
-                }
-
-                var counter = r.Next(3) == 0 ? _skillCounters[Type] : (int?)null;
-                var expires = NextAction != null && tick - NextAction.Expires < SkillInterval * 2 ? NextAction.Expires + SkillInterval : tick+SkillInterval;
-                NextAction = new SkillAction
-                {
-                    Counter = counter,
-                    Expires = expires
-                };
-                break;
+            HasActioned = false;
+            Counter = null;
         }
 
+        if (IsWon() || IsLost())
+        {
+            IsCompleted = true;
+            return true;
+        }
+
+        var hasNull = _skillCounters[Type].Contains(null);
+        int? counter;
+        if (hasNull)
+        {
+            //1/3 chance of a counter
+            counter = r.Next(3) != 0 ? null : _skillCounters[Type][r.Next(_skillCounters[Type].Length - 1) + 1];
+        }
+        else
+        {
+            counter = _skillCounters[Type][r.Next(_skillCounters[Type].Length)];
+        }
+
+        var expires = NextAction != null && tick - NextAction.Expires < SkillInterval * 2 ? NextAction.Expires + SkillInterval : tick + SkillInterval;
+        NextAction = new SkillAction
+        {
+            Counter = counter,
+            Expires = expires
+        };
+        
         return true;
     }
 
@@ -97,5 +111,4 @@ public class SkillState
     {
         IsCompleted = true;
     }
-
 }
