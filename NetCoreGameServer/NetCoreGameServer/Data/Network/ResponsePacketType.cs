@@ -19,6 +19,8 @@ public enum ResponsePacketType
     AttackTarget = 14,
     AddGroundItem = 15,
     UpdateGroundItem = 16,
+    StartSkill = 17,
+    UpdateSkill = 18,
 
     Error = 255,
 }

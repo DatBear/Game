@@ -67,6 +67,34 @@ public class ItemGenerator
             < 990 => 12,
             < 1000 => 13,
         };
+    }
 
+    public static Item? GenerateSkillItem(Character character, SkillState state)
+    {
+        switch (state.Type)
+        {
+            case SkillType.Fishing:
+                //todo use fish level/prof
+                var hasMana = r.Next(100) >= 75;
+                var hasLife = !hasMana || r.Next(100) >= 75;
+                var tier = (int)Math.Floor(state.Level!.Value / 5d)+1;
+                var item = new Item
+                {
+                    Id = NextId++,
+                    Stats = new ItemStats
+                    {
+                        MaxLife = hasLife ? r.Next(100*tier) + 1 : 0,
+                        MaxMana = hasMana ? r.Next(100*tier) + 1 : 0,
+                    },
+                    SubType = ItemSubType.Fish,
+                    Quantity = 1,
+                    Tier = tier,
+                    OwnerId = character.Id
+                };
+                return item;
+                break;
+        }
+
+        return null;
     }
 }

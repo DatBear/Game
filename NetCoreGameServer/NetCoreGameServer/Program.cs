@@ -66,6 +66,7 @@ internal class Program
         services.AddSingleton<GameManager>();
         services.AddSingleton<MobActionThread>();
         services.AddSingleton<CharacterRegenThread>();
+        services.AddSingleton<SkillingThread>();
 
         services.AddSharedServices(configuration);
 

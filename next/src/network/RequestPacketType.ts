@@ -21,6 +21,9 @@ enum RequestPacketType {
   ChangeZone,
   PickGroundItem,
   ShrineItem,
+  StartSkill,
+  DoSkillAction,
+  StopSkill,
 }
 
 export default RequestPacketType;

@@ -13,6 +13,7 @@ public class User
     public Character? SelectedCharacter { get; set; }
     public Group? Group { get; set; }
     public Maze? Maze { get; set; }
+    public SkillState? CurrentSkill { get; set; }
 
     public GroupUser AsGroupUser(FightingPosition fightingPosition = FightingPosition.Front)
     {

@@ -5,7 +5,7 @@ type Skill = {
   directions: string;
   startAction: string;
   itemsRequired: number;
-  inputsRequired?: string[];
+  levelInput?: boolean;
   buttons: string[];
   counters: string[];
   labels: string[];
@@ -71,7 +71,7 @@ let Fishing: Skill = {
   directions: 'Drop a fishing rod onto the box below to use it, or leave it blank to use a free loaner fishing rod.',
   startAction: 'Fish',
   itemsRequired: 1,
-  inputsRequired: ['Level'],
+  levelInput: true,
   buttons: ['Snag Counter', 'Reel'],
   counters: ['Snag!'],
   bars: ['Fishing Rod', '? ? ?'],

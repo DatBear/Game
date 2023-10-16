@@ -4,65 +4,43 @@ using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Background;
 
-public class MobActionThread
+public class MobActionThread : BaseBackgroundThread
 {
     private static readonly Random r = new();
-    private readonly GameManager _gameManager;
 
-
-    public MobActionThread(GameManager gameManager)
+    public MobActionThread(GameManager gameManager) : base(gameManager)
     {
-        _gameManager = gameManager;
     }
 
-    public async Task Run()
-    {
-        var stopwatch = new Stopwatch();
-        while (true)
-        {
-            try
-            {
-                await DoMobActions();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            await Task.Delay(Math.Max(0, 50 - (int)stopwatch.ElapsedMilliseconds));//20 tick
-            stopwatch.Restart();
-        }
-    }
-
-    private async Task DoMobActions()
+    protected override async Task Process()
     {
         var tick = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        var groups = _gameManager.GetGroups();
+        var groups = GameManager.GetGroups();
         foreach (var group in groups)
         {
             foreach (var mob in group.Maze.Mobs)
             {
-                var session = _gameManager.GetSession(group.Users.FirstOrDefault()?.User.Id);
+                var session = GameManager.GetSession(group.Users.FirstOrDefault()?.User.Id);
                 if (session != null)
                 {
                     var (attack, target) = mob.GetNextAction(group, tick);
                     if (attack == null) continue;
                     //Console.WriteLine($"#{mob.Id} attacked {target.User.Username} for {dmg} damage.");
-                    
-                    _gameManager.GroupBroadcast(session, new AttackTargetResponse
+
+                    GameManager.GroupBroadcast(session, new AttackTargetResponse
                     {
                         Data = attack
                     });
 
                     if (target.SelectedCharacter.Life <= 0)
                     {
-                        _gameManager.OnPlayerDeath(_gameManager.GetSession(target.Id), target.SelectedCharacter);
+                        GameManager.OnPlayerDeath(GameManager.GetSession(target.Id), target.SelectedCharacter);
                     }
                 }
             }
         }
 
-        var sessions = _gameManager.GetUngroupedSessions();
+        var sessions = GameManager.GetUngroupedSessions();
         foreach (var session in sessions)
         {
             if (session.User.Maze == null) continue;
@@ -77,9 +55,10 @@ public class MobActionThread
 
                 if (session.User.SelectedCharacter.Life <= 0)
                 {
-                    _gameManager.OnPlayerDeath(session, session.User.SelectedCharacter);
+                    GameManager.OnPlayerDeath(session, session.User.SelectedCharacter);
                 }
             }
         }
     }
+
 }

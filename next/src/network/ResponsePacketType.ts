@@ -16,6 +16,8 @@ enum ResponsePacketType {
   AttackTarget,
   AddGroundItem,
   UpdateGroundItem,
+  StartSkill,
+  UpdateSkill,
 
   Error = 255
 }

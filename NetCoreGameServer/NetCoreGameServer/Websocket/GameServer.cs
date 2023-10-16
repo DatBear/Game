@@ -42,6 +42,11 @@ public class GameServer : WsServer
                 var charRegenThread = _serviceProvider.GetService<CharacterRegenThread>();
                 await charRegenThread.Run();
             });
+            Task.Factory.StartNew(async () =>
+            {
+                var skillingThread = _serviceProvider.GetService<SkillingThread>();
+                await skillingThread.Run();
+            });
             Console.WriteLine($"Server started on {Address}:{Port}.");
         }
         else

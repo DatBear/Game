@@ -8,6 +8,9 @@ import { UIWindow } from "@/models/UIWindow";
 import ProgressBar from "./ProgressBar";
 import clsx from "clsx";
 import Item from "@/models/Item";
+import RequestPacketType from "@/network/RequestPacketType";
+import { listen, send } from "@/network/Socket";
+import ResponsePacketType from "@/network/ResponsePacketType";
 
 type SkillingWindowProps = {
   skillType: SkillType;
@@ -20,6 +23,7 @@ type SkillAction = {
 }
 
 type SkillState = {
+  type: SkillType;
   isCompleted: boolean;
   completedItem?: Item;
   progress: number[];
@@ -33,57 +37,60 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
   let minSkillUpTier = skillType !== SkillType.Fishing ? 'Tier I' : '';//todo implement
   const { closeWindow, windowState } = useWindow<UISkillWindowState>(window);
   const [started, setStarted] = useState(false);//false
-  const [inputValues, setInputValues] = useState(skill.inputsRequired?.map(x => ''));
-  const [progressBars, setProgressBars] = useState(skill.bars.map(_ => 50));
-  const [nextAction, setNextAction] = useState<SkillAction>();
+  const [inputValue, setInputValue] = useState('');
   const [actionIndicatorOpacity, setActionIndicatorOpacity] = useState(0);
+  const [skillState, setSkillState] = useState<SkillState>({} as SkillState);
 
   const startSkill = () => {
     console.log(skill.startAction);
-    setStarted(true);
+    send(RequestPacketType.StartSkill, {
+      type: skillType,
+      level: skill.levelInput ? inputValue : null,
+      itemIds: []//todo get itemids from windowState
+    }, true);
   }
 
   const sendAction = (action: number) => {
-    console.log('action', action);
+    send(RequestPacketType.DoSkillAction, action < skill.counters.length ? action : null);
   }
 
   const stopSkill = () => {
-    setStarted(false);
+    send(RequestPacketType.StopSkill, null);
   }
 
   useEffect(() => {
-    var timer = setInterval(() => {
+    return listen(ResponsePacketType.StartSkill, (e: SkillState) => {
+      if (e.type !== skillType) return;
+      setStarted(true);
+      setSkillState(e);
+    }, true);
+  }, []);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.UpdateSkill, (e: SkillState) => {
+      if (e.type !== skillType) return;
+      setSkillState(e);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!skillState.nextAction) return;
+    var timer = setTimeout(() => {
       if (!started) return;
-      setNextAction(undefined);
-      console.log('next action set');
-    }, 1500);
-    return () => clearInterval(timer);
-  }, [started, setNextAction]);
+      setSkillState({ ...skillState!, nextAction: undefined });
+    }, skillState.nextAction.expires - new Date().getTime());
+    return () => clearTimeout(timer);
+  }, [started, skillState, setSkillState]);
 
   useEffect(() => {
-    if (nextAction) return;
-    var timeout = setTimeout(() => {
-      setNextAction({
-        counter: Math.random() > .5 ? 0 : undefined,//
-        expires: new Date().getTime() + skillActionInterval
-      });
-      return () => clearTimeout(timeout);
-    }, 1500);
-  }, [nextAction]);
-
-  useEffect(() => {
-    if (!nextAction || !started) return;
+    if (!skillState.nextAction || !started) return;
     var interval = setInterval(() => {
-
-      var opacity = (nextAction.expires - new Date().getTime()) / skillActionInterval * 2;
+      if (!skillState.nextAction) return;
+      var opacity = (skillState.nextAction!.expires - new Date().getTime()) / skillActionInterval * 2;
       setActionIndicatorOpacity(opacity);
-      //console.log('opacity', opacity);
     }, 50);
-
     return () => clearInterval(interval);
-  }, [nextAction]);
-
-
+  }, [skillState]);
 
   return <Window className="!w-96" isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>{skill.name}</Window.Title>
@@ -93,12 +100,10 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
         {[...Array(windowState?.items?.length ?? 0)].map((_, idx) => <ItemSlot key={idx} item={windowState?.items[idx]} action={idx == 0 ? ItemAction.SetSkill : ItemAction.SetSkill2} skill={skillType} />)}
       </div>
       {minSkillUpTier !== '' && <span>Minimum To Skill Up: {minSkillUpTier}</span>}
-      {(skill.inputsRequired?.length ?? 0) > 0 && skill.inputsRequired?.map((x, idx) => {
-        return <label key={x} className="flex flex-row gap-x-2 items-center">
-          <span>{x}:</span>
-          <div className="w-14"><input name={x} placeholder={x} value={inputValues![idx]} onChange={(e) => { inputValues!.splice(idx, 1, e.target.value); setInputValues([...inputValues!]) }} /></div>
-        </label>
-      })}
+      {skill.levelInput && <label className="flex flex-row gap-x-2 items-center">
+        <span>Level:</span>
+        <div className="w-14"><input placeholder="Level" value={inputValue} onChange={(e) => setInputValue(e.target.value)} /></div>
+      </label>}
       <div>
         <button className="ignore-reorder" onClick={startSkill}>{skill.startAction}</button>
       </div>
@@ -108,15 +113,19 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
       {skill.bars.map((x, idx) => <div key={idx} className="w-full flex flex-col gap-1 items-center">
         <div>{skill.labels[idx]}</div>
         <div className="flex flex-row w-full">
-          <ProgressBar text={x} current={progressBars[idx]} max={100} color="red" />
+          <ProgressBar text={x} current={skillState.progress[idx]} max={100} color="red" />
           {idx == 1 && <div style={{ opacity: actionIndicatorOpacity }} className="pl-1">!</div>}
         </div>
       </div>)}
       <div className={clsx("grid gap-3", skill.buttons.length == 2 ? "grid-cols-2" : "grid-cols-3")}>{skill.buttons.map((x, idx) => <button key={x} onClick={() => sendAction(idx)} className="!px-2">{x}</button>)}</div>
-      {progressBars[0] === 0 ? <button onClick={startSkill}>{skill.again}</button> : <button onClick={stopSkill}>{skill.stop}</button>}
+      {skillState.progress[0] === 0 || skillState.isCompleted ? <button onClick={startSkill}>{skill.again}</button> : <button onClick={stopSkill}>{skill.stop}</button>}
     </div>}
-    {started && nextAction && <div className="absolute inset-0 pointer-events-none">
-      {nextAction.counter !== undefined && <div className="relative left-[40%] top-[40%] text-shadow text-2xl counter-anim">{skill.counters[nextAction.counter]}</div>}
+    {skillState?.isCompleted && skillState?.completedItem && <div className="w-full flex flex-col items-center pt-2 gap-2">
+      Congratulations! You received:
+      <ItemSlot item={skillState.completedItem} noDrag />
+    </div>}
+    {started && skillState.nextAction && <div className="absolute inset-0 pointer-events-none">
+      {skillState.nextAction.counter !== undefined && <div className="relative left-[40%] top-[40%] text-shadow text-2xl counter-anim">{skill.counters[skillState.nextAction.counter]}</div>}
     </div>}
   </Window>
 };

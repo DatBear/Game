@@ -24,4 +24,7 @@ public enum RequestPacketType
     ChangeZone = 19,
     PickGroundItem = 20,
     ShrineItem = 21,
+    StartSkill = 22,
+    DoSkillAction = 23,
+    StopSkill = 24,
 }
