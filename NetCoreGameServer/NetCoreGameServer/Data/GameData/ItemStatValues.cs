@@ -57,4 +57,22 @@ public class ItemStatValues
         { ItemStat.LevelUp, 0 },
         { ItemStat.LevelCap, 0 },
     };
+
+    public static List<Action<ItemStats>> EssenceActions = new()
+    {
+        //this is a little deranged
+        x => x.EnhancedEffect = 1,
+        x => x.Strength = 1,
+        x => x.Dexterity = 1,
+        x => x.Vitality = 1,
+        x => x.Intelligence = 1,
+        x => x.MaxLife = 1,
+        x => x.MaxMana = 1,
+        x => x.ExperienceGained = 1,
+        x => x.MagicLuck = 1,
+        x => x.LifeRegen = 1,
+        x => x.ManaRegen = 1,
+        x => x.ExtraEquipmentSlots = 1,
+        x => x.CriticalStrike = 1,
+    };
 }

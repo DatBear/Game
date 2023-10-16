@@ -76,21 +76,22 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
       setStarted(true);
       setSkillState(e);
     }, true);
-  }, []);
+  }, [windowState, setWindowState]);
 
   useEffect(() => {
     return listen(ResponsePacketType.UpdateSkill, (e: SkillState) => {
       if (e.type !== skillType) return;
       setSkillState(e);
     });
-  }, []);
+  }, [setSkillState]);
 
   useEffect(() => {
     if (!skillState.nextAction || !started) return;
+    var duration = skillState.nextAction.expires - new Date().getTime();
     var timer = setTimeout(() => {
       if (!started) return;
       setSkillState({ ...skillState!, nextAction: undefined });
-    }, skillState.nextAction.expires - new Date().getTime());
+    }, duration - 50);
     return () => clearTimeout(timer);
   }, [started, skillState, setSkillState]);
 
@@ -136,7 +137,7 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
       Congratulations! You received:
       <ItemSlot item={skillState.completedItem} noDrag />
     </div>}
-    {started && skillState.nextAction && <div className="absolute inset-0 pointer-events-none">
+    {started && skillState.nextAction && <div className="absolute inset-0 pointer-events-none overflow-hidden">
       {skillState.nextAction.counter !== undefined && <div className="relative left-[40%] top-[40%] text-shadow text-2xl counter-anim">{skill.counters[skillState.nextAction.counter]}</div>}
     </div>}
   </Window>

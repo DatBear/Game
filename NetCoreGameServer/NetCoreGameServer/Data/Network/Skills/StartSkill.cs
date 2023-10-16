@@ -45,9 +45,16 @@ public class StartSkillHandler : IRequestHandler<StartSkillRequest>
             Type = request.Data.Type,
             Level = request.Data.Level ?? 1,
             Progress = new[] { 100, 0 },
-            InputItems = request.Data.ItemIds.Select(x => _session.User.SelectedCharacter.AllItems.FirstOrDefault(item => item.Id == x)).Where(x => x != null).ToList()
+            InputItems = request.Data.ItemIds
+                                .Select(x => _session.User.SelectedCharacter.AllItems.FirstOrDefault(item => item.Id == x))
+                                .Where(x => x != null).Select(x => x!)
+                                .OrderBy(x => x.SubType)
+                                .Take(2).ToList()
         };
         state.Update(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+
+        var firstItem = state.InputItems.Count > 0 ? state.InputItems[0] : null;
+        var secondItem = state.InputItems.Count > 1 ? state.InputItems[1] : null;
 
         switch (request.Data.Type)
         {
@@ -57,6 +64,7 @@ public class StartSkillHandler : IRequestHandler<StartSkillRequest>
                     _session.SendError("Your inventory is full.");
                     return;
                 }
+
                 break;
             case SkillType.Cooking:
                 if (_session.User.SelectedCharacter.Items.Count >= 16)
@@ -64,11 +72,75 @@ public class StartSkillHandler : IRequestHandler<StartSkillRequest>
                     _session.SendError("Your inventory is full.");
                     return;
                 }
+
                 if (state.InputItems.Count != 1 || !state.InputItems.All(x => x is { SubType: ItemSubType.Fish } && x.Stats.ExperienceGained == 0))
                 {
                     _session.SendError("An uncooked fish is required for cooking.");
                     return;
                 }
+
+                break;
+            case SkillType.Glyphing:
+                if (state.InputItems.Count == 0)
+                {
+                    _session.SendError("Glyphing requires one item or two glyphs.");
+                    return;
+                }
+
+                if (firstItem is { SubType: < ItemSubType.Fish } && secondItem != null)
+                {
+                    if (secondItem != null)
+                    {
+                        _session.SendError("Glyphing an item requires an empty second slot.");
+                        return;
+                    }
+
+                    if (_session.User.SelectedCharacter.Items.Count >= 16)
+                    {
+                        _session.SendError("Your inventory is full.");
+                        return;
+                    }
+                }
+
+                if (firstItem is { SubType: ItemSubType.Glyph } && secondItem is not { SubType: ItemSubType.Glyph })
+                {
+                    //todo add tier/overlapping stats restriction
+                    _session.SendError("Combining glyphs requires two glyphs of the same tier without overlapping stats.");
+                    return;
+                }
+
+                break;
+            case SkillType.Transmuting:
+                if (state.InputItems.Count == 0 || firstItem is { SubType: >= ItemSubType.Fish })
+                {
+                    _session.SendError("Transmuting requires one item or an item and an essence.");
+                    return;
+                }
+
+                if (firstItem is { SubType: < ItemSubType.Fish })
+                {
+                    if (secondItem != null)
+                    {
+                        if (firstItem.Stats.NumStats() > 0 || secondItem.SubType != ItemSubType.Essence)
+                        {
+                            _session.SendError("Transmuting an item requires a normal item and an essence.");
+                            return;
+                        }
+
+                        if (firstItem.Tier != secondItem.Tier)
+                        {
+                            _session.SendError("Both items must be the same tier.");
+                            return;
+                        }
+                    }
+
+                    if (_session.User.SelectedCharacter.Items.Count >= 16 && secondItem == null)
+                    {
+                        _session.SendError("Your inventory is full.");
+                        return;
+                    }
+                }
+
                 break;
         }
 

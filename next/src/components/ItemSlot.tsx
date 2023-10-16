@@ -172,7 +172,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
           <div className="relative flex flex-col">
             <div className="w-max"><b>{prefix} {itemNames[item.subType]} {itemTiers[item.tier]}</b></div>
             {calculatedItemStats.filter(x => x.hasStat(item, character)).map(x => <div key={x.name} className={clsx(x.class && x.class(item, character), "w-max")}>{x.name}: {x.value(item, character)}</div>)}
-            {recordKeys(item.stats).map(k => {
+            {item.subType != ItemSubType.Essence && recordKeys(item.stats).map(k => {
               const statNamesRecord = type === ItemType.Item ? itemSpecificStatNames : statNames;
               const statName = statNamesRecord[k];
               if (!statName) {

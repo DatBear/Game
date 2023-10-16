@@ -50,6 +50,7 @@ public class SkillState
             return false;
         }
 
+        var hasNull = _skillCounters[Type].Contains(null);
         if (NextAction != null)
         {
             //todo base difficulty on level / prof / item tier
@@ -58,11 +59,11 @@ public class SkillState
             if (successful)
             {
                 Progress[0] -= 5;
-                Progress[1] += isCounter ? 5 : 10;
+                Progress[1] += hasNull && isCounter ? 5 : 10;
             }
             else
             {
-                Progress[0] -= isCounter ? 10 : 5;
+                Progress[0] -= hasNull && isCounter ? 10 : 5;
             }
 
             HasActioned = false;
@@ -75,7 +76,6 @@ public class SkillState
             return true;
         }
 
-        var hasNull = _skillCounters[Type].Contains(null);
         int? counter;
         if (hasNull)
         {

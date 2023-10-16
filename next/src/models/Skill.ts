@@ -59,13 +59,14 @@ let Transmuting: Skill = {
   name: 'Transmuting',
   directions: 'Drop an item or item + essence you wish to transmute onto the box(es) below.',
   startAction: 'Transmute',
-  itemsRequired: 2,
-  buttons: [],
-  counters: [],
-  bars: [],
-  labels: [],
-  stop: '',
-  again: '',
+  itemsRequired: 1,
+  buttons: ['Stabilize', 'Transmute'],
+  counters: ['Volatile!'],
+  bars: ['Volatility', 'Transmutation'],
+  labels: ["Click Stabilize to lower the Volatility.", "Click Transmute to transmute your item."],
+  stop: 'Abort',
+  again: 'Transmute More',
+  inverseBar: [true, false],
 }
 
 let Fishing: Skill = {

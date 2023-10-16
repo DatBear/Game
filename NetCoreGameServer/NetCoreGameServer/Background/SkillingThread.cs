@@ -33,9 +33,9 @@ public class SkillingThread : BaseBackgroundThread
                         session.User.SelectedCharacter.AllItems.Add(addItem);
                     }
 
-                    if (removeItem != null)
+                    if (removeItem != null && removeItem.Any())
                     {
-                        session.User.SelectedCharacter.AllItems.Remove(removeItem);
+                        session.User.SelectedCharacter.AllItems.RemoveAll(x => removeItem.Contains(x));
                     }
 
                     session.Send(new UpdateCharacterResponse
