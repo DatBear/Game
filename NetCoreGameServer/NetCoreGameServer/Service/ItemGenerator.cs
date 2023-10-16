@@ -79,6 +79,12 @@ public class ItemGenerator
                 {
                     return (null, state.InputItems.FirstOrDefault());
                 }
+
+                if (!state.IsWon())
+                {
+                    return (null, null);
+                }
+
                 //todo use fish level/prof
                 var hasMana = r.Next(100) >= 75;
                 var hasLife = !hasMana || r.Next(100) >= 75;
@@ -101,8 +107,8 @@ public class ItemGenerator
             case SkillType.Cooking:
             {
                 var fish = state.InputItems.First();
-                var cooked = Math.Min(100, state.Progress[1]);
-                var multiplier = !state.IsLost() ? 1 + cooked / 100d : 1 - (100-state.Progress[0])/100d;//something like this...
+                var cooked = Math.Min(100, state.Progress[1]) + (state.IsLost() ? -100 : 0);
+                var multiplier = 1 + cooked / 100d;//something like this...
                 var item = new Item
                 {
                     Id = NextId++,

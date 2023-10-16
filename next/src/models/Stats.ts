@@ -119,7 +119,7 @@ const itemSpecificStatNames: Record<string, string> = {
   ...statNames,
   ["maxLife"]: "Heals {x} Life",
   ["maxMana"]: "Recovers {x} Mana",
-  ["experienceGained"]: "% Cooked"
+  ["experienceGained"]: "{x}% Cooked"
 }
 
 

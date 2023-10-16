@@ -35,7 +35,7 @@ const skillActionInterval = 1500;
 export default function SkillingWindow({ skillType, window }: SkillingWindowProps) {
   const skill = allSkills[skillType];
   let minSkillUpTier = skillType !== SkillType.Fishing ? 'Tier I' : '';//todo implement
-  const { closeWindow, windowState, setWindowState } = useWindow<UISkillWindowState>(window);
+  const { windowState, setWindowState } = useWindow<UISkillWindowState>(window);
   const [started, setStarted] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [actionIndicatorOpacity, setActionIndicatorOpacity] = useState(0);
@@ -62,6 +62,13 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
     send(RequestPacketType.StopSkill, null);
   }
 
+  const closeWindow = () => {
+    setWindowState({ ...windowState!, isVisible: false, items: Array(windowState!.items.length) });
+    if (skillState && !skillState.isCompleted) {
+      stopSkill();
+    }
+  }
+
   useEffect(() => {
     return listen(ResponsePacketType.StartSkill, (e: SkillState) => {
       if (e.type !== skillType) return;
@@ -79,7 +86,7 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
   }, []);
 
   useEffect(() => {
-    if (!skillState.nextAction) return;
+    if (!skillState.nextAction || !started) return;
     var timer = setTimeout(() => {
       if (!started) return;
       setSkillState({ ...skillState!, nextAction: undefined });
@@ -123,7 +130,7 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
         </div>
       </div>)}
       <div className={clsx("grid gap-3", skill.buttons.length == 2 ? "grid-cols-2" : "grid-cols-3")}>{skill.buttons.map((x, idx) => <button key={x} onClick={() => sendAction(idx)} className="!px-2">{x}</button>)}</div>
-      {skillState.progress[0] === 0 || skillState.isCompleted ? <button onClick={startSkill}>{skill.again}</button> : <button onClick={stopSkill}>{skill.stop}</button>}
+      {skillState.progress[0] === 0 || skillState.isCompleted ? <button onClick={startSkill} className="ignore-reorder">{skill.again}</button> : <button onClick={stopSkill}>{skill.stop}</button>}
     </div>}
     {started && skillState?.isCompleted && skillState?.completedItem && <div className="w-full flex flex-col items-center pt-2 gap-2">
       Congratulations! You received:
