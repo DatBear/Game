@@ -1,4 +1,4 @@
-import { ProgressBarProps } from "@/components/ProgressBar";
+import { ProgressBarProps } from '@/components/ProgressBar';
 
 type Skill = {
   name: string;
@@ -34,12 +34,12 @@ let Suffusencing: Skill = {
   directions: 'Drop an item + essence you wish to suffusence onto the boxes below.',
   startAction: 'Suffusence',
   itemsRequired: 2,
-  buttons: [],
-  counters: [],
-  bars: [],
-  labels: [],
-  stop: '',
-  again: '',
+  buttons: ['Suffuse', 'Extract'],
+  counters: ['Suffuse!', 'Extract!'],
+  bars: ['Permanence', 'Suffusencion'],
+  labels: ['Don\'t let the Permanance run out.', 'Click the correct technique as necessary.'],
+  stop: 'Abort',
+  again: 'Suffusence more',
 }
 
 let Glyphing: Skill = {
@@ -63,7 +63,7 @@ let Transmuting: Skill = {
   buttons: ['Stabilize', 'Transmute'],
   counters: ['Volatile!'],
   bars: ['Volatility', 'Transmutation'],
-  labels: ["Click Stabilize to lower the Volatility.", "Click Transmute to transmute your item."],
+  labels: ['Click Stabilize to lower the Volatility.', 'Click Transmute to transmute your item.'],
   stop: 'Abort',
   again: 'Transmute More',
   inverseBar: [true, false],

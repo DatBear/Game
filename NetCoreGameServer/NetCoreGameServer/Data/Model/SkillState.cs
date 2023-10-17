@@ -18,7 +18,7 @@ public class SkillState
         { SkillType.Fishing, new int?[] { null, 0 } },
         { SkillType.Cooking, new int?[] { null, 0 } },
         { SkillType.Glyphing, new int?[] { 0, 1, 2 } },
-        { SkillType.Suffusencing, new int?[] { null, 0 } },
+        { SkillType.Suffusencing, new int?[] { 0, 1 } },
         { SkillType.Transmuting, new int?[] { null, 0 } }
     };
 

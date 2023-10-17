@@ -119,6 +119,12 @@ public class StartSkillHandler : IRequestHandler<StartSkillRequest>
 
                 if (firstItem is { SubType: < ItemSubType.Fish })
                 {
+                    if (firstItem.Stats.NumStats() <= 0 && secondItem == null)
+                    {
+                        _session.SendError("Transmuting an item to an essence requires magical or higher items.");
+                        return;
+                    }
+
                     if (secondItem != null)
                     {
                         if (firstItem.Stats.NumStats() > 0 || secondItem.SubType != ItemSubType.Essence)
@@ -141,6 +147,24 @@ public class StartSkillHandler : IRequestHandler<StartSkillRequest>
                     }
                 }
 
+                break;
+            case SkillType.Suffusencing:
+                if (state.InputItems.Count == 0 || firstItem is not { SubType: ItemSubType.Fish or ItemSubType.Glyph } || secondItem is not { SubType: ItemSubType.Essence })
+                {
+                    _session.SendError("Suffusencing requires a fish or glyph and an essence to enhance it with.");
+                    return;
+                }
+
+                if (firstItem.Stats.EnhancedEffect > 0)
+                {
+                    _session.SendError("That item has already been enhanced.");
+                    return;
+                }
+
+                if (firstItem.Tier != secondItem.Tier)
+                {
+                    _session.SendError("Items must be the same tier.");
+                }
                 break;
         }
 

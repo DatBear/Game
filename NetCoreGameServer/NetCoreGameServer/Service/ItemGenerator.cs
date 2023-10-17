@@ -202,27 +202,53 @@ public class ItemGenerator
                     ItemStatValues.EssenceActions.Take(firstItem.Stats.NumStats()).ToList().ForEach(x => x(essence.Stats));
                     return (essence, new List<Item?> { firstItem });
                 }
-                else
+
+                //transmuting item
+                if (!state.IsWon())
                 {
-                    //transmuting item
-                    if (!state.IsWon())
-                    {
-                        return (null, state.InputItems); //ridiculous warning
-                    }
-
-                    var possibleStats = PossibleStats(firstItem.SubType);
-                    var stats = GenerateStats(possibleStats, secondItem.Stats.NumStats(), firstItem.Tier);
-                    var item = new Item
-                    {
-                        Id = NextId++,
-                        OwnerId = character.Id,
-                        Tier = firstItem.Tier,
-                        SubType = firstItem.SubType,
-                        Stats = stats
-                    };
-
-                    return (item, state.InputItems);
+                    return (null, state.InputItems); //ridiculous warning
                 }
+
+                var possibleStats = PossibleStats(firstItem.SubType);
+                var stats = GenerateStats(possibleStats, secondItem.Stats.NumStats(), firstItem.Tier);
+                var item = new Item
+                {
+                    Id = NextId++,
+                    OwnerId = character.Id,
+                    Tier = firstItem.Tier,
+                    SubType = firstItem.SubType,
+                    Stats = stats
+                };
+
+                return (item, state.InputItems);
+            }
+            case SkillType.Suffusencing:
+            {
+                if (!state.IsWon())
+                {
+                    return (null, state.InputItems);
+                }
+
+
+                var item = new Item
+                {
+                    Id = NextId++,
+                    OwnerId = character.Id,
+                    Quantity = firstItem.Quantity.HasValue ? 1 : 0,
+                    SubType = firstItem.SubType,
+                    Tier = firstItem.Tier,
+                    Stats = firstItem.Stats,
+                };
+                item.Stats.EnhancedEffect = secondItem.Stats.NumStats() * 20;
+                switch (firstItem.SubType)
+                {
+                    case ItemSubType.Fish:
+                        item.Stats.MaxLife = (int)Math.Floor(item.Stats.MaxLife * ((100 + item.Stats.EnhancedEffect) / 100d));
+                        item.Stats.MaxMana = (int)Math.Floor(item.Stats.MaxMana * ((100 + item.Stats.EnhancedEffect) / 100d));
+                        break;
+                }
+
+                return (item, state.InputItems);
             }
         }
 
