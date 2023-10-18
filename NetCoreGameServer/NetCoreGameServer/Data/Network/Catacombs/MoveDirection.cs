@@ -29,6 +29,10 @@ public class MoveDirectionHandler : IRequestHandler<MoveDirectionRequest>
         }
 
         var maze = _session.User.Group?.Maze ?? _session.User.Maze;
+        if (maze.Mobs.Count > 0)
+        {
+            return;
+        }
 
         var newDirection = request.Data switch
         {

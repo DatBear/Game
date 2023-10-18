@@ -28,15 +28,13 @@ public class SkillState
     public Item? CompletedItem { get; set; }
     public int[] Progress { get; set; }
     public SkillAction? NextAction { get; set; }
+    public List<Item> InputItems { get; set; } = new();
 
     [JsonIgnore]
     public bool HasActioned { get; set; }
 
     [JsonIgnore]
     public int? Counter { get; set; }
-
-    [JsonIgnore]
-    public List<Item> InputItems { get; set; } = new();
 
     [JsonIgnore]
     public int? Level { get; set; }

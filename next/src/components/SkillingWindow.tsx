@@ -7,7 +7,7 @@ import { ItemAction } from "@/models/ItemAction";
 import { UIWindow } from "@/models/UIWindow";
 import ProgressBar from "./ProgressBar";
 import clsx from "clsx";
-import Item from "@/models/Item";
+import Item, { getItemName } from "@/models/Item";
 import RequestPacketType from "@/network/RequestPacketType";
 import { listen, send } from "@/network/Socket";
 import ResponsePacketType from "@/network/ResponsePacketType";
@@ -28,6 +28,7 @@ type SkillState = {
   completedItem?: Item;
   progress: number[];
   nextAction?: SkillAction;
+  inputItems: Item[];
 }
 
 const skillActionInterval = 1500;
@@ -126,7 +127,7 @@ export default function SkillingWindow({ skillType, window }: SkillingWindowProp
       {skill.bars.map((x, idx) => <div key={idx} className="w-full flex flex-col gap-1 items-center">
         <div>{skill.labels[idx]}</div>
         <div className="flex flex-row w-full">
-          <ProgressBar text={x} current={skill.inverseBar && skill.inverseBar[idx] ? 100 - skillState.progress[idx] : skillState.progress[idx]} max={100} color="red" />
+          <ProgressBar text={x.replace("ITEM0", getItemName(skillState.inputItems[0]))} current={skill.inverseBar && skill.inverseBar[idx] ? 100 - skillState.progress[idx] : skillState.progress[idx]} max={100} color="red" />
           {idx == 1 && <div style={{ opacity: actionIndicatorOpacity }} className="pl-1">!</div>}
         </div>
       </div>)}

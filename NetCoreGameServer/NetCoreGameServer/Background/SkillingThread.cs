@@ -35,7 +35,10 @@ public class SkillingThread : BaseBackgroundThread
 
                     if (removeItem != null && removeItem.Any())
                     {
-                        session.User.SelectedCharacter.AllItems.RemoveAll(x => removeItem.Contains(x));
+                        foreach (var item in removeItem.Where(item => item.Unstack()))
+                        {
+                            session.User.SelectedCharacter.AllItems.Remove(item);
+                        }
                     }
 
                     session.Send(new UpdateCharacterResponse

@@ -5,7 +5,7 @@ namespace NetCoreGameServer.Service;
 
 public class ItemGenerator
 {
-    private static Random r = new Random();
+    private static Random r = new();
     private static int DropChance = 100;
     private static int NextId = 1;
 
@@ -60,6 +60,7 @@ public class ItemGenerator
         return type switch
         {
             < ItemSubType.Fish => Enum.GetValues<ItemStat>().Take((int)ItemStat.Jubilance + 1).ToList(),
+            ItemSubType.Glyph => Enum.GetValues<ItemStat>().Take((int)ItemStat.Jubilance + 1).ToList(),
             ItemSubType.Fish => new List<ItemStat> { ItemStat.MaxLife, ItemStat.MaxMana },
             ItemSubType.FishingRod => new List<ItemStat> { ItemStat.EnhancedEffect },
             ItemSubType.Comfrey => new List<ItemStat> { ItemStat.MaxLife, ItemStat.MaxMana },
@@ -88,8 +89,7 @@ public class ItemGenerator
             < 940 => 9,
             < 960 => 10,
             < 975 => 11,
-            < 990 => 12,
-            < 1000 => 13,
+            < 1000 => 12
         };
     }
 
@@ -135,14 +135,14 @@ public class ItemGenerator
             {
                 var fish = state.InputItems.First();
                 var cooked = Math.Min(100, state.Progress[1]) + (state.IsLost() ? -100 : 0);
-                var multiplier = 1 + cooked / 100d; //something like this...
+                var multiplier = 1 + cooked / 100d;
                 var item = new Item
                 {
                     Id = NextId++,
                     Stats = new ItemStats
                     {
-                        MaxLife = (int)Math.Floor(fish.Stats.MaxLife * multiplier),
-                        MaxMana = (int)Math.Floor(fish.Stats.MaxMana * multiplier),
+                        MaxLife = (int)Math.Floor(fish.Stats.MaxLife / ((double?)fish.Quantity ?? 1d) * multiplier),
+                        MaxMana = (int)Math.Floor(fish.Stats.MaxMana / ((double?)fish.Quantity ?? 1d) * multiplier),
                         ExperienceGained = cooked,
                     },
                     Tier = fish.Tier,
@@ -228,24 +228,25 @@ public class ItemGenerator
                 {
                     return (null, state.InputItems);
                 }
-
-
+                
                 var item = new Item
                 {
                     Id = NextId++,
                     OwnerId = character.Id,
-                    Quantity = firstItem.Quantity.HasValue ? 1 : 0,
+                    Quantity = 1,
                     SubType = firstItem.SubType,
                     Tier = firstItem.Tier,
-                    Stats = firstItem.Stats,
+                    Stats = firstItem.Stats.Clone(),
                 };
                 item.Stats.EnhancedEffect = secondItem.Stats.NumStats() * 20;
                 switch (firstItem.SubType)
                 {
                     case ItemSubType.Fish:
-                        item.Stats.MaxLife = (int)Math.Floor(item.Stats.MaxLife * ((100 + item.Stats.EnhancedEffect) / 100d));
-                        item.Stats.MaxMana = (int)Math.Floor(item.Stats.MaxMana * ((100 + item.Stats.EnhancedEffect) / 100d));
-                        break;
+                        var quantity = firstItem.Quantity ?? 1d;
+                        item.Stats.MaxLife = (int)Math.Floor(firstItem.Stats.MaxLife / quantity * ((100 + item.Stats.EnhancedEffect) / 100d));
+                        item.Stats.MaxMana = (int)Math.Floor(firstItem.Stats.MaxMana / quantity * ((100 + item.Stats.EnhancedEffect) / 100d));
+                        item.Stats.ExperienceGained = (int)Math.Floor(firstItem.Stats.ExperienceGained / quantity);
+                            break;
                 }
 
                 return (item, state.InputItems);

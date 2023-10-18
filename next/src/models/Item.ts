@@ -1,4 +1,4 @@
-import Character, { CharacterClass } from "./Character";
+import { CharacterClass } from "./Character";
 import { EquippedItemSlot } from "./EquippedItem";
 import { Stats } from "./Stats";
 
@@ -232,5 +232,10 @@ let defaultItem = (subType: ItemSubType) => {
   } as Item;
 };
 
-export { itemTypes, getItemType, itemIcons, itemTiers, itemMagicPrefixes, itemNames, classWeapons, classArmors, classCharms, defaultItem }
+let getItemName = (item?: Item) => {
+  if (!item) return '';
+  return `${itemMagicPrefixes[Object.keys(item?.stats ?? 0).length]} ${itemNames[item.subType]} ${itemTiers[item.tier]}`;
+}
+
+export { itemTypes, getItemType, itemIcons, itemTiers, itemMagicPrefixes, itemNames, classWeapons, classArmors, classCharms, defaultItem, getItemName }
 export default Item;

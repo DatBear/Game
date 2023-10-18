@@ -1,7 +1,10 @@
-﻿namespace NetCoreGameServer.Data.Model;
+﻿using Newtonsoft.Json;
+
+namespace NetCoreGameServer.Data.Model;
 
 public class Stats
 {
+    [JsonIgnore]
     public int Id { get; set; }
     public int EnhancedEffect { get; set; }
     public int Strength { get; set; }

@@ -20,7 +20,13 @@ public class ItemStats : Stats
 
     public int NumStats()
     {
+        //todo remove reflection
         var props = typeof(ItemStats).GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => x.Name != "Id");
         return props.Count(x => x.PropertyType == typeof(int) && (int)x.GetValue(this) > 0);
+    }
+
+    public ItemStats Clone()
+    {
+        return (ItemStats)MemberwiseClone();
     }
 }

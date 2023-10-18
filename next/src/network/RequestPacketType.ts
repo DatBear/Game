@@ -24,6 +24,7 @@ enum RequestPacketType {
   StartSkill,
   DoSkillAction,
   StopSkill,
+  StackItem,
 }
 
 export default RequestPacketType;

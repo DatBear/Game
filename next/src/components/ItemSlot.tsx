@@ -1,4 +1,4 @@
-import Item, { itemIcons, itemTiers, ItemSubType, ItemType, getItemType, itemMagicPrefixes, itemNames } from "@/models/Item";
+import Item, { itemIcons, itemTiers, ItemSubType, ItemType, getItemType, itemMagicPrefixes, itemNames, getItemName } from "@/models/Item";
 import { ItemAction } from "@/models/ItemAction";
 import { SkillType } from "@/models/Skill";
 import clsx from "clsx";
@@ -10,6 +10,8 @@ import { itemSpecificStatNames, statNames } from "@/models/Stats";
 import calculatedItemStats from "@/models/CalculatedItemStat";
 import { recordKeys } from "@/utils/RecordUtils";
 import { EquippedItemSlot } from "@/models/EquippedItem";
+import RequestPacketType from "@/network/RequestPacketType";
+import { send } from "@/network/Socket";
 
 const dragType = "Item";
 
@@ -42,13 +44,12 @@ const typeSlots: Partial<Record<ItemType, EquippedItemSlot>> = {
 }
 
 export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTypes, acceptMaxTier, slot, action: action, skill, noDrag, noTooltip, hotkey, borderless, noBackground, children, className, ...props }: ItemProps) {
-  const prefix = itemMagicPrefixes[Object.keys(item?.stats ?? 0).length];
   const type = item && getItemType(item.subType);
   const iconPath = !item ? '' : `svg/${itemIcons[item.subType].replaceAll(' ', '')}.svg`;
 
   const ref = useRef(null);
   const id = useId().replaceAll(':', '');
-  const { character, hasSelectedCharacter,
+  const { character,
     canEquipItem, equipItem,
     canUnequipItem, unequipItem,
     canDoItemAction, doItemAction
@@ -103,7 +104,11 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
         return unequipItem(draggedSlot);
       }
       if (action != null && draggedItem != null) {
-        return doItemAction(draggedItem, action, skill);
+        //todo figure out why the find is needed after stacking an item to show the correct quantity
+        return doItemAction(character.items.find(x => x.id === draggedItem.id) ?? draggedItem, action, skill);
+      }
+      if (item && item.quantity && draggedItem.quantity) {
+        send(RequestPacketType.StackItem, { itemId: item.id, draggedItemId: draggedItem.id })
       }
     },
     collect(monitor) {
@@ -146,7 +151,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
     }
   }
 
-  const numStats = item ? Object.keys(item.stats).filter(x => x !== "id").length : 0;
+  const numStats = item ? Object.keys(item.stats).length : 0;
   return (<>
     <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, equippableClass, borderClass, bgClass, "flex-none relative", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} onClick={onClick} {...props}>
       {item && !isDragging && <>
@@ -170,7 +175,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
           </div>
 
           <div className="relative flex flex-col">
-            <div className="w-max"><b>{prefix} {itemNames[item.subType]} {itemTiers[item.tier]}</b></div>
+            <div className="w-max"><b>{getItemName(item)}</b></div>
             {calculatedItemStats.filter(x => x.hasStat(item, character)).map(x => <div key={x.name} className={clsx(x.class && x.class(item, character), "w-max")}>{x.name}: {x.value(item, character)}</div>)}
             {item.subType != ItemSubType.Essence && recordKeys(item.stats).map(k => {
               const statNamesRecord = type === ItemType.Item ? itemSpecificStatNames : statNames;
@@ -178,7 +183,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
               if (!statName) {
                 return null;
               }
-              const value = item.stats[k]?.toString() ?? '';
+              const value = Math.floor(item.stats[k]! / (item.quantity ?? 1)).toString() ?? '';
               const isReplace = statName.indexOf('{x}') > -1;
               const replaced = `${isReplace ? '' : '+'}${isReplace ? '' : value}${(statName.startsWith('%') ? '' : ' ')}${statName.replaceAll('{x}', value)}`
               return <div key={k} className="w-max">{replaced}</div>

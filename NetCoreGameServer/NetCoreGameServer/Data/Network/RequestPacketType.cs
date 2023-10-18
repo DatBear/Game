@@ -27,4 +27,5 @@ public enum RequestPacketType
     StartSkill = 22,
     DoSkillAction = 23,
     StopSkill = 24,
+    StackItem = 25,
 }

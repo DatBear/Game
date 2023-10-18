@@ -35,7 +35,10 @@ public class StopSkillHandler : IRequestHandler<StopSkillRequest>
 
             if (removeItem != null && removeItem.Any())
             {
-                _session.User.SelectedCharacter.AllItems.RemoveAll(x => removeItem.Contains(x));
+                foreach (var item in removeItem.Where(item => item.Unstack()))
+                {
+                    _session.User.SelectedCharacter.AllItems.Remove(item);
+                }
             }
 
             _session.Send(new UpdateCharacterResponse
