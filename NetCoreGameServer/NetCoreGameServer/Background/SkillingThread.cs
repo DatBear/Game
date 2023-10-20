@@ -10,9 +10,11 @@ public class SkillingThread : BaseBackgroundThread
 {
     private static readonly Random r = new();
 
+    private readonly DatabaseThread _dbThread;
 
-    public SkillingThread(GameManager gameManager) : base(20, gameManager)
+    public SkillingThread(GameManager gameManager, DatabaseThread dbThread) : base(20, gameManager)
     {
+        _dbThread = dbThread;
     }
 
     protected override async Task Process()
@@ -30,14 +32,23 @@ public class SkillingThread : BaseBackgroundThread
                     session.User.CurrentSkill.CompletedItem = addItem;
                     if (addItem != null)
                     {
+                        await _dbThread.CreateItem(addItem);
                         session.User.SelectedCharacter.AllItems.Add(addItem);
                     }
 
                     if (removeItem != null && removeItem.Any())
                     {
-                        foreach (var item in removeItem.Where(item => item.Unstack()))
+                        foreach (var item in removeItem)
                         {
-                            session.User.SelectedCharacter.AllItems.Remove(item);
+                            if (item.Unstack())
+                            {
+                                session.User.SelectedCharacter.AllItems.Remove(item);
+                                await _dbThread.DeleteItem(item);
+                            }
+                            else
+                            {
+                                await _dbThread.UpdateItem(item);
+                            }
                         }
                     }
 

@@ -219,7 +219,9 @@ export default function MarketplaceWindow() {
         <div id="sellItems" className="flex flex-col sm:flex-row pt-4 gap-4 h-96 sm:w-[40rem]">
           <div className="basis-1/5 flex flex-row sm:flex-col gap-5 justify-center sm:justify-start items-center">
             <ItemSlot className="flex justify-center place-items-center">
-              <span className="text-2xl">?</span>
+              <div className="w-full h-full flex justify-around">
+                <p className="self-center text-2xl">?</p>
+              </div>
             </ItemSlot>
             <ItemSlot action={ItemAction.Delete}>
               <img className="absolute inset-0 p-1 mx-auto w-full h-full" src="svg/iconTrash.svg" alt="delete item" />
@@ -258,11 +260,13 @@ export default function MarketplaceWindow() {
         <div id="transfer" className="flex flex-col sm:flex-row pt-4 gap-4 h-96 sm:w-[40rem]">
           <div className="basis-1/5 flex flex-row sm:flex-col gap-5 justify-center sm:justify-start items-center">
             <ItemSlot className="flex justify-center place-items-center">
-              <span className="text-2xl">?</span>
+              <div className="w-full h-full flex justify-around">
+                <p className="self-center text-2xl">?</p>
+              </div>
             </ItemSlot>
           </div>
           <div className="basis-4/5 flex flex-col gap-y-4">
-            <div className="flex-grow border flex flex-col p-2 gap-y-2">
+            <div className="flex-grow border flex flex-col p-2 gap-y-2 overflow-y-auto">
               {user.characters.length === 1 && <span className="p-3">No characters found.</span>}
               {user.characters.filter(x => x.id !== character.id).map(x => <CharacterSlot key={x.id} character={x} isSelected={transferTabState.selectedCharacter?.id == x.id} onClick={() => selectCharacter(x)} />)}
             </div>

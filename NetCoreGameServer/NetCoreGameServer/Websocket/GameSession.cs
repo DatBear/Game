@@ -107,6 +107,7 @@ public class GameSession : WsSession
     {
         if (User != null)
         {
+            Task.Run(async() => await _serviceProvider.GetService<DatabaseThread>()!.ForceCharacterUpdate(User.SelectedCharacter!));
             _serviceProvider.GetService<GameManager>()!.RemoveSession(User.Id);
         }
         Console.WriteLine($"WebSocket session with Id {Id} disconnected!");
@@ -161,6 +162,7 @@ public class GameSession : WsSession
 
         collection.AddSingleton(_serviceProvider.GetService<GameManager>()!);
         collection.AddSingleton(_serviceProvider.GetService<GlyphThread>()!);
+        collection.AddSingleton(_serviceProvider.GetService<DatabaseThread>()!);
 
         return collection;
     }

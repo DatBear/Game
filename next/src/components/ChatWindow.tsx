@@ -24,7 +24,7 @@ export default function ChatWindow() {
     return listen(ResponsePacketType.SendChatMessage, (e: ChatMessage) => {
       setMessages([...messages, e]);
     });
-  }, [windowState, setWindowState]);
+  }, [windowState, setWindowState, messages]);
 
   useEffect(() => {
     return listen(ResponsePacketType.LeaveGroup, (e: User) => {
@@ -62,7 +62,7 @@ export default function ChatWindow() {
 
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && message && message.length > 0) {
       send(RequestPacketType.SendChatMessage, { message, type: ChatMessageType.GlobalChat } as ChatMessage);
       setMessage('');
     }
@@ -70,7 +70,7 @@ export default function ChatWindow() {
 
   return <Window isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>Chat</Window.Title>
-    <div className="flex flex-col gap-y-1 h-60 w-96 border border-white overflow-y-scroll wrap">
+    <div className="flex flex-col gap-y-1 h-60 w-96 border border-white overflow-y-auto wrap">
       <div className="flex-grow"></div>
       {messages.map(x => {
         var message = x.from ? `${x.from}: ${x.message}` : x.to ? `To ${x.to}: ${x.message}` : x.message;

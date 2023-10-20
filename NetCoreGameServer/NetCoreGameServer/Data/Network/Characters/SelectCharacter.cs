@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
@@ -18,14 +19,20 @@ public class SelectCharacterResponse : BaseResponsePacket<int?>
 public class SelectCharacterHandler : IRequestHandler<SelectCharacterRequest>
 {
     private readonly GameSession _session;
+    private readonly DatabaseThread _dbThread;
 
-    public SelectCharacterHandler(GameSession session)
+    public SelectCharacterHandler(GameSession session, DatabaseThread dbThread)
     {
         _session = session;
+        _dbThread = dbThread;
     }
 
     public async Task Handle(SelectCharacterRequest request, CancellationToken cancellationToken)
     {
+        if (_session.User.SelectedCharacter != null)
+        {
+            await _dbThread.UpdateCharacter(_session.User.SelectedCharacter);
+        }
         _session.User!.SelectedCharacter = _session.User.Characters.FirstOrDefault(x => x.Id == request.Data);
 
         if (_session.User.SelectedCharacter != null)

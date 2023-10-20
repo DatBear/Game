@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.GameData;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Service;
@@ -19,17 +20,15 @@ public class CreateCharacterResponse : BaseResponsePacket<Character>
 public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
 {
     private readonly CharacterRepository _characterRepository;
-    private readonly UserRepository _userRepository;
     private readonly GameSession _session;
-    private readonly ItemRepository _itemRepository;
+    private readonly DatabaseThread _dbThread;
 
 
-    public CreateCharacterHandler(CharacterRepository characterRepository, UserRepository userRepository, GameSession session, ItemRepository itemRepository)
+    public CreateCharacterHandler(CharacterRepository characterRepository, UserRepository userRepository, GameSession session, ItemRepository itemRepository, DatabaseThread dbThread)
     {
         _characterRepository = characterRepository;
-        _userRepository = userRepository;
         _session = session;
-        _itemRepository = itemRepository;
+        _dbThread = dbThread;
     }
 
     public async Task Handle(CreateCharacterRequest request, CancellationToken cancellationToken)
@@ -62,7 +61,7 @@ public class CreateCharacterHandler : IRequestHandler<CreateCharacterRequest>
                     Tier = 1
                 };
 
-                item = await _itemRepository.CreateItem(item);
+                await _dbThread.CreateItem(item);
                 character.AllItems.Add(item);
             }
         }

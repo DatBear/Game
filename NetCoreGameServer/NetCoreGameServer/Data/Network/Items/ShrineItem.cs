@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.Network.Characters;
 using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
@@ -13,12 +14,12 @@ public class ShrineItemRequest : BaseRequestPacket<int>, IRequest
 public class ShrineItemHandler : IRequestHandler<ShrineItemRequest>
 {
     private readonly GameSession _session;
-    private readonly ItemRepository _itemRepository;
+    private readonly DatabaseThread _dbThread;
 
-    public ShrineItemHandler(GameSession session, ItemRepository itemRepository)
+    public ShrineItemHandler(GameSession session, DatabaseThread dbThread)
     {
         _session = session;
-        _itemRepository = itemRepository;
+        _dbThread = dbThread;
     }
 
     public async Task Handle(ShrineItemRequest request, CancellationToken cancellationToken)
@@ -33,7 +34,7 @@ public class ShrineItemHandler : IRequestHandler<ShrineItemRequest>
         character.Mana += Math.Min(maxHeal, character.Stats.MaxMana - character.Mana);
 
         character.AllItems.Remove(item);
-        await _itemRepository.DeleteItem(item);
+        await _dbThread.DeleteItem(item);
 
         _session.Send(new UpdateCharacterResponse
         {

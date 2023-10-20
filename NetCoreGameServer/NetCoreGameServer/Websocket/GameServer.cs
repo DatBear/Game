@@ -18,6 +18,15 @@ public class GameServer : WsServer
     private readonly IServiceProvider _serviceProvider;
     private readonly IConfigurationRoot _config;
 
+    private List<Func<BaseBackgroundThread>> _backgroundThreads => new()
+    {
+        () => _serviceProvider.GetService<DatabaseThread>()!,
+        () => _serviceProvider.GetService<MobActionThread>()!,
+        () => _serviceProvider.GetService<CharacterRegenThread>()!,
+        () => _serviceProvider.GetService<SkillingThread>()!,
+        () => _serviceProvider.GetService<GlyphThread>()!,
+    };
+
     public GameServer(IPAddress address, int port, NextAuthHelper nextAuthHelper, UserRepository userRepository, IServiceCollection serviceCollection, IServiceProvider serviceProvider, IConfigurationRoot config) : base(address, port)
     {
         _nextAuthHelper = nextAuthHelper;
@@ -32,26 +41,10 @@ public class GameServer : WsServer
         var success = base.Start();
         if (success)
         {
-            Task.Factory.StartNew(async () =>
+            foreach (var thread in _backgroundThreads.Select(x => x()))
             {
-                var mobActionThread = _serviceProvider.GetService<MobActionThread>();
-                await mobActionThread.Run();
-            });
-            Task.Factory.StartNew(async () =>
-            {
-                var charRegenThread = _serviceProvider.GetService<CharacterRegenThread>();
-                await charRegenThread.Run();
-            });
-            Task.Factory.StartNew(async () =>
-            {
-                var skillingThread = _serviceProvider.GetService<SkillingThread>();
-                await skillingThread.Run();
-            });
-            Task.Factory.StartNew(async () =>
-            {
-                var glyphThread = _serviceProvider.GetService<GlyphThread>();
-                await glyphThread.Run();
-            });
+                Task.Factory.StartNew(async () => await thread.Run());
+            }
             Console.WriteLine($"Server started on {Address}:{Port}.");
         }
         else

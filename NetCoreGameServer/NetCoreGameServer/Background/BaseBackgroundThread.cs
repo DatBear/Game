@@ -1,13 +1,15 @@
 ﻿using System.Diagnostics;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Background;
 
 public abstract class BaseBackgroundThread
 {
-    protected readonly int Ticks;
+    protected readonly double Ticks;
     protected readonly GameManager GameManager;
-    protected BaseBackgroundThread(int ticks, GameManager gameManager)
+
+    protected BaseBackgroundThread(double ticks, GameManager gameManager)
     {
         Ticks = ticks;
         GameManager = gameManager;
@@ -28,7 +30,7 @@ public abstract class BaseBackgroundThread
                 Console.WriteLine(ex);
             }
 
-            await Task.Delay(Math.Max(0, delay - (int)stopwatch.ElapsedMilliseconds));
+            await Task.Delay(Math.Max(0, (int)delay - (int)stopwatch.ElapsedMilliseconds));
             stopwatch.Restart();
         }
     }

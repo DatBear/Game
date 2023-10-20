@@ -3,6 +3,7 @@ using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Websocket;
 using System.Data;
 using NetCoreGameServer.Background;
+using NetCoreGameServer.Service;
 
 namespace NetCoreGameServer.Data.Network.Items;
 
@@ -21,6 +22,7 @@ public class UseItemRequestHandler : IRequestHandler<UseItemRequest>
 {
     private readonly GameSession _session;
     private readonly GlyphThread _glyphThread;
+    private readonly DatabaseThread _dbThread;
 
     private static List<ItemSubType> _usableItems = new()
     {
@@ -31,10 +33,11 @@ public class UseItemRequestHandler : IRequestHandler<UseItemRequest>
         ItemSubType.Potion,
     };
 
-    public UseItemRequestHandler(GameSession session, GlyphThread glyphThread)
+    public UseItemRequestHandler(GameSession session, GlyphThread glyphThread, DatabaseThread dbThread)
     {
         _session = session;
         _glyphThread = glyphThread;
+        _dbThread = dbThread;
     }
 
     public async Task Handle(UseItemRequest request, CancellationToken cancellationToken)
@@ -59,10 +62,15 @@ public class UseItemRequestHandler : IRequestHandler<UseItemRequest>
                 if (item.Unstack(1))
                 {
                     target.AllItems.Remove(item);
+                    await _dbThread.DeleteItem(item);
+                }
+                else
+                {
+                    await _dbThread.UpdateItem(item);
                 }
                 break;
             case ItemSubType.Glyph:
-                _glyphThread.UseGlyph(_session, targetUser, item);
+                await _glyphThread.UseGlyph(_session, targetUser, item);
                 break;
         }
     }

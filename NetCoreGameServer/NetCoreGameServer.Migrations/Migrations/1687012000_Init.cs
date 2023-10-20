@@ -150,6 +150,7 @@ public class Init : Migration {
             Position     int           null,
             EquippedItemSlot int           null,
             OwnerId      int           not null,
+            ExpiresAt    bigint        null,
             constraint Item_Character_Id_fk
                 foreign key (OwnerId) references `Character` (Id),
             constraint Item_ItemStats_fk

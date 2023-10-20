@@ -1,6 +1,8 @@
 ﻿using MediatR;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Data.Network.Characters;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Data.Network.Catacombs;
@@ -15,11 +17,13 @@ public class PickGroundItemHandler : IRequestHandler<PickGroundItemRequest>
     private static readonly Random r = new();
     private readonly GameSession _session;
     private readonly GameManager _gameManager;
+    private readonly DatabaseThread _dbThread;
 
-    public PickGroundItemHandler(GameSession session, GameManager gameManager)
+    public PickGroundItemHandler(GameSession session, GameManager gameManager, DatabaseThread dbThread)
     {
         _session = session;
         _gameManager = gameManager;
+        _dbThread = dbThread;
     }
 
     public async Task Handle(PickGroundItemRequest request, CancellationToken cancellationToken)
@@ -52,7 +56,9 @@ public class PickGroundItemHandler : IRequestHandler<PickGroundItemRequest>
                 var winner = clickedItem.FindWinner(_gameManager);
                 if (winner == null) return;
                 winner.SelectedCharacter!.AllItems.Add(clickedItem.Item);
+                clickedItem.Item.OwnerId = winner.SelectedCharacter.Id;
                 maze.Items.Remove(clickedItem);
+                await _dbThread.CreateItem(item.Item);
 
                 var session = _gameManager.GetSession(winner.Id);
                 session?.Send(new UpdateCharacterResponse

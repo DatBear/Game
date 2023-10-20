@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.Network.Characters;
 using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
@@ -13,12 +14,11 @@ public class DeleteItemRequest : BaseRequestPacket<int>, IRequest
 public class DeleteItemHandler : IRequestHandler<DeleteItemRequest>
 {
     private readonly GameSession _session;
-    private readonly ItemRepository _itemRepository;
+    private readonly DatabaseThread _dbThread;
 
     public DeleteItemHandler(GameSession session, ItemRepository itemRepository)
     {
         _session = session;
-        _itemRepository = itemRepository;
     }
 
     public async Task Handle(DeleteItemRequest request, CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ public class DeleteItemHandler : IRequestHandler<DeleteItemRequest>
         var itemToDelete = _session.User.SelectedCharacter.AllItems.FirstOrDefault(x => x.Id == request.Data);
         if (itemToDelete != null)
         {
-            await _itemRepository.DeleteItem(itemToDelete);
+            await _dbThread.DeleteItem(itemToDelete);
             _session.User.SelectedCharacter.AllItems.Remove(itemToDelete);
             _session.Send(new UpdateCharacterResponse()
             {

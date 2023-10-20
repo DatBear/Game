@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using MySqlX.XDevAPI;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.Network.Characters;
 using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
@@ -14,15 +15,17 @@ public class StopSkillRequest: BaseRequestPacket<NullData>, IRequest
 public class StopSkillHandler : IRequestHandler<StopSkillRequest>
 {
     private readonly GameSession _session;
+    private readonly DatabaseThread _dbThread;
 
-    public StopSkillHandler(GameSession session)
+    public StopSkillHandler(GameSession session, DatabaseThread dbThread)
     {
         _session = session;
+        _dbThread = dbThread;
     }
 
     public async Task Handle(StopSkillRequest request, CancellationToken cancellationToken)
     {
-        if (_session.User.CurrentSkill != null)
+        if (_session.User.CurrentSkill != null && _session.User.SelectedCharacter != null)
         {
             _session.User.CurrentSkill.Stop();
 
@@ -30,14 +33,23 @@ public class StopSkillHandler : IRequestHandler<StopSkillRequest>
             _session.User.CurrentSkill.CompletedItem = addItem;
             if (addItem != null)
             {
+                await _dbThread.CreateItem(addItem);
                 _session.User.SelectedCharacter.AllItems.Add(addItem);
             }
 
             if (removeItem != null && removeItem.Any())
             {
-                foreach (var item in removeItem.Where(item => item.Unstack()))
+                foreach (var item in removeItem)
                 {
-                    _session.User.SelectedCharacter.AllItems.Remove(item);
+                    if (item.Unstack())
+                    {
+                        _session.User.SelectedCharacter.AllItems.Remove(item);
+                        await _dbThread.DeleteItem(item);
+                    }
+                    else
+                    {
+                        await _dbThread.UpdateItem(item);
+                    }
                 }
             }
 

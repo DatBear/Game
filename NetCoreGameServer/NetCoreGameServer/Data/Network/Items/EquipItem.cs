@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using MediatR;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.GameData;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Data.Network.Characters;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Data.Network.Items;
@@ -22,15 +24,18 @@ public class EquipItemHandler : IRequestHandler<EquipItemRequest>
 {
     private readonly GameSession _session;
     private readonly GameManager _gameManager;
+    private readonly DatabaseThread _dbThread;
 
-    public EquipItemHandler(GameSession session, GameManager gameManager)
+    public EquipItemHandler(GameSession session, GameManager gameManager, DatabaseThread dbThread)
     {
         _session = session;
         _gameManager = gameManager;
+        _dbThread = dbThread;
     }
 
     public async Task Handle(EquipItemRequest request, CancellationToken cancellationToken)
     {
+        
         var toEquip = _session.User.SelectedCharacter.AllItems.FirstOrDefault(x => x.Id == request.Data.ItemId);
         var currentlyEquipped = _session.User.SelectedCharacter.AllItems.FirstOrDefault(x => x.EquippedItemSlot == request.Data.EquippedItemSlot);
         if (CanEquipItem(_session.User.SelectedCharacter, toEquip, request.Data.EquippedItemSlot))
@@ -39,10 +44,13 @@ public class EquipItemHandler : IRequestHandler<EquipItemRequest>
             {
                 currentlyEquipped.EquippedItemSlot = null;
                 _session.User.SelectedCharacter.Stats -= currentlyEquipped.Stats;
+                await _dbThread.UpdateItem(currentlyEquipped);
             }
 
             toEquip.EquippedItemSlot = request.Data.EquippedItemSlot;
             _session.User.SelectedCharacter.Stats += toEquip.Stats;
+
+            await _dbThread.UpdateItem(toEquip);
             _session.Send(new UpdateCharacterResponse
             {
                 Data = _session.User.SelectedCharacter

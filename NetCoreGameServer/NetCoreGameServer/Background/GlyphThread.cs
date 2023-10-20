@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Data.Network.Characters;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Background;
@@ -9,9 +10,11 @@ namespace NetCoreGameServer.Background;
 public class GlyphThread : BaseBackgroundThread
 {
     private ConcurrentQueue<(User user, Item glyph)> _activeGlyphs = new();
+    private readonly DatabaseThread _dbThread;
 
-    public GlyphThread(GameManager gameManager) : base(1, gameManager)
+    public GlyphThread(GameManager gameManager, DatabaseThread dbThread) : base(1, gameManager)
     {
+        _dbThread = dbThread;
     }
 
     protected override async Task Process()
@@ -47,16 +50,18 @@ public class GlyphThread : BaseBackgroundThread
         }
     }
 
-    public void UseGlyph(GameSession? session, User? user, Item? glyph)
+    public async Task<bool> UseGlyph(GameSession? session, User? user, Item? glyph)
     {
-        if(session == null || user?.SelectedCharacter == null || glyph == null) return;
+        if(session == null || user?.SelectedCharacter == null || glyph == null) return false;
 
         glyph.ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(glyph.Tier * 5 * (100 + glyph.Stats.EnhancedEffect) / 100d).ToUnixTimeMilliseconds();
         user.SelectedCharacter.Stats += glyph.Stats;
+        await _dbThread.UpdateItem(glyph);
         _activeGlyphs.Enqueue((user, glyph));
         session.Send(new UpdateCharacterResponse
         {
             Data = user.SelectedCharacter
         });
+        return true;
     }
 }

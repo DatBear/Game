@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using NetCoreGameServer.Data.Network.Catacombs;
+using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
 namespace NetCoreGameServer.Background;
@@ -7,9 +8,11 @@ namespace NetCoreGameServer.Background;
 public class MobActionThread : BaseBackgroundThread
 {
     private static readonly Random r = new();
+    private readonly DatabaseThread _dbThread;
 
-    public MobActionThread(GameManager gameManager) : base(20, gameManager)
+    public MobActionThread(GameManager gameManager, DatabaseThread dbThread) : base(20, gameManager)
     {
+        _dbThread = dbThread;
     }
 
     protected override async Task Process()
@@ -26,6 +29,7 @@ public class MobActionThread : BaseBackgroundThread
                     var (attack, target) = mob.GetNextAction(group, tick);
                     if (attack == null) continue;
                     //Console.WriteLine($"#{mob.Id} attacked {target.User.Username} for {dmg} damage.");
+                    await _dbThread.UpdateCharacter(target.SelectedCharacter);
 
                     GameManager.GroupBroadcast(session, new AttackTargetResponse
                     {

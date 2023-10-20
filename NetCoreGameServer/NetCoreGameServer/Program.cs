@@ -64,11 +64,13 @@ internal class Program
         var services = new ServiceCollection();
 
         services.AddSingleton<GameManager>();
+
+        services.AddSingleton<DatabaseThread>();
         services.AddSingleton<MobActionThread>();
         services.AddSingleton<CharacterRegenThread>();
         services.AddSingleton<SkillingThread>();
         services.AddSingleton<GlyphThread>();
-
+        
         services.AddSharedServices(configuration);
 
         services.AddSingleton<IServiceCollection>(services);
