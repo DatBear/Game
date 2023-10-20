@@ -7,6 +7,7 @@ using System.Text;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.Config;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Data.Network;
@@ -159,6 +160,7 @@ public class GameSession : WsSession
         collection.AddTransient<PacketMapper>();
 
         collection.AddSingleton(_serviceProvider.GetService<GameManager>()!);
+        collection.AddSingleton(_serviceProvider.GetService<GlyphThread>()!);
 
         return collection;
     }

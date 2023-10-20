@@ -56,6 +56,7 @@ type Item = {
   equippedItemSlot?: EquippedItemSlot,
   subType: ItemSubType;
   stats: Stats;
+  expiresAt?: number;
 };
 
 let itemTypes: Record<ItemType, ItemSubType[]> = {

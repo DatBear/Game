@@ -8,7 +8,7 @@ public class MobActionThread : BaseBackgroundThread
 {
     private static readonly Random r = new();
 
-    public MobActionThread(GameManager gameManager) : base(gameManager)
+    public MobActionThread(GameManager gameManager) : base(20, gameManager)
     {
     }
 

@@ -47,6 +47,11 @@ public class GameServer : WsServer
                 var skillingThread = _serviceProvider.GetService<SkillingThread>();
                 await skillingThread.Run();
             });
+            Task.Factory.StartNew(async () =>
+            {
+                var glyphThread = _serviceProvider.GetService<GlyphThread>();
+                await glyphThread.Run();
+            });
             Console.WriteLine($"Server started on {Address}:{Port}.");
         }
         else

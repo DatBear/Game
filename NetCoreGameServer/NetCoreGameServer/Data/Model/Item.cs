@@ -14,6 +14,7 @@ public class Item
 
     public int ItemStatsId { get; set; }
     public ItemStats Stats { get; set; } = new();
+    public long? ExpiresAt { get; set; }
 
     public bool IsObject()
     {

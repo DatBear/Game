@@ -125,6 +125,22 @@ const calculatedItemStats: CalculatedItemStat[] = [
       let ee = item.stats.enhancedEffect ?? 0;
       return getCalcStat(2 - data[1], item.tier, character.stats.intelligence, ee) + " to " + getCalcStat(7 - data[2], item.tier, character.stats.intelligence, ee);
     }
+  },
+  {
+    name: 'Duration',
+    hasStat: (item, character) => {
+      return item.subType === ItemSubType.Glyph;
+    },
+    value: (item, character) => {
+      var secs = item.tier * 5 * (100 + (item.stats.enhancedEffect ?? 0)) / 100 * 60;
+      if (item.expiresAt) {
+        secs = Math.floor(Math.max(0, (item.expiresAt - new Date().getTime()) / 1000));
+      }
+      var mins = Math.floor(secs / 60);
+      var minString = mins > 0 ? `${mins} minute${mins > 1 ? 's' : ''}` : '';
+      var secString = secs % 60 > 0 ? `, ${secs % 60} second${secs % 60 != 1 ? 's' : ''}` : '';
+      return `${minString}${secString}`;
+    }
   }
 ];
 

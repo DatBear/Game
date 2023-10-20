@@ -67,6 +67,7 @@ internal class Program
         services.AddSingleton<MobActionThread>();
         services.AddSingleton<CharacterRegenThread>();
         services.AddSingleton<SkillingThread>();
+        services.AddSingleton<GlyphThread>();
 
         services.AddSharedServices(configuration);
 

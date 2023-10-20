@@ -45,6 +45,7 @@ type Character = {
   zone: Zone;
   imageRef: RefObject<HTMLDivElement>;
   lastRegenAction: number;
+  activeGlyphs: Item[];
 }
 
 export default Character;

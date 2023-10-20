@@ -8,7 +8,7 @@ public class CharacterRegenThread : BaseBackgroundThread
 {
     private static int RegenInterval = 1000;
 
-    public CharacterRegenThread(GameManager gameManager) : base(gameManager)
+    public CharacterRegenThread(GameManager gameManager) : base(20, gameManager)
     {
     }
     

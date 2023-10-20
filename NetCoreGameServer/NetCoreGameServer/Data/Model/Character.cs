@@ -6,6 +6,7 @@ namespace NetCoreGameServer.Data.Model;
 public class Character
 {
     public int Id { get; set; }
+    public int UserId { get; set; }
     public string Name { get; set; }
     public int Level { get; set; }
     public int ClassId { get; set; }
@@ -28,13 +29,11 @@ public class Character
     public List<Item> AllItems = new();
     public List<Item> EquippedItems => AllItems.Where(x => x.EquippedItemSlot != null).ToList();
     public List<Item> Equipment => AllItems.Where(x => x.SubType < ItemSubType.Fish && x.EquippedItemSlot == null).ToList();
-    public List<Item> Items => AllItems.Where(x => x.SubType >= ItemSubType.Fish).ToList();
-
-    
-
-    public int UserId { get; set; }
+    public List<Item> Items => AllItems.Where(x => x.SubType >= ItemSubType.Fish && !x.ExpiresAt.HasValue).ToList();
+    public List<Item> ActiveGlyphs => AllItems.Where(x => x.ExpiresAt.HasValue).ToList();
 
     //not persisted
+
     private const int ItemSlots = 16;
     public Zone? Zone { get; set; }
     [JsonIgnore]

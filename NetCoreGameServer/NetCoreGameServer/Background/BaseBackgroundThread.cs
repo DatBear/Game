@@ -5,14 +5,17 @@ namespace NetCoreGameServer.Background;
 
 public abstract class BaseBackgroundThread
 {
+    protected readonly int Ticks;
     protected readonly GameManager GameManager;
-    protected BaseBackgroundThread(GameManager gameManager)
+    protected BaseBackgroundThread(int ticks, GameManager gameManager)
     {
+        Ticks = ticks;
         GameManager = gameManager;
     }
 
     public async Task Run()
     {
+        var delay = 1000 / Ticks;
         var stopwatch = new Stopwatch();
         while (true)
         {
@@ -25,7 +28,7 @@ public abstract class BaseBackgroundThread
                 Console.WriteLine(ex);
             }
 
-            await Task.Delay(Math.Max(0, 50 - (int)stopwatch.ElapsedMilliseconds));//20 tick
+            await Task.Delay(Math.Max(0, delay - (int)stopwatch.ElapsedMilliseconds));
             stopwatch.Restart();
         }
     }

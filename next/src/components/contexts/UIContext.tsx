@@ -139,15 +139,20 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
     {!user.selectedCharacter && children}
     {user.selectedCharacter && <>
       <div className="flex flex-col gap-3 p-2 h-full">
-        {character && <div className="flex flex-row gap-2">
-          <ItemSlot medium noDrag noTooltip hotkey="Q" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon)} />
-          <ItemSlot medium noDrag noTooltip hotkey="E" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Charm)} />
-          <ItemSlot medium noDrag noTooltip hotkey="R" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.AccCharm)} />
-          <ItemSlot medium noDrag noTooltip hotkey="1" />
-          <ItemSlot medium noDrag noTooltip hotkey="2" />
-          <ItemSlot medium noDrag noTooltip hotkey="3" />
-          <ItemSlot medium noDrag noTooltip hotkey="4" />
-          <ItemSlot medium noDrag noTooltip hotkey="5" />
+        {character && <div className="flex flex-row">
+          <div className="flex flex-row gap-2">
+            <ItemSlot medium noDrag noTooltip hotkey="Q" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon)} />
+            <ItemSlot medium noDrag noTooltip hotkey="E" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Charm)} />
+            <ItemSlot medium noDrag noTooltip hotkey="R" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.AccCharm)} />
+            <ItemSlot medium noDrag noTooltip hotkey="1" />
+            <ItemSlot medium noDrag noTooltip hotkey="2" />
+            <ItemSlot medium noDrag noTooltip hotkey="3" />
+            <ItemSlot medium noDrag noTooltip hotkey="4" />
+            <ItemSlot medium noDrag noTooltip hotkey="5" />
+          </div>
+          <div className="flex flex-row gap-2 pl-10">
+            {character.activeGlyphs.map(x => <ItemSlot key={x.id} medium noDrag noBackground borderless item={x} />)}
+          </div>
         </div>}
         <div className="flex flex-row flex-grow">
           <GroupDisplay />

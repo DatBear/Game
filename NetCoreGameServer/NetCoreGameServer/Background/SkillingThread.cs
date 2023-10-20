@@ -11,7 +11,7 @@ public class SkillingThread : BaseBackgroundThread
     private static readonly Random r = new();
 
 
-    public SkillingThread(GameManager gameManager) : base(gameManager)
+    public SkillingThread(GameManager gameManager) : base(20, gameManager)
     {
     }
 
