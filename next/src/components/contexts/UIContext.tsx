@@ -123,6 +123,8 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
   useHotkeys('e', e => !e.repeat && setSelectedItemSlot(EquippedItemSlot.Charm));
   useHotkeys('r', e => !e.repeat && setSelectedItemSlot(EquippedItemSlot.AccCharm));
 
+  useHotkeys('c', e => !e.repeat && toggleWindow(UIWindow.Stats));
+  useHotkeys('i', e => !e.repeat && toggleWindow(UIWindow.Inventory));
 
   const setWindowState = (type: UIWindow, state: UIWindowState) => {
     //console.log('saving window state', UIWindow[type], state);
@@ -148,9 +150,9 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
       <div className="flex flex-col gap-3 p-2 h-full">
         {character && <div className="flex flex-row">
           <div className="flex flex-row gap-2">
-            <ItemSlot medium noDrag noTooltip hotkey="Q" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon)} className={clsx(selectedItemSlot === EquippedItemSlot.Weapon && "border-green-500")} />
-            <ItemSlot medium noDrag noTooltip hotkey="E" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Charm)} className={clsx(selectedItemSlot === EquippedItemSlot.Charm && "border-green-500")} />
-            <ItemSlot medium noDrag noTooltip hotkey="R" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.AccCharm)} className={clsx(selectedItemSlot === EquippedItemSlot.AccCharm && "border-green-500")} />
+            <ItemSlot medium noDrag hotkey="Q" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon)} className={clsx(selectedItemSlot === EquippedItemSlot.Weapon && "border-green-500")} />
+            <ItemSlot medium noDrag hotkey="E" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Charm)} className={clsx(selectedItemSlot === EquippedItemSlot.Charm && "border-green-500")} />
+            <ItemSlot medium noDrag hotkey="R" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.AccCharm)} className={clsx(selectedItemSlot === EquippedItemSlot.AccCharm && "border-green-500")} />
             <ItemSlot medium noDrag noTooltip hotkey="1" />
             <ItemSlot medium noDrag noTooltip hotkey="2" />
             <ItemSlot medium noDrag noTooltip hotkey="3" />
@@ -158,7 +160,7 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
             <ItemSlot medium noDrag noTooltip hotkey="5" />
           </div>
           <div className="flex flex-row gap-2 pl-10">
-            {character.activeGlyphs.map(x => <ItemSlot key={x.id} medium noDrag noBackground borderless item={x} />)}
+            {character.activeGlyphs.filter(x => x.expiresAt && x.expiresAt > new Date().getTime()).map(x => <ItemSlot key={x.id} medium noDrag noBackground borderless item={x} />)}
           </div>
         </div>}
         <div className="flex flex-row flex-grow">

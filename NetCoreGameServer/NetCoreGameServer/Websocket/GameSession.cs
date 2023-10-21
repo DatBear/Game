@@ -78,6 +78,11 @@ public class GameSession : WsSession
         var gameManager = _serviceProvider.GetService<GameManager>()!;
         gameManager.RemoveSession(User.Id);
         gameManager!.SetSession(User.Id, this);
+        var glyphThread = _serviceProvider.GetService<GlyphThread>()!;
+        foreach (var glyph in User.Characters.SelectMany(x => x.ActiveGlyphs))
+        {
+            Task.Factory.StartNew(async() => await glyphThread.TrackGlyph(this, User, glyph));
+        }
     }
 
     public bool Send<T>(T? obj) where T : IResponsePacket

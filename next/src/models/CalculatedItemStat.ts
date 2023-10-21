@@ -137,8 +137,8 @@ const calculatedItemStats: CalculatedItemStat[] = [
         secs = Math.floor(Math.max(0, (item.expiresAt - new Date().getTime()) / 1000));
       }
       var mins = Math.floor(secs / 60);
-      var minString = mins > 0 ? `${mins} minute${mins > 1 ? 's' : ''}` : '';
-      var secString = secs % 60 > 0 ? `, ${secs % 60} second${secs % 60 != 1 ? 's' : ''}` : '';
+      var minString = mins > 0 ? `${mins} minute${mins > 1 ? 's' : ''}, ` : '';
+      var secString = secs % 60 > 0 ? `${secs % 60} second${secs % 60 != 1 ? 's' : ''}` : '';
       return `${minString}${secString}`;
     }
   }
