@@ -69,6 +69,19 @@ body {
   @apply border border-green-400;
 }
 
+.loading {
+  animation: spin 2s normal forwards infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes semiFadeOut {
   0% {
     opacity: 1;

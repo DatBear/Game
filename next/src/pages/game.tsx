@@ -9,12 +9,15 @@ import { Zone } from "@/models/Zone";
 import { Catacombs } from "@/components/scenes/Catacombs";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { listen, send, socket } from '@/network/Socket';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import RequestPacketType from "@/network/RequestPacketType";
+import ResponsePacketType from "@/network/ResponsePacketType";
 
 type GameProps = InferGetServerSidePropsType<typeof getServerSideProps>;
 
 export default function Game({ }: GameProps) {
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     socket().onopen = async (evt) => {
       //await (async () => await new Promise(r => setTimeout(r, 2000)))()
@@ -22,16 +25,29 @@ export default function Game({ }: GameProps) {
     }
   }, []);
 
-  return (<DndProvider backend={HTML5Backend}>
+  useEffect(() => {
+    return listen(ResponsePacketType.GetUser, e => {
+      setIsLoading(false);
+    })
+  }, []);
+
+  return <DndProvider backend={HTML5Backend}>
     <div className={gs.gameContainer}>
       <UserContextProvider>
-        <CharacterSelect />
+        {isLoading && <div className="flex flex-col items-center justify-center w-full h-full">
+          <img src="svg/iconRefresh.svg" alt="loading" className="loading w-12 h-12" />
+          <div className="text-2xl">
+
+            Loading Characters...
+          </div>
+        </div>}
+        {!isLoading && <CharacterSelect />}
         <UIContextProvider>
           <CurrentZone />
         </UIContextProvider>
       </UserContextProvider>
     </div>
-  </DndProvider>);
+  </DndProvider>
 };
 
 function CurrentZone() {
@@ -47,7 +63,6 @@ function CurrentZone() {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
-    props: {
-    }
+    props: {}
   };
 }
