@@ -36,8 +36,7 @@ public class Character
 
     private const int ItemSlots = 16;
     public Zone? Zone { get; set; }
-    [JsonIgnore]
-    public long LastRegen { get; set; }
+    public long LastRegenAction { get; set; }
 
     public bool CanPickItem(Item item)
     {

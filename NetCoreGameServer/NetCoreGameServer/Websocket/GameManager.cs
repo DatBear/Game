@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using NetCoreGameServer.Background;
 using NetCoreGameServer.Data.Model;
 using NetCoreGameServer.Data.Network;
 using NetCoreGameServer.Data.Network.Catacombs;
@@ -13,12 +14,15 @@ namespace NetCoreGameServer.Websocket;
 
 public class GameManager
 {
+    private static Random r = new();
     private static int NextGroupId = 1;
     private readonly Dictionary<int, GameSession> _sessions = new();
     private readonly List<Group> _groups = new();
+    private readonly DatabaseThread _dbThread;
 
-    public GameManager()
+    public GameManager(DatabaseThread dbThread)
     {
+        _dbThread = dbThread;
     }
 
     public void SetSession(int userId, GameSession session)
@@ -217,11 +221,36 @@ public class GameManager
         });
     }
 
-    public void OnMobDeath(GameSession session, Mob mob)
+    public async Task OnMobDeath(GameSession session, Mob mob)
     {
         //todo give xp/level up
         var maze = session.User.Group?.Maze ?? session.User.Maze;
         maze.Mobs.Remove(mob);
+
+        var groupChars = session.User.Group?.Users.Where(x => x.User.SelectedCharacter != null && x.User.SelectedCharacter.Zone == Zone.Catacombs)
+               .Select(x => x.User.SelectedCharacter) ?? new []{ session.User.SelectedCharacter };
+
+        var exp = r.Next(20000, 30000);
+        foreach (var groupChar in groupChars)
+        {
+            groupChar.Kills += 1;
+            groupChar.Experience += exp;
+            if (groupChar.Experience >= groupChar.Level * 1_000_000)
+            {
+                groupChar.Experience = groupChar.Level * 1_000_000;
+                groupChar.Level += 1;
+                groupChar.Life = groupChar.Stats.MaxLife;
+                groupChar.Mana = groupChar.Stats.MaxMana;
+                //todo send level-up response
+            }
+
+            await _dbThread.UpdateCharacter(groupChar);
+            GroupBroadcast(session, new UpdateCharacterResponse
+            {
+                Data = groupChar
+            });
+        }
+        
         var item = ItemGenerator.Generate(session.User.Group!, session.User.SelectedCharacter, mob);
         if (item != null)
         {
@@ -247,7 +276,7 @@ public class GameManager
             character.Zone = Zone.Town;
             if (session != null)
             {
-                session.Send(new UpdateCharacterResponse
+                GroupBroadcast(session, new UpdateCharacterResponse
                 {
                     Data = character
                 });

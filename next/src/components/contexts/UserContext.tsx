@@ -29,12 +29,15 @@ type UserContextData = {
   updateCharacter: (character: Character) => void;
   listMarketItem: (item: MarketItem) => boolean;
   transferItem: (item: Item, character: Character) => boolean;
+  selectedItemSlot: EquippedItemSlot;
+  setSelectedItemSlot: (slot: EquippedItemSlot) => void;
 };
 
 const UserContext = createContext<UserContextData>({} as UserContextData);
 
 export default function UserContextProvider({ children }: React.PropsWithChildren) {
   const [user, setUser] = useState<User>({ id: 1, characters: [], gold: 1000, username: 'DatBear', marketItems: [] });
+  const [selectedItemSlot, setSelectedItemSlot] = useState(EquippedItemSlot.Weapon);
 
   const setCharacters = (characters: Character[]) => {
     setUser(user => ({
@@ -57,6 +60,12 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
 
   const updateCharacter = (character: Character) => {
     user.characters.splice(user.characters.findIndex(x => x.id === character.id), 1, character);
+    if (user.group) {
+      var groupUser = user.group.users.find(x => x.user?.id === user.id)?.user;
+      if (groupUser) {
+        groupUser.selectedCharacter = character;
+      }
+    }
     setUser(_ => ({
       ...user,
       selectedCharacter: { ...character }
@@ -166,7 +175,7 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
       } else {
         let existingUser = user.group?.users?.find(x => x.user?.selectedCharacter?.id == e.id);
         if (existingUser) {
-          existingUser.user!.selectedCharacter = e;
+          existingUser.user!.selectedCharacter = { ...e, imageRef: existingUser.user!.selectedCharacter?.imageRef! };
         }
         setUser({ ...user });
       }
@@ -213,7 +222,7 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     var nextRegen = 1000 - (new Date().getTime() - user.selectedCharacter.lastRegenAction);
     if (nextRegen < 0) {
       regen();
-      return;
+      nextRegen = 1000;
     }
 
     var timeout = setTimeout(regen, nextRegen);
@@ -221,16 +230,27 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
   }, [user]);
 
   const regen = () => {
+    if (user.group) {
+      for (var groupUser of user.group?.users) {
+        let groupChar = groupUser.user?.selectedCharacter;
+        if (!groupChar || groupChar.zone == Zone.Catacombs || groupChar.lastRegenAction > new Date().getTime() - 1000) continue;
+        groupChar.lastRegenAction = new Date().getTime();
+        groupChar.life += Math.min(groupChar.stats.lifeRegen, groupChar.stats.maxLife - groupChar.life);
+        groupChar.mana += Math.min(groupChar.stats.manaRegen, groupChar.stats.maxMana - groupChar.mana);
+      }
+    }
+
     if (!user.selectedCharacter) return;
     var char = user.selectedCharacter!;
-    if (char.zone != Zone.Town) return;
+    //if (char.zone === Zone.Catacombs) return;
     char.lastRegenAction = new Date().getTime();
     char.life += Math.min(char.stats.lifeRegen, char.stats.maxLife - char.life);
     char.mana += Math.min(char.stats.manaRegen, char.stats.maxMana - char.mana);
+
     setUser({ ...user });
   }
 
-  return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem }}>
+  return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem, selectedItemSlot, setSelectedItemSlot }}>
     {children}
   </UserContext.Provider>
 }

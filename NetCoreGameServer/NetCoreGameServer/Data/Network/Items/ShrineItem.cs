@@ -15,11 +15,13 @@ public class ShrineItemHandler : IRequestHandler<ShrineItemRequest>
 {
     private readonly GameSession _session;
     private readonly DatabaseThread _dbThread;
+    private readonly GameManager _gameManager;
 
-    public ShrineItemHandler(GameSession session, DatabaseThread dbThread)
+    public ShrineItemHandler(GameSession session, DatabaseThread dbThread, GameManager gameManager)
     {
         _session = session;
         _dbThread = dbThread;
+        _gameManager = gameManager;
     }
 
     public async Task Handle(ShrineItemRequest request, CancellationToken cancellationToken)
@@ -36,7 +38,7 @@ public class ShrineItemHandler : IRequestHandler<ShrineItemRequest>
         character.AllItems.Remove(item);
         await _dbThread.DeleteItem(item);
 
-        _session.Send(new UpdateCharacterResponse
+        _gameManager.GroupBroadcast(_session, new UpdateCharacterResponse()
         {
             Data = character
         });

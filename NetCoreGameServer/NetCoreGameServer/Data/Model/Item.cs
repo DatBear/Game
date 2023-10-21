@@ -1,4 +1,5 @@
 ﻿using K4os.Hash.xxHash;
+using NetCoreGameServer.Data.GameData;
 
 namespace NetCoreGameServer.Data.Model;
 
@@ -24,8 +25,8 @@ public class Item
     public bool CanStackWith(Item item)
     {
         //todo add max quantity check
-        return Tier == item.Tier && 
-               Quantity.HasValue && item.Quantity.HasValue && 
+        return Tier == item.Tier &&
+               Quantity.HasValue && item.Quantity.HasValue &&
                SubType == item.SubType &&
                (Stats.ExperienceGained != 0) == (item.Stats.ExperienceGained != 0) &&
                (Stats.EnhancedEffect != 0) == (item.Stats.EnhancedEffect != 0) &&
@@ -43,5 +44,33 @@ public class Item
         Stats.ExperienceGained -= (int)Math.Floor(Stats.ExperienceGained / (decimal)Quantity.Value) * quantity;
         Quantity -= quantity;
         return Quantity == 0;
+    }
+
+
+    public int[] GetRange(Character character)
+    {
+        //todo add defense calcs
+        var data = ItemStatValues.ForDamageCalculation[SubType];
+        switch (WearableItems.GetItemType(SubType))
+        {
+            case ItemType.Weapon:
+            {
+                var statDamage = Math.Floor(character.Stats.Strength * data[4] / 100d) + Math.Floor(character.Stats.Dexterity * (100 - data[4]) / 100d);
+                statDamage = Math.Floor(statDamage * 1.25);
+                return new[] { GetCalcStat(data[1], Tier, statDamage, Stats.EnhancedEffect), GetCalcStat(data[2], Tier, statDamage, Stats.EnhancedEffect) };
+            }
+            case ItemType.Charm:
+            {
+                var ee = Stats.EnhancedEffect + Stats.Intelligence;
+                return new[] { GetCalcStat(data[1], Tier, Stats.Intelligence, ee), GetCalcStat(data[2], Tier, Stats.Intelligence, ee) };
+            }
+        }
+        
+        return new[] { 0, 0 };
+    }
+
+    private int GetCalcStat(int perTier, int itemTier, double statDamage, int ee)
+    {
+        return (int)Math.Floor((perTier * itemTier) * (100 + statDamage - 5) / 100d * ((100 + ee) / 100d));
     }
 }

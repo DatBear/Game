@@ -11,8 +11,6 @@ export type CharacterDisplayProps = {
 }
 
 export default function CharacterDisplay({ character, isGroupLeader }: CharacterDisplayProps) {
-
-  const { user } = useUser();
   const { character: loggedInChar } = useCharacter();
 
   if (character) {
@@ -26,7 +24,7 @@ export default function CharacterDisplay({ character, isGroupLeader }: Character
         <div className="text-lg text-center">{isGroupLeader && "*"}{character.name}</div>
         <ProgressBar current={character.life} max={character.stats.maxLife!} color={"red"} />
         <ProgressBar current={character.mana} max={character.stats.maxMana!} color={"blue"} />
-        <ProgressBar current={character.experience - (character.level - 1) * 1000000} max={1000000} color={"green"} text={`Lv. ${character.level}`} />
+        <ProgressBar current={character.experience - (character.level - 1) * 1_000_000} max={1_000_000} color={"green"} text={`Lv. ${character.level}`} />
       </div>
       <div className={clsx("w-12 h-24", isDifferentZone && "opacity-40")}>
         <CharacterImage character={character} ref={character.imageRef} />

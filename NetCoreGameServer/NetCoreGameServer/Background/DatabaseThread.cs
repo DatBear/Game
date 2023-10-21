@@ -15,7 +15,7 @@ public class DatabaseThread : BaseBackgroundThread
     private readonly CharacterRepository _characterRepository; 
     private readonly ItemRepository _itemRepository;
     
-    public DatabaseThread(GameManager gameManager, CharacterRepository characterRepository, ItemRepository itemRepository) : base(.1, gameManager)
+    public DatabaseThread(CharacterRepository characterRepository, ItemRepository itemRepository) : base(.1, null)
     {
         _characterRepository = characterRepository;
         _itemRepository = itemRepository;

@@ -34,14 +34,14 @@ function GroupListing({ group, isSelected, setSelectedGroup }: { group: Group, i
     return group.users.find(x => x.user!.id === group.leaderId)!.user!;
   }
 
-  return (<div className={clsx("flex flex-row flex-wrap w-full outline outline-1 bg-stone-700 hover:bg-stone-600 px-1", isInGroup(group, user) ? "outline-green-400" : "outline-white")} onClick={() => setSelectedGroup(group)}>
+  return <div className={clsx("flex flex-row flex-wrap w-full outline outline-1 bg-stone-700 hover:bg-stone-600 px-1 ignore-reorder", isInGroup(group, user) ? "outline-green-400" : "outline-white")} onClick={() => setSelectedGroup(group)}>
     {isSelected && <div className="pr-1">&gt;</div>}
     <div className="basis-1/12">{group.users.length}/5</div>
     <div className="basis-2/12">Lv {leader().selectedCharacter?.level}</div>
     <div className="basis-2/12">{leader().selectedCharacter?.class}</div>
     <div className="flex-grow basis-4/12">{leader().selectedCharacter?.name}{guildName("tester's guild")}</div>
     {isSelected && <div>&lt;</div>}
-  </div>);
+  </div>
 }
 
 function CharListing({ char }: { char: Character }) {

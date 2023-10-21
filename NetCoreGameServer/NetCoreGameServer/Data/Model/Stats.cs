@@ -47,25 +47,87 @@ public class Stats
 
     public static Stats operator +(Stats a, Stats b)
     {
+        a.EnhancedEffect += b.EnhancedEffect;
         a.Strength += b.Strength;
         a.Dexterity += b.Dexterity;
         a.Vitality += b.Vitality;
         a.Intelligence += b.Intelligence;
         a.MaxLife += b.MaxLife;
         a.MaxMana += b.MaxMana;
-        //todo implement the rest
+        a.ExperienceGained += b.ExperienceGained;
+        a.MagicLuck += b.MagicLuck;
+        a.LifeRegen += b.LifeRegen;
+        a.ManaRegen += b.ManaRegen;
+        a.ExtraEquipmentSlots += b.ExtraEquipmentSlots;
+        a.CriticalStrike += b.CriticalStrike;
+        a.LifePerAttack += b.LifePerAttack;
+        a.ManaPerAttack += b.ManaPerAttack;
+        a.LifePerKill += b.LifePerKill;
+        a.ManaPerKill += b.ManaPerKill;
+        a.LifeSteal += b.LifeSteal;
+        a.DamageReturn += b.DamageReturn;
+        a.MindNumb += b.MindNumb;
+        a.ArmorPierce += b.ArmorPierce;
+        a.Parry += b.Parry;
+        a.CriticalFlux += b.CriticalFlux;
+        a.PhysicalDamageReduction += b.PhysicalDamageReduction;
+        a.MagicalDamageReduction += b.MagicalDamageReduction;
+        a.ManaSiphon += b.ManaSiphon;
+        a.QuickDraw += b.QuickDraw;
+        a.ManaConsumption += b.ManaConsumption;
+        a.IceMastery += b.IceMastery;
+        a.FireMastery += b.FireMastery;
+        a.LightningMastery += b.LightningMastery;
+        a.EarthMastery += b.EarthMastery;
+        a.WindMastery += b.WindMastery;
+        a.HealMastery += b.HealMastery;
+        a.ManaSkin += b.ManaSkin;
+        a.PowerShot += b.PowerShot;
+        a.GlancingBlow += b.GlancingBlow;
+        a.Jubilance += b.Jubilance;
         return a;
     }
 
     public static Stats operator -(Stats a, Stats b)
     {
+        a.EnhancedEffect -= b.EnhancedEffect;
         a.Strength -= b.Strength;
         a.Dexterity -= b.Dexterity;
         a.Vitality -= b.Vitality;
         a.Intelligence -= b.Intelligence;
         a.MaxLife -= b.MaxLife;
         a.MaxMana -= b.MaxMana;
-        //todo implement the rest
+        a.ExperienceGained -= b.ExperienceGained;
+        a.MagicLuck -= b.MagicLuck;
+        a.LifeRegen -= b.LifeRegen;
+        a.ManaRegen -= b.ManaRegen;
+        a.ExtraEquipmentSlots -= b.ExtraEquipmentSlots;
+        a.CriticalStrike -= b.CriticalStrike;
+        a.LifePerAttack -= b.LifePerAttack;
+        a.ManaPerAttack -= b.ManaPerAttack;
+        a.LifePerKill -= b.LifePerKill;
+        a.ManaPerKill -= b.ManaPerKill;
+        a.LifeSteal -= b.LifeSteal;
+        a.DamageReturn -= b.DamageReturn;
+        a.MindNumb -= b.MindNumb;
+        a.ArmorPierce -= b.ArmorPierce;
+        a.Parry -= b.Parry;
+        a.CriticalFlux -= b.CriticalFlux;
+        a.PhysicalDamageReduction -= b.PhysicalDamageReduction;
+        a.MagicalDamageReduction -= b.MagicalDamageReduction;
+        a.ManaSiphon -= b.ManaSiphon;
+        a.QuickDraw -= b.QuickDraw;
+        a.ManaConsumption -= b.ManaConsumption;
+        a.IceMastery -= b.IceMastery;
+        a.FireMastery -= b.FireMastery;
+        a.LightningMastery -= b.LightningMastery;
+        a.EarthMastery -= b.EarthMastery;
+        a.WindMastery -= b.WindMastery;
+        a.HealMastery -= b.HealMastery;
+        a.ManaSkin -= b.ManaSkin;
+        a.PowerShot -= b.PowerShot;
+        a.GlancingBlow -= b.GlancingBlow;
+        a.Jubilance -= b.Jubilance;
         return a;
     }
 }

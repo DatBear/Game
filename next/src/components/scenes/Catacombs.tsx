@@ -27,7 +27,7 @@ type AttackRequest = {
 
 export function Catacombs() {
   const attackTimeout = useRef<NodeJS.Timer>();
-  const { user } = useUser();
+  const { user, selectedItemSlot } = useUser();
   const { character, goToZone, addExperience, addKill, addDeath } = useCharacter();
   const [areHotkeysEnabled, setAreHotkeysEnabled] = useState(true);
   const [target, setTarget] = useState<number>();
@@ -64,7 +64,6 @@ export function Catacombs() {
   }
 
   const targetEnemy = (id: number) => {
-    //console.log('set target ', id);
     setTarget(id);
     if (!attackTimeout.current) {
       attack(id);
@@ -82,7 +81,7 @@ export function Catacombs() {
       sourceId: user.selectedCharacter?.id!,
       targetId: targetId,
       type: AttackType.PlayerAttack,
-      equippedItemSlot: EquippedItemSlot.Weapon,//todo change
+      equippedItemSlot: selectedItemSlot,
     }
     send(RequestPacketType.AttackTarget, attack);
     setLastAction(new Date().getTime());
@@ -126,12 +125,12 @@ export function Catacombs() {
         case AttackType.PlayerAttack:
           let source = user.group?.users.map(x => x.user?.selectedCharacter).find(x => x?.id === e.sourceId && x.imageRef) ?? user.selectedCharacter;
           let target = mobs.find(x => x.id === e.targetId);
-          if (!source || !target || !target.ref.current) return;
+          if (!source || !source.imageRef?.current || !target || !target.ref?.current) return;
 
-          e.xSource = source?.imageRef.current?.offsetLeft! + source?.imageRef.current?.offsetWidth! * .8;
-          e.ySource = source?.imageRef.current?.offsetTop! + source?.imageRef.current?.offsetHeight! * .5;
+          e.xSource = source.imageRef.current.offsetLeft! + source.imageRef.current.offsetWidth! * .8;
+          e.ySource = source.imageRef.current.offsetTop! + source.imageRef.current.offsetHeight! * .5;
 
-          [e.xTarget, e.yTarget] = randomPos(target?.ref.current!);
+          [e.xTarget, e.yTarget] = randomPos(target.ref.current!);
           e.weapon = e.weaponType != undefined ? defaultItem(e.weaponType) : undefined;
           e.isPlayer = true;
 

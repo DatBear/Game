@@ -35,7 +35,6 @@ public class EquipItemHandler : IRequestHandler<EquipItemRequest>
 
     public async Task Handle(EquipItemRequest request, CancellationToken cancellationToken)
     {
-        
         var toEquip = _session.User.SelectedCharacter.AllItems.FirstOrDefault(x => x.Id == request.Data.ItemId);
         var currentlyEquipped = _session.User.SelectedCharacter.AllItems.FirstOrDefault(x => x.EquippedItemSlot == request.Data.EquippedItemSlot);
         if (CanEquipItem(_session.User.SelectedCharacter, toEquip, request.Data.EquippedItemSlot))
@@ -51,7 +50,7 @@ public class EquipItemHandler : IRequestHandler<EquipItemRequest>
             _session.User.SelectedCharacter.Stats += toEquip.Stats;
 
             await _dbThread.UpdateItem(toEquip);
-            _session.Send(new UpdateCharacterResponse
+            _gameManager.GroupBroadcast(_session, new UpdateCharacterResponse
             {
                 Data = _session.User.SelectedCharacter
             });
@@ -64,7 +63,7 @@ public class EquipItemHandler : IRequestHandler<EquipItemRequest>
         {
             return false;
         }
-        
+
         var maxTier = Math.Floor(3 + character.Level / 5d);
         var subTypes = slot switch
         {

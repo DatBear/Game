@@ -25,10 +25,10 @@ public class MobGenerator
                 Level = (int)Math.Round(user.Group?.Users.Average(x => x.User.SelectedCharacter.Level) ?? user.SelectedCharacter.Level),
                 Position = pos,
                 Image = r.Next(101),
-                Damage = new[] { 5, 7 },
+                Damage = new[] { 2, 5 },
                 AttackSpeed = r.Next(1000, 2000),
-                Life = 100,
-                MaxLife = 100,
+                Life = 30,
+                MaxLife = 30,
                 Weapon = ItemSubType.Fire,
                 LastAction = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             };

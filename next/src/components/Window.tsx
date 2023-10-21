@@ -56,8 +56,8 @@ export default function Window({ children, isVisible, coords, className, tabbed,
   };
 
   const onClick = (e: React.MouseEvent<HTMLElement>) => {
-    let classes = (e.target as HTMLDivElement)?.classList;
-    if (classes.contains("close-window") || classes.contains("ignore-reorder")) {
+    let el = (e.target as HTMLElement);
+    if (el.classList.contains("close-window") || el.classList.contains("ignore-reorder") || el.parentElement?.classList.contains("ignore-reorder")) {
       return;
     }
     let types = Object.values(UIWindow).filter((v) => !isNaN(Number(v))).map(x => x as UIWindow);

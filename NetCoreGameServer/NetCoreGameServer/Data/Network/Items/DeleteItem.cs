@@ -16,9 +16,10 @@ public class DeleteItemHandler : IRequestHandler<DeleteItemRequest>
     private readonly GameSession _session;
     private readonly DatabaseThread _dbThread;
 
-    public DeleteItemHandler(GameSession session, ItemRepository itemRepository)
+    public DeleteItemHandler(GameSession session, DatabaseThread dbThread)
     {
         _session = session;
+        _dbThread = dbThread;
     }
 
     public async Task Handle(DeleteItemRequest request, CancellationToken cancellationToken)

@@ -23,7 +23,7 @@ public class CharacterRegenThread : BaseBackgroundThread
         foreach (var session in sessions)
         {
             var character = session.User.SelectedCharacter;
-            if (character == null || character.LastRegen + RegenInterval > tick) continue;
+            if (character == null || character.LastRegenAction + RegenInterval > tick) continue;
             if (character is { Zone: Zone.Town })
             {
                 if (character.Life < character.Stats.MaxLife || character.Mana < character.Stats.MaxMana)
@@ -33,13 +33,13 @@ public class CharacterRegenThread : BaseBackgroundThread
                     await _dbThread.UpdateCharacter(character);
                 }
                 
-                if (tick - character.LastRegen < RegenInterval * 2)
+                if (tick - character.LastRegenAction < RegenInterval * 2)
                 {
-                    character.LastRegen += RegenInterval;
+                    character.LastRegenAction += RegenInterval;
                 }
                 else
                 {
-                    character.LastRegen = tick;
+                    character.LastRegenAction = tick;
                 }
                 //Console.WriteLine($"{character.Name}'s life: {character.Life}");
             }

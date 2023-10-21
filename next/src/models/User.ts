@@ -1,4 +1,5 @@
 import Character from "./Character";
+import { EquippedItemSlot } from "./EquippedItem";
 import Group from "./Group";
 import MarketItem from "./MarketItem";
 import { Maze } from "./Maze";

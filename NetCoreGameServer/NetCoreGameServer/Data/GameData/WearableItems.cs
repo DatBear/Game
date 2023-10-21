@@ -60,4 +60,10 @@ public class WearableItems
         { CharacterClasses.Headhunter, new[] { ItemSubType.Lightning } },
         { CharacterClasses.Alchemist, ItemTypes[ItemType.Charm] },
     };
+
+    public static ItemType GetItemType(ItemSubType? type)
+    {
+        if (type == null) return ItemType.Weapon;
+        return ItemTypes.FirstOrDefault(p => p.Value.Contains(type.Value)).Key;
+    }
 }

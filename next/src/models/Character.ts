@@ -2,6 +2,7 @@ import { RefObject } from "react";
 import Item from "./Item";
 import { CharacterStats } from "./Stats";
 import { Zone } from "./Zone";
+import { EquippedItemSlot } from "./EquippedItem";
 
 export enum CharacterClass {
   Fighter = "Fighter",

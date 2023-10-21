@@ -17,6 +17,8 @@ import GroupDisplay from "../GroupDisplay";
 import GroundItemsWindow from "../GroundItemsWindow";
 import { UIWindow } from "@/models/UIWindow";
 import { XYCoord } from "react-dnd";
+import { useHotkeys } from "react-hotkeys-hook";
+import clsx from "clsx";
 
 export type UIWindowState = {
   isVisible: boolean;
@@ -72,7 +74,7 @@ const defaultWindowState = (type: UIWindow) => {
     type,
     isVisible: false,
     order: order++,
-    coords: { x: 50, y: 50 }
+    coords: { x: 50 + (type * 10), y: 50 + (type * 10) }
   } as UIWindowState;
 }
 
@@ -114,8 +116,13 @@ const UIContext = createContext({} as UIContextProps);
 
 export default function UIContextProvider({ children }: React.PropsWithChildren) {
   const [windowStates, setWindowStates] = useState(defaultWindowStates);
-  const { user, selectCharacter } = useUser();
+  const { user, selectCharacter, selectedItemSlot, setSelectedItemSlot } = useUser();
   const { character } = useCharacter();
+
+  useHotkeys('q', e => !e.repeat && setSelectedItemSlot(EquippedItemSlot.Weapon));
+  useHotkeys('e', e => !e.repeat && setSelectedItemSlot(EquippedItemSlot.Charm));
+  useHotkeys('r', e => !e.repeat && setSelectedItemSlot(EquippedItemSlot.AccCharm));
+
 
   const setWindowState = (type: UIWindow, state: UIWindowState) => {
     //console.log('saving window state', UIWindow[type], state);
@@ -141,9 +148,9 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
       <div className="flex flex-col gap-3 p-2 h-full">
         {character && <div className="flex flex-row">
           <div className="flex flex-row gap-2">
-            <ItemSlot medium noDrag noTooltip hotkey="Q" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon)} />
-            <ItemSlot medium noDrag noTooltip hotkey="E" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Charm)} />
-            <ItemSlot medium noDrag noTooltip hotkey="R" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.AccCharm)} />
+            <ItemSlot medium noDrag noTooltip hotkey="Q" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon)} className={clsx(selectedItemSlot === EquippedItemSlot.Weapon && "border-green-500")} />
+            <ItemSlot medium noDrag noTooltip hotkey="E" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Charm)} className={clsx(selectedItemSlot === EquippedItemSlot.Charm && "border-green-500")} />
+            <ItemSlot medium noDrag noTooltip hotkey="R" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.AccCharm)} className={clsx(selectedItemSlot === EquippedItemSlot.AccCharm && "border-green-500")} />
             <ItemSlot medium noDrag noTooltip hotkey="1" />
             <ItemSlot medium noDrag noTooltip hotkey="2" />
             <ItemSlot medium noDrag noTooltip hotkey="3" />
