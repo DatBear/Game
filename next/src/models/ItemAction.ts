@@ -9,6 +9,7 @@ export enum ItemAction {
   Combine,
   Shrine,
   PickUp,
+  Swap,
   // SendToVault,
   // SendToPlayer,
   // TakeFromVault

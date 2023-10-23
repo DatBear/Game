@@ -149,7 +149,7 @@ public class Init : Migration {
             ItemStatsId  int           not null,
             Position     int           null,
             EquippedItemSlot int           null,
-            OwnerId      int           not null,
+            OwnerId      int           null,
             ExpiresAt    bigint        null,
             constraint Item_Character_Id_fk
                 foreign key (OwnerId) references `Character` (Id),
@@ -166,9 +166,10 @@ public class Init : Migration {
         (
             Id       int auto_increment
                 primary key,
-            Email    varchar(191) not null,
-            Password varchar(191) not null,
-            Username varchar(191) not null
+            Email    varchar(191)  not null,
+            Password varchar(191)  not null,
+            Username varchar(191)  not null,
+            Gold     decimal(13,2) not null
         )
             collate = utf8mb4_unicode_ci;
 
@@ -180,44 +181,21 @@ public class Init : Migration {
             add constraint User_Username_key
                 unique (Username);
 
-#        create table CharacterInventoryItem
-#        (
-#            CharacterId int not null,
-#            ItemId      int not null,
-#            Position    int not null,
-#            constraint CharacterInventoryItem_pk
-#                primary key (CharacterId, Itemid),
-#            constraint CharacterInventoryItem_Character_fk
-#                foreign key (CharacterId) references `Character` (Id),
-#            constraint CharacterInventoryItem_Item_fk
-#                foreign key (ItemId) references Item (Id)
-#        );
-#
-#        create table CharacterInventoryEquipment
-#        (
-#            CharacterId int not null,
-#            ItemId      int not null,
-#            Position    int not null,
-#            constraint CharacterInventoryEquipment_pk
-#                primary key (CharacterId, Itemid),
-#            constraint CharacterInventoryEquipment_Character_fk
-#                foreign key (CharacterId) references `Character` (Id),
-#            constraint CharacterInventoryEquipment_Item_fk
-#                foreign key (ItemId) references Item (Id)
-#        );
-#
-#        create table CharacterEquippedItem
-#        (
-#            CharacterId int not null,
-#            ItemId      int not null,
-#            Slot        int not null,
-#            constraint CharacterEquippedItem_pk
-#                primary key (CharacterId, Itemid),
-#            constraint CharacterEquippedItem_Character_Id_fk
-#                foreign key (CharacterId) references `Character` (Id),
-#            constraint CharacterEquippedItem_Item_Id_fk
-#                foreign key (ItemId) references Item (Id)
-#        );
+        create table MarketItem
+        (
+            Id        int auto_increment,
+            Itemid    int            not null,
+            UserId   int            not null,
+            Price     decimal(13, 2) not null,
+            ExpiresAt bigint         not null,
+            constraint Id
+                primary key (Id),
+            constraint MarketItem_Item_Id_fk
+                foreign key (Itemid) references Item (Id),
+            constraint MarketItem_User_Id_fk
+                foreign key (UserId) references User (Id)
+        );
+
         ");
     }
 

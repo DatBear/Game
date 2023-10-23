@@ -38,8 +38,8 @@ function InventoryWindow() {
     <div>
       <span>Equipment ({character.equipment.length}/{character.equipmentSlots})</span>
       <div className="grid grid-cols-5 gap-x-2 gap-y-3">
-        {character.equipment.concat([...Array(character.equipmentSlots - character.equipment.length)]).map((x, idx) => {
-          return <ItemSlot key={x?.id ?? idx - character.equipmentSlots - 1} item={x} />
+        {character.equipment.concat([...Array(Math.max(0, character.equipmentSlots - character.equipment.length))]).map((x, idx) => {
+          return <ItemSlot key={x?.id ?? idx - character.equipmentSlots - 1} item={x} action={ItemAction.Swap} />
         })}
       </div>
     </div>

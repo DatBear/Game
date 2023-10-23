@@ -11,7 +11,7 @@ public class Item
     public ItemSubType SubType { get; set; }
     public int? Position { get; set; }
     public EquippedItemSlot? EquippedItemSlot { get; set; }
-    public int OwnerId { get; set; }
+    public int? OwnerId { get; set; }
 
     public int ItemStatsId { get; set; }
     public ItemStats Stats { get; set; } = new();

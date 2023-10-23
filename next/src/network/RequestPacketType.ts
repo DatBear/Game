@@ -26,6 +26,11 @@ enum RequestPacketType {
   StopSkill,
   StackItem,
   UseItem,
+  SellItem,
+  SearchMarketItems,
+  BuyItem,
+  UpdateMarketitem,
+  CancelMarketItem,
 }
 
 export default RequestPacketType;

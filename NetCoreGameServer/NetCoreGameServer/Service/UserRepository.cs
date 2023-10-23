@@ -56,7 +56,26 @@ public class UserRepository
             return user;
         }, new { Id = id }).FirstOrDefault();
 
+        var marketItems = _db.Query<MarketItem, Item, ItemStats, MarketItem>($@"SELECT
+            mi.*
+            , mii.*
+            , itemStats.*
+            FROM {TableNames.MarketItem} mi
+            LEFT JOIN {TableNames.Item} mii on mi.ItemId = mii.id
+            LEFT JOIN {TableNames.ItemStats} itemStats on mii.ItemStatsId = itemStats.Id
+            WHERE mi.UserId = @Id
+        ", (marketItem, item, itemStats) =>
+        {
+            if (marketItem != null)
+            {
+                marketItem.Item = item;
+                marketItem.Item.Stats = itemStats;
+            }
+            return marketItem;
+        }, user);
+
         user.Characters = user.Characters.DistinctBy(x => x.Id).ToList();
+        user.MarketItems = marketItems.DistinctBy(x => x.Id).ToList();
         return user;
     }
 }

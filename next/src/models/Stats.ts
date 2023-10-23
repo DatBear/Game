@@ -111,9 +111,7 @@ const statNames: Record<string, string> = {
   ["levelCap"]: "Level Cap"
 }
 
-type Stats = Partial<CharacterStats> & Partial<ItemStats> & {
-  id: number;
-};
+type Stats = Partial<CharacterStats> & Partial<ItemStats>;
 
 const itemSpecificStatNames: Record<string, string> = {
   ...statNames,

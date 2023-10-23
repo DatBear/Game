@@ -1,7 +1,9 @@
 ﻿using System.Data;
 using Dapper;
+using MySql.Data.MySqlClient;
 using NetCoreGameServer.Data;
 using NetCoreGameServer.Data.Model;
+using NetCoreGameServer.Data.Network.Items;
 
 namespace NetCoreGameServer.Service;
 
@@ -52,7 +54,7 @@ public class ItemRepository
         return true;
     }
 
-    public async Task<bool> UpdateItem(Item item)
+    public async Task<bool> UpdateItem(Item item, IDbTransaction transaction = null)
     {
         await UpdateItemStats(new[] { item.Stats });
 
@@ -65,7 +67,7 @@ public class ItemRepository
             OwnerId = @OwnerId,
             ExpiresAt = @ExpiresAt
         WHERE Id = @Id";
-        await _db.ExecuteAsync(sql, item);
+        await _db.ExecuteAsync(sql, item, transaction);
         return true;
     }
 
@@ -88,7 +90,7 @@ public class ItemRepository
         return true;
     }
 
-    private async Task<bool> UpdateItemStats(IEnumerable<ItemStats> stats)
+    private async Task<bool> UpdateItemStats(IEnumerable<ItemStats> stats, IDbTransaction transaction = null)
     {
         var sql = $@"UPDATE {TableNames.ItemStats} SET 
             EnhancedEffect = @EnhancedEffect,
@@ -142,7 +144,7 @@ public class ItemRepository
             LevelUp = @LevelUp,
             LevelCap = @LevelCap
         WHERE Id = @Id";
-        await _db.ExecuteAsync(sql, stats);
+        await _db.ExecuteAsync(sql, stats, transaction);
         return true;
     }
 
@@ -152,6 +154,171 @@ public class ItemRepository
             DELETE FROM {TableNames.Item} WHERE Id = @Id;
             DELETE FROM {TableNames.ItemStats} WHERE Id = @ItemStatsId;
         ", item);
+        return true;
+    }
+
+    public async Task<bool> CreateMarketItem(MarketItem marketItem)
+    {
+        _db.Open();
+        using var transaction = _db.BeginTransaction();
+        try
+        {
+            await UpdateItem(marketItem.Item, transaction);
+
+            var id = await _db.QueryFirstAsync<int>($@"
+            INSERT INTO {TableNames.MarketItem} (
+                ItemId,
+                UserId,
+                Price,
+                ExpiresAt
+            ) VALUES(
+                @ItemId,
+                @UserId,
+                @Price,
+                @ExpiresAt
+            );
+            SELECT LAST_INSERT_ID();", marketItem, transaction);
+            marketItem.Id = id;
+            transaction.Commit();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            transaction.Rollback();
+            return false;
+        }
+        finally
+        {
+            _db.Close();
+        }
+
+        return true;
+    }
+
+    public async Task<bool> BuyMarketItem(MarketItem item, User user)
+    {
+        _db.Open();
+        using var transaction = _db.BeginTransaction();
+        try
+        {
+            await _db.ExecuteAsync($@"DELETE FROM {TableNames.MarketItem} WHERE Id = @Id", item);
+            await UpdateItem(item.Item, transaction);
+            await _db.ExecuteAsync($@"UPDATE {TableNames.User} SET Gold = Gold + @Price WHERE Id = @UserId", item);
+            await _db.ExecuteAsync($@"UPDATE {TableNames.User} SET Gold = Gold - @Price WHERE Id = @UserId", new { UserId = user.Id, Price = item.Price });
+            transaction.Commit();
+            user.Gold -= item.Price;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            transaction.Rollback();
+            return false;
+        }
+        finally
+        {
+            _db.Close();
+        }
+
+        return true;
+    }
+
+    public async Task<bool> UpdateMarketItemPrice(MarketItem item)
+    {
+        await _db.ExecuteAsync($@"UPDATE {TableNames.MarketItem} SET Price = @Price WHERE Id = @Id", item);
+        return true;
+    }
+
+    public async Task<List<MarketItem>> SearchMarketItems(SearchMarketItemsDbRequest request)
+    {
+        var sql = $@"SELECT 
+            mi.*,
+            i.*,
+            stats.*
+        FROM {TableNames.MarketItem} mi
+        INNER JOIN {TableNames.Item} i ON mi.ItemId = i.Id
+        INNER JOIN {TableNames.ItemStats} stats ON i.ItemStatsId = stats.Id
+        /**where**/";
+        var builder = new SqlBuilder();
+        var template = builder.AddTemplate(sql);
+
+        if (request.SubType.HasValue)
+        {
+            builder.Where("i.SubType = @SubType");
+        }
+
+        if (request.MinTier.HasValue)
+        {
+            builder.Where("i.Tier >= @MinTier");
+        }
+
+        if (request.MaxTier.HasValue)
+        {
+            builder.Where("i.Tier <= @MaxTier");
+        }
+
+        if (request.MinCost.HasValue)
+        {
+            builder.Where("mi.Price >= @MinCost");
+        }
+
+        if (request.MaxCost.HasValue)
+        {
+            builder.Where("mi.Price <= @MaxCost");
+        }
+
+        var items = await _db.QueryAsync<MarketItem, Item, ItemStats, MarketItem>(template.RawSql, (marketItem, item, stats) =>
+        {
+            marketItem.Item = item;
+            item.Stats = stats;
+            return marketItem;
+        }, request);
+
+        return items.ToList();
+    }
+
+    public async Task<MarketItem?> GetMarketItem(int id)
+    {
+        var sql = $@"SELECT 
+            mi.*,
+            i.*,
+            stats.*
+        FROM {TableNames.MarketItem} mi
+        INNER JOIN {TableNames.Item} i ON mi.ItemId = i.Id
+        INNER JOIN {TableNames.ItemStats} stats ON i.ItemStatsId = stats.Id
+        WHERE mi.Id = @Id";
+        var item = await _db.QueryAsync<MarketItem, Item, ItemStats, MarketItem>(sql, (marketItem, item, stats) =>
+        {
+            if (marketItem != null)
+            {
+                marketItem.Item = item;
+                marketItem.Item.Stats = stats;
+            }
+            return marketItem;
+        }, new { Id = id });
+        return item.FirstOrDefault();
+    }
+
+    public async Task<bool> DeleteMarketItem(MarketItem item, Character character)
+    {
+        _db.Open();
+        var transaction = _db.BeginTransaction();
+        try
+        {
+            await _db.ExecuteAsync($@"DELETE FROM {TableNames.MarketItem} WHERE Id = @Id", item);
+            await _db.ExecuteAsync($@"UPDATE {TableNames.Item} SET OwnerId = @OwnerId WHERE Id = @Id", item.Item);
+            transaction.Commit();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            transaction.Rollback();
+            return false;
+        }
+        finally
+        {
+            _db.Close();
+        }
+
         return true;
     }
 }

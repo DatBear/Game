@@ -29,4 +29,9 @@ public enum RequestPacketType
     StopSkill = 24,
     StackItem = 25,
     UseItem = 26,
+    SellItem = 27,
+    SearchMarketItems = 28,
+    BuyItem = 29,
+    UpdateMarketItem = 30,
+    CancelMarketItem = 31,
 }

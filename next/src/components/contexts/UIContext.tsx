@@ -29,6 +29,7 @@ export type UIWindowState = {
 
 export type UIMarketplaceWindowState = UIWindowState & {
   sellItem?: Item;
+  sellCost: string;
   buyItem?: MarketItem;
   transferItem?: Item;
   searchResults: MarketItem[];
@@ -125,6 +126,7 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
 
   useHotkeys('c', e => !e.repeat && toggleWindow(UIWindow.Stats));
   useHotkeys('i', e => !e.repeat && toggleWindow(UIWindow.Inventory));
+  useHotkeys('g', e => !e.repeat && toggleWindow(UIWindow.Groups));
 
   const setWindowState = (type: UIWindow, state: UIWindowState) => {
     //console.log('saving window state', UIWindow[type], state);
@@ -148,7 +150,7 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
     {!user.selectedCharacter && children}
     {user.selectedCharacter && <>
       <div className="flex flex-col gap-3 p-2 h-full">
-        {character && <div className="flex flex-row">
+        {character && <div className="flex flex-row gap-6">
           <div className="flex flex-row gap-2">
             <ItemSlot medium noDrag hotkey="Q" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Weapon)} className={clsx(selectedItemSlot === EquippedItemSlot.Weapon && "border-green-500")} />
             <ItemSlot medium noDrag hotkey="E" item={character.equippedItems.find(x => x.equippedItemSlot === EquippedItemSlot.Charm)} className={clsx(selectedItemSlot === EquippedItemSlot.Charm && "border-green-500")} />
@@ -159,7 +161,11 @@ export default function UIContextProvider({ children }: React.PropsWithChildren)
             <ItemSlot medium noDrag noTooltip hotkey="4" />
             <ItemSlot medium noDrag noTooltip hotkey="5" />
           </div>
-          <div className="flex flex-row gap-2 pl-10">
+          <div className="flex flex-row gap-2 h-full items-center">
+            <img src="svg/iconGold.svg" className="w-6 h-6" />
+            {user.gold.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div className="flex flex-row gap-2 pl-8">
             {character.activeGlyphs.filter(x => x.expiresAt && x.expiresAt > new Date().getTime()).map(x => <ItemSlot key={x.id} medium noDrag noBackground borderless item={x} />)}
           </div>
         </div>}

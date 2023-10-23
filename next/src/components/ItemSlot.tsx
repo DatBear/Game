@@ -100,8 +100,10 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
       if (slot != null && draggedSlot == null && draggedItem != null) {
         return equipItem(draggedItem, slot);
       }
-      if (slot == null && draggedSlot != null && draggedItem != null && action == null) {
-        return unequipItem(draggedSlot);
+      if (slot == null && draggedSlot != null && draggedItem != null && action == ItemAction.Swap) {
+        if (unequipItem(draggedSlot)) {
+          return;
+        }
       }
       if (action != null && draggedItem != null) {
         //todo figure out why the find is needed after stacking an item to show the correct quantity
@@ -141,8 +143,9 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
     && !canEquipItem(item, typeSlots[getItemType(item.subType)]!)
     ? "bg-red-600/20"
     : "";
+
   let borderClass = (borderless ?? false) ? "" : "border";
-  let bgClass = (noBackground ?? false) ? "" : "bg-stone-900";
+  let bgClass = (noBackground ?? false) ? "" : equippableClass.length == 0 ? "bg-stone-900" : equippableClass;
   let dragClass = !(noDrag ?? false) && isDragging ? '!border-green-500/25' : '';
   let dropClass = '';
   if (isOver && !(noDrag ?? false)) {
@@ -153,7 +156,7 @@ export default function ItemSlot({ item, small, medium, acceptTypes, acceptSubTy
 
   const numStats = item ? Object.keys(item.stats).length : 0;
   return (<>
-    <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, equippableClass, borderClass, bgClass, "flex-none relative", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} onClick={onClick} {...props}>
+    <div ref={ref} id={id} className={clsx("item", className, sizeClass, dragClass, dropClass, borderClass, bgClass, "flex-none relative", item?.subType === ItemSubType.FishingRod && "bg-stone-500")} onClick={onClick} {...props}>
       {item && !isDragging && <>
         <img src={iconPath} className="absolute inset-0 p-1 mx-auto w-full h-full" alt={itemNames[item.subType]} />
         {!small && !medium && <>

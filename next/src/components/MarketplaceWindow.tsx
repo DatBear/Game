@@ -1,5 +1,5 @@
 import Window from '@/components/Window';
-import { ItemSubType } from "@/models/Item";
+import { ItemSubType, ItemType, itemMagicPrefixes, itemNames, itemTiers, itemTypes } from "@/models/Item";
 import MarketItem from "@/models/MarketItem";
 import ItemSlot from "./ItemSlot";
 import { useWindow, UIMarketplaceWindowState } from "./contexts/UIContext";
@@ -9,22 +9,36 @@ import { useCharacter, useUser } from "./contexts/UserContext";
 import Character from "@/models/Character";
 import clsx from "clsx";
 import { UIWindow } from "@/models/UIWindow";
+import { ItemStats } from "@/models/Stats";
+import { MarketSearchRequest } from "@/models/MarketSearchRequest";
+import RequestPacketType from "@/network/RequestPacketType";
+import { listen, send } from "@/network/Socket";
+import ResponsePacketType from "@/network/ResponsePacketType";
 
 
 const marketItems: MarketItem[] = [
-  { price: 100, item: { id: 0, subType: ItemSubType.Club, stats: { id: 0, strength: 1 }, tier: 4 } },
-  { price: 110, item: { id: 1, subType: ItemSubType.PaddedRobe, stats: { id: 0, criticalFlux: 1 }, tier: 2 } },
-  { price: 120, item: { id: 2, subType: ItemSubType.Ice, stats: { id: 0, damageReturn: 3 }, tier: 3 } },
-  { price: 130, item: { id: 3, subType: ItemSubType.Fire, stats: { id: 0, enhancedEffect: 36 }, tier: 3 } },
-  { price: 140, item: { id: 4, subType: ItemSubType.Fish, stats: { id: 0, maxLife: 19 }, tier: 1, quantity: 12 } },
-  { price: 150, item: { id: 5, subType: ItemSubType.Fish, stats: { id: 0, maxLife: 100 }, tier: 2, quantity: 1 } },
-  { price: 160, item: { id: 6, subType: ItemSubType.Fish, stats: { id: 0, maxLife: 130, maxMana: 100 }, tier: 3, quantity: 20 } },
-  { price: 100, item: { id: 7, subType: ItemSubType.Club, stats: { id: 0, strength: 1, enhancedEffect: 24 }, tier: 4 } },
+  { id: 0, userId: 0, expiresAt: 0, isSold: false, price: 100, item: { id: 0, subType: ItemSubType.Club, stats: { strength: 1 }, tier: 4 } },
+  { id: 0, userId: 0, expiresAt: 0, isSold: false, price: 110, item: { id: 1, subType: ItemSubType.PaddedRobe, stats: { criticalFlux: 1 }, tier: 2 } },
+  { id: 0, userId: 0, expiresAt: 0, isSold: false, price: 120, item: { id: 2, subType: ItemSubType.Ice, stats: { damageReturn: 3 }, tier: 3 } },
+  { id: 0, userId: 0, expiresAt: 0, isSold: false, price: 130, item: { id: 3, subType: ItemSubType.Fire, stats: { enhancedEffect: 36 }, tier: 3 } },
+  { id: 0, userId: 0, expiresAt: 0, isSold: false, price: 140, item: { id: 4, subType: ItemSubType.Fish, stats: { maxLife: 19 }, tier: 1, quantity: 12 } },
+  { id: 0, userId: 0, expiresAt: 0, isSold: false, price: 150, item: { id: 5, subType: ItemSubType.Fish, stats: { maxLife: 100 }, tier: 2, quantity: 1 } },
+  { id: 0, userId: 0, expiresAt: 0, isSold: false, price: 160, item: { id: 6, subType: ItemSubType.Fish, stats: { maxLife: 130, maxMana: 100 }, tier: 3, quantity: 20 } },
+  { id: 0, userId: 0, expiresAt: 0, isSold: false, price: 100, item: { id: 7, subType: ItemSubType.Club, stats: { strength: 1, enhancedEffect: 24 }, tier: 4 } },
 ];
 
+let defaultSearchRequest: MarketSearchRequest = {
+  type: ItemType.Weapon,
+  usableOnly: false,
+  tierRange: [0, 0],
+  magicLevel: [-1, -1],
+  costRange: [0, 999999]
+};
+
 function MarketItemSlot({ marketItem, action }: { marketItem?: MarketItem, action?: ItemAction }) {
+  const { user } = useUser();
   return (<div className="flex flex-col w-16">
-    <ItemSlot item={marketItem?.item} action={action} />
+    <ItemSlot item={marketItem?.item} action={action} className={clsx(marketItem && marketItem.userId === user.id && "border-green-500")} />
     {marketItem && <div className="flex flex-row bg-stone-500/50 items-center w-16">
       <span className="flex-grow text-right px-1">{marketItem.price}</span>
       <img src="svg/iconGold.svg" alt="gold" />
@@ -33,8 +47,8 @@ function MarketItemSlot({ marketItem, action }: { marketItem?: MarketItem, actio
 }
 
 function CharacterSlot({ character, isSelected, onClick }: { character: Character, isSelected: boolean, onClick: () => void }) {
-  const classes = clsx("flex flex-row border p-1", isSelected ? "bg-stone-700" : "bg-stone-800");
-  return <div className={classes} onClick={_ => onClick()}>
+  const classes = clsx("flex flex-row border p-1", isSelected ? "bg-stone-600" : "bg-stone-800");
+  return <div className={classes} onClick={onClick}>
     <div>{character.name} (Lv. {character.level} {character.class})</div>
   </div>
 }
@@ -44,7 +58,6 @@ type BuyTabState = {
 }
 
 type SellTabState = {
-  cost: number;
   fee: number;
   goldPassword: string;
 }
@@ -54,47 +67,60 @@ type TransferTabState = {
 }
 
 export default function MarketplaceWindow() {
-  const { user, listMarketItem, transferItem } = useUser();
+  const { user, transferItem } = useUser();
   const { character, buyMarketItem } = useCharacter();
   const { closeWindow, windowState, setWindowState } = useWindow<UIMarketplaceWindowState>(UIWindow.Marketplace);
   const [buyTabState, setBuyTabState] = useState({ searchResults: windowState?.searchResults } as BuyTabState);
   const [sellTabState, setSellTabState] = useState({} as SellTabState);
   const [transferTabState, setTransferTabState] = useState({} as TransferTabState);
+  const [searchRequest, setSearchRequest] = useState(defaultSearchRequest);
 
+  const isSellEdit = windowState?.sellItem && user.marketItems.find(x => x.item.id === windowState!.sellItem!.id);
 
   useEffect(() => {
-    setWindowState({ ...windowState!, isVisible: windowState?.isVisible ?? false, searchResults: marketItems });
+    //setWindowState({ ...windowState!, isVisible: windowState?.isVisible ?? false, searchResults: marketItems });
   }, []);
 
-  const search = () => {
-
+  const search = (e: any) => {
+    e.preventDefault();
+    send(RequestPacketType.SearchMarketItems, searchRequest);
   }
 
   const buyItem = () => {
     if (!windowState?.buyItem) return;
     var item = windowState.buyItem;
-    if (buyMarketItem(item)) {
-      //sound?
-    }
+    send(RequestPacketType.BuyItem, { itemId: item.id, price: item.price });
   }
 
-  const updateCost = (cost: string) => {
+  const updateCost = (cost: string, fromWindowState?: boolean) => {
     const costFloat = parseFloat(cost);
-    const fee = costFloat < 20 ? 0 : costFloat * 5 / 100
-    setSellTabState(s => ({ ...s, cost: costFloat, fee }));
+    const fee = Math.floor(costFloat * 5 / 100);
+    if (!cost || cost.match(/^\d{1,}(\.\d{0,4})?$/)) {
+      if (!fromWindowState) {
+        setWindowState({ ...windowState!, sellCost: cost });
+      }
+      setSellTabState(s => ({ ...s, fee }));
+    }
   }
 
-  const sellItem = () => {
+  useEffect(() => {
+    updateCost(windowState?.sellCost!, true);
+  }, [windowState]);
+
+  const sellOrUpdateItemListing = () => {
     if (!windowState?.sellItem) return;
-    //todo check gold password, subtract fee
-    const marketItem: MarketItem = {
-      item: windowState?.sellItem,
-      price: sellTabState.cost
-    };
-    if (listMarketItem(marketItem)) {
-      setSellTabState({} as SellTabState);
-      setWindowState({ ...windowState, sellItem: undefined })
+    if (Number(windowState?.sellCost) < 1 || !user.selectedCharacter) return;
+
+    if (isSellEdit) {
+      send(RequestPacketType.UpdateMarketitem, { item: { id: windowState?.sellItem.id }, price: Number(windowState.sellCost) });
+    } else {
+      if (user.marketItems.length < 16) {
+        send(RequestPacketType.SellItem, { itemId: windowState?.sellItem.id, price: Number(windowState.sellCost) }, true);
+      }
     }
+
+    setSellTabState({} as SellTabState);
+    setWindowState({ ...windowState, sellItem: undefined, sellCost: '' });
   }
 
   const selectCharacter = (char: Character) => {
@@ -104,10 +130,22 @@ export default function MarketplaceWindow() {
   const transfer = () => {
     if (!windowState?.transferItem) return;
     if (!transferTabState.selectedCharacter) return;
-    if (transferItem(windowState.transferItem, transferTabState.selectedCharacter)) {
-      setWindowState({ ...windowState, transferItem: undefined });
-    }
+    // if (transferItem(windowState.transferItem, transferTabState.selectedCharacter)) {
+    //   setWindowState({ ...windowState, transferItem: undefined });
+    // }
   }
+
+  useEffect(() => {
+    return listen(ResponsePacketType.SearchMarketItems, (e: MarketItem[]) => {
+      setWindowState({ ...windowState!, searchResults: e });
+    });
+  }, [windowState]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.BuyItem, (e: MarketItem) => {
+      setWindowState({ ...windowState!, searchResults: windowState!.searchResults.filter(x => x.id !== e.id), buyItem: undefined });
+    });
+  }, [windowState]);
 
   return <Window tabbed isVisible={windowState!.isVisible} close={closeWindow} coords={windowState!.coords} type={windowState!.type}>
     <Window.Title>
@@ -122,37 +160,42 @@ export default function MarketplaceWindow() {
         <div id="marketSearch" className="flex flex-row flex-wrap sm:flex-nowrap pt-4 gap-4 sm:w-[40rem]">
           <form className="flex flex-col text-center gap-y-2 basis-full sm:basis-4/12 text-xs">
             <span className="">Type:</span>
-            <select>
-              <option>Weapons</option>
+            <select value={searchRequest.type} onChange={e => setSearchRequest({ ...searchRequest, type: Number(e.target.value) })}>
+              {Object.keys(ItemType).filter(x => !isNaN(Number(x))).map(x => Number(x)).map(x => <option key={x} value={x}>{ItemType[x]}</option>)}
             </select>
-            <select>
-              <option>Sub Type</option>
+            <select value={searchRequest.subType} onChange={e => setSearchRequest({ ...searchRequest, subType: Number(e.target.value) })}>
+              <option value="-1">Sub Type</option>
+              {itemTypes[searchRequest.type].map(x => <option key={x} value={x}>{itemNames[x]}</option>)}
             </select>
             <span>Level Range:</span>
             <div className="flex flex-row gap-x-2 items-center">
-              <select>
-                <option></option>
+              <select value={(searchRequest.tierRange[0])} onChange={e => setSearchRequest({ ...searchRequest, tierRange: [Number(e.target.value), searchRequest.tierRange[1]] })}>
+                <option value="0"></option>
+                {Object.keys(itemTiers).map(x => Number(x)).filter(x => x > 0).map(x => <option key={x} value={x}>{itemTiers[x]} ({Math.max(0, (x - 3) * 5)})</option>)}
               </select>
               <span>to</span>
-              <select>
+              <select value={(searchRequest.tierRange[1])} onChange={e => setSearchRequest({ ...searchRequest, tierRange: [searchRequest.tierRange[0], Number(e.target.value)] })}>
                 <option></option>
+                {Object.keys(itemTiers).map(x => Number(x)).filter(x => x >= searchRequest.tierRange[0] && x > 0).map(x => <option key={x} value={x}>{itemTiers[x]} ({Math.max(0, (x - 3) * 5)})</option>)}
               </select>
             </div>
             <span>Magic Level:</span>
             <div className="flex flex-row gap-x-2 items-center">
-              <select>
-                <option></option>
+              <select value={(searchRequest.magicLevel[0])} onChange={e => setSearchRequest({ ...searchRequest, magicLevel: [Number(e.target.value), searchRequest.magicLevel[1]] })}>
+                <option value="-1"></option>
+                {Object.keys(itemMagicPrefixes).map(x => Number(x)).map(x => <option key={x} value={x}>{itemMagicPrefixes[x]}</option>)}
               </select>
               <span>to</span>
-              <select>
-                <option></option>
+              <select value={(searchRequest.magicLevel[1])} onChange={e => setSearchRequest({ ...searchRequest, magicLevel: [searchRequest.magicLevel[0], Number(e.target.value)] })}>
+                <option value="-1"></option>
+                {Object.keys(itemMagicPrefixes).map(x => Number(x)).filter(x => x >= searchRequest.magicLevel[0]).map(x => <option key={x} value={x}>{itemMagicPrefixes[x]}</option>)}
               </select>
             </div>
             <span>Cost Range:</span>
             <div className="flex flex-row gap-x-2 items-center">
-              <input />
+              <input value={searchRequest.costRange[0]} onChange={e => setSearchRequest({ ...searchRequest, costRange: [Number(e.target.value), searchRequest.costRange[1]] })} />
               <span>to</span>
-              <input />
+              <input value={searchRequest.costRange[1]} onChange={e => setSearchRequest({ ...searchRequest, costRange: [searchRequest.costRange[1], Number(e.target.value)] })} />
             </div>
             <div className="flex flex-row">
               <span className="w-3/4 text-left px-4">Attributes:</span>
@@ -190,10 +233,10 @@ export default function MarketplaceWindow() {
             </div>
             <div>
               <label>
-                <input type="checkbox" defaultChecked /> Only show items I can use
+                <input type="checkbox" checked={searchRequest.usableOnly} onChange={e => setSearchRequest({ ...searchRequest, usableOnly: e.target.checked })} /> Only show items I can use
               </label>
             </div>
-            <button className="mx-auto" onClick={_ => search()}>Search</button>
+            <button className="mx-auto ignore-reorder" onClick={e => search(e)}>Search</button>
           </form>
 
           <div className="flex flex-col flex-grow text-sm gap-y-4 basis-full sm:basis-8/12 w-min">
@@ -209,7 +252,7 @@ export default function MarketplaceWindow() {
               </div>
               <div className="flex flex-col gap-y-4">
                 <input placeholder="Gold Password" type="password" />
-                <button onClick={_ => buyItem()}>Buy this item</button>
+                <button onClick={_ => buyItem()} className="ignore-reorder">Buy this item</button>
               </div>
             </div>
           </div>
@@ -241,7 +284,7 @@ export default function MarketplaceWindow() {
               <div className="flex flex-col gap-4">
                 <label className="flex flex-row">
                   <span className="w-1/4">Cost:</span>
-                  <div className="w-3/5"><input value={(isNaN(sellTabState.cost) ? '' : sellTabState.cost) ?? ''} onChange={e => updateCost(e.target.value)} /></div>
+                  <div className="w-3/5"><input value={windowState?.sellCost ?? ''} onChange={e => updateCost(e.target.value)} /></div>
                 </label>
                 <label className="flex flex-row">
                   <span className="w-1/4">Fee:</span>
@@ -250,7 +293,7 @@ export default function MarketplaceWindow() {
               </div>
               <div className="flex flex-col gap-y-4">
                 <input value={sellTabState.goldPassword ?? ''} onChange={e => setSellTabState({ ...sellTabState, goldPassword: e.target.value })} placeholder="Gold Password" type="password" />
-                <button onClick={_ => sellItem()}>Sell this item</button>
+                <button onClick={_ => sellOrUpdateItemListing()} className="ignore-reorder">{isSellEdit ? "Edit listing" : "Sell this item"}</button>
               </div>
             </div>
           </div>

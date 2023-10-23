@@ -34,7 +34,7 @@ public class Character
 
     //not persisted
 
-    private const int ItemSlots = 16;
+    public const int ItemSlots = 16;
     public Zone? Zone { get; set; }
     public long LastRegenAction { get; set; }
 

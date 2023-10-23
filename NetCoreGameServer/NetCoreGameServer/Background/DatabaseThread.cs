@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using NetCoreGameServer.Data.Model;
+using NetCoreGameServer.Data.Network.Items;
 using NetCoreGameServer.Service;
 using NetCoreGameServer.Websocket;
 
@@ -74,5 +75,35 @@ public class DatabaseThread : BaseBackgroundThread
         await _itemRepository.UpdateItems(items);
         Console.WriteLine($"Force updated {items.Count()} items");
         return true;
+    }
+
+    public async Task<bool> SellItem(MarketItem item)
+    {
+        return await _itemRepository.CreateMarketItem(item);
+    }
+
+    public async Task<List<MarketItem>> SearchMarketItems(SearchMarketItemsDbRequest request)
+    {
+        return await _itemRepository.SearchMarketItems(request);
+    }
+
+    public async Task<MarketItem?> GetMarketItem(int id)
+    {
+        return await _itemRepository.GetMarketItem(id);
+    }
+
+    public async Task<bool> BuyItem(MarketItem item, User user)
+    {
+        return await _itemRepository.BuyMarketItem(item, user);
+    }
+
+    public async Task<bool> UpdateMarketItemPrice(MarketItem item)
+    {
+        return await _itemRepository.UpdateMarketItemPrice(item);
+    }
+
+    public async Task<bool> CancelMarketItem(MarketItem item, Character character)
+    {
+        return await _itemRepository.DeleteMarketItem(item, character);
     }
 }

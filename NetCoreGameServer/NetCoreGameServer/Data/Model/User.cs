@@ -5,9 +5,11 @@ public class User
     public int Id { get; set; }
     public string Username { get; set; }
     public string Email { get; set; }
+    public decimal Gold { get; set; }
 
     public List<Character> Characters { get; set; } = new();
     public int? GuildId { get; set; }
+    public List<MarketItem> MarketItems { get; set; } = new();
 
     //not persisted
     public Character? SelectedCharacter { get; set; }

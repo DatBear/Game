@@ -21,6 +21,11 @@ public enum ResponsePacketType
     UpdateGroundItem = 16,
     StartSkill = 17,
     UpdateSkill = 18,
+    SellItem = 19,
+    SearchMarketItems = 20,
+    BuyItem = 21,
+    UpdateMarketItem = 22,
+    CancelMarketItem = 23,
 
     Error = 255,
 }

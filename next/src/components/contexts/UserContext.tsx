@@ -27,7 +27,6 @@ type UserContextData = {
   deleteCharacter: (character: Character) => void;
   selectCharacter: (character: Character | null) => void;
   updateCharacter: (character: Character) => void;
-  listMarketItem: (item: MarketItem) => boolean;
   transferItem: (item: Item, character: Character) => boolean;
   selectedItemSlot: EquippedItemSlot;
   setSelectedItemSlot: (slot: EquippedItemSlot) => void;
@@ -78,16 +77,6 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
       group: group
     }))
   };
-
-  const listMarketItem = (item: MarketItem) => {
-    if (user.marketItems.length < 16 && item.price > 0 && user.selectedCharacter) {
-      user.marketItems.push(item);
-      user.selectedCharacter.equipment = user.selectedCharacter.equipment.filter(x => x.id !== item.item.id);
-      setUser(x => ({ ...x, marketItems: user.marketItems }));
-      return true;
-    }
-    return false;
-  }
 
   const transferItem = (item: Item, character: Character) => {
     if (!item || !character || !user.selectedCharacter) return false;
@@ -242,15 +231,63 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
 
     if (!user.selectedCharacter) return;
     var char = user.selectedCharacter!;
-    //if (char.zone === Zone.Catacombs) return;
     char.lastRegenAction = new Date().getTime();
     char.life += Math.min(char.stats.lifeRegen, char.stats.maxLife - char.life);
     char.mana += Math.min(char.stats.manaRegen, char.stats.maxMana - char.mana);
-
     setUser({ ...user });
   }
 
-  return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, listMarketItem, transferItem, selectedItemSlot, setSelectedItemSlot }}>
+  useEffect(() => {
+    return listen(ResponsePacketType.SellItem, (e: { item: MarketItem }) => {
+      user.marketItems.push(e.item);
+      if (user.selectedCharacter) {
+        user.selectedCharacter.items = user.selectedCharacter.items.filter(x => x.id !== e.item.item.id);
+        user.selectedCharacter.equipment = user.selectedCharacter.equipment.filter(x => x.id !== e.item.item.id);
+        user.selectedCharacter.equippedItems = user.selectedCharacter.equippedItems.filter(x => x.id !== e.item.item.id);
+      }
+      setUser({ ...user });
+    }, true);
+  }, [user]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.BuyItem, (e: MarketItem) => {
+      user.gold -= e.price;
+      let isItem = e.item.subType >= ItemSubType.Fish;
+      if (isItem) {
+        user.selectedCharacter?.items.push(e.item);
+      } else {
+        user.selectedCharacter?.equipment.push(e.item);
+      }
+      setUser({ ...user });
+    }, true);
+  }, [user]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.UpdateMarketItem, (e: MarketItem) => {
+      if (e.isSold) {
+        user.gold += e.price;
+        user.marketItems = user.marketItems.filter(x => x.id !== e.id);
+        setUser({ ...user });
+      } else {
+        user.marketItems = user.marketItems.filter(x => x.id !== e.id).concat(e);
+        setUser({ ...user });
+      }
+    });
+  }, [user]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.CancelMarketItem, (e: MarketItem) => {
+      user.marketItems = user.marketItems.filter(x => x.id !== e.id);
+      let isItem = e.item.subType >= ItemSubType.Fish;
+      if (isItem) {
+        user.selectedCharacter?.items.push(e.item);
+      } else {
+        user.selectedCharacter?.equipment.push(e.item);
+      }
+    }, true);
+  }, [user]);
+
+  return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, transferItem, selectedItemSlot, setSelectedItemSlot }}>
     {children}
   </UserContext.Provider>
 }
@@ -294,23 +331,26 @@ export function useCharacter() {
   }
 
   function unequipItem(slot: EquippedItemSlot) {
-    if (!canUnequipItem()) return;
+    if (!canUnequipItem()) return false;
     send(RequestPacketType.UnequipItem, slot, true);
     //this is client side and gets updated by the updatecharacter packet later
     var currentItem = character.equippedItems.find(x => x.equippedItemSlot === slot);
     if (currentItem) {
       character.equipment.push(currentItem);
       character.equippedItems = character.equippedItems.filter(x => x.equippedItemSlot !== currentItem!.equippedItemSlot);
+      console.log('char', character);
       updateCharacter(character);
+      return true;
     }
+    return false;
   }
 
   const canEquipItem = useCallback((item: Item, slot: EquippedItemSlot): boolean => {
-    if (item == null || character.equipment.find(x => x?.id === item.id) == undefined) return false;
+    if (item == null) return false;
     let maxTier = Math.floor(3 + character.level / 5);
     let subTypes = slot == EquippedItemSlot.Armor ? classArmors[character.class] : slot == EquippedItemSlot.Weapon ? classWeapons[character.class] : classCharms[character.class];
 
-    let canEquipSubType = subTypes!.find(x => x == item.subType) !== undefined;
+    let canEquipSubType = subTypes!.find(x => x === item.subType) !== undefined;
     let canEquipTier = maxTier >= item.tier;
     return canEquipSubType && canEquipTier;
   }, [character]);
@@ -322,7 +362,7 @@ export function useCharacter() {
   const canDoItemAction = (item: Item, action: ItemAction, skill?: SkillType): boolean => {
     switch (action) {
       case ItemAction.Sell:
-        return character.equipment.find(x => x.id === item.id) !== undefined;
+        return character.equipment.find(x => x.id === item.id) !== undefined || character.items.find(x => x.id === item.id) !== undefined || user.marketItems.find(x => x.item.id === item.id) !== undefined;
       case ItemAction.Buy:
         return marketplaceWindowState?.searchResults.find(x => x.item.id === item.id) !== undefined;
       case ItemAction.Transfer:
@@ -339,6 +379,8 @@ export function useCharacter() {
           //todo glyphing, transmuting, suffusencing
         }
         break;
+      case ItemAction.Swap:
+        return true;
     }
     return true;
   }
@@ -349,6 +391,7 @@ export function useCharacter() {
       case ItemAction.Sell:
         if (!marketplaceWindowState) return;
         marketplaceWindowState.sellItem = item;
+        marketplaceWindowState.sellCost = user.marketItems.find(x => x.item.id === item.id)?.price?.toString() ?? '';
         setMarketplaceWindowState(marketplaceWindowState);
         break;
       case ItemAction.Buy:
@@ -382,6 +425,10 @@ export function useCharacter() {
         break;
       case ItemAction.Use:
         send(RequestPacketType.UseItem, { itemId: item.id, targetId: character.id }, true);
+      case ItemAction.Swap:
+        if (user.marketItems.find(x => x.item.id === item.id) !== undefined) {
+          send(RequestPacketType.CancelMarketItem, item.id);
+        }
         break;
     }
   }
