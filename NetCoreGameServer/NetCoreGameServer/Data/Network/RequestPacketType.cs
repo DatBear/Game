@@ -34,4 +34,5 @@ public enum RequestPacketType
     BuyItem = 29,
     UpdateMarketItem = 30,
     CancelMarketItem = 31,
+    TransferItem = 32,
 }

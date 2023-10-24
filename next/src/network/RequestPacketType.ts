@@ -31,6 +31,7 @@ enum RequestPacketType {
   BuyItem,
   UpdateMarketitem,
   CancelMarketItem,
+  TransferItem
 }
 
 export default RequestPacketType;

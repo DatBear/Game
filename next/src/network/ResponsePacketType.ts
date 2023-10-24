@@ -23,6 +23,7 @@ enum ResponsePacketType {
   BuyItem,
   UpdateMarketItem,
   CancelMarketItem,
+  TransferItem,
 
   Error = 255
 }

@@ -130,9 +130,7 @@ export default function MarketplaceWindow() {
   const transfer = () => {
     if (!windowState?.transferItem) return;
     if (!transferTabState.selectedCharacter) return;
-    // if (transferItem(windowState.transferItem, transferTabState.selectedCharacter)) {
-    //   setWindowState({ ...windowState, transferItem: undefined });
-    // }
+    send(RequestPacketType.TransferItem, { itemId: windowState.transferItem.id, characterId: transferTabState.selectedCharacter.id });
   }
 
   useEffect(() => {
@@ -144,6 +142,12 @@ export default function MarketplaceWindow() {
   useEffect(() => {
     return listen(ResponsePacketType.BuyItem, (e: MarketItem) => {
       setWindowState({ ...windowState!, searchResults: windowState!.searchResults.filter(x => x.id !== e.id), buyItem: undefined });
+    });
+  }, [windowState]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.TransferItem, (e: { itemId: number, characterId: number }) => {
+      setWindowState({ ...windowState!, transferItem: undefined });
     });
   }, [windowState]);
 

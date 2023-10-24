@@ -232,8 +232,8 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
     if (!user.selectedCharacter) return;
     var char = user.selectedCharacter!;
     char.lastRegenAction = new Date().getTime();
-    char.life += Math.min(char.stats.lifeRegen, char.stats.maxLife - char.life);
-    char.mana += Math.min(char.stats.manaRegen, char.stats.maxMana - char.mana);
+    char.life += Math.max(0, Math.min(char.stats.lifeRegen ?? 0, char.stats.maxLife - char.life));
+    char.mana += Math.max(0, Math.min(char.stats.manaRegen ?? 0, char.stats.maxMana - char.mana));
     setUser({ ...user });
   }
 
@@ -286,6 +286,23 @@ export default function UserContextProvider({ children }: React.PropsWithChildre
       }
     }, true);
   }, [user]);
+
+  useEffect(() => {
+    return listen(ResponsePacketType.TransferItem, (e: { itemId: number, characterId: number }) => {
+      let equipmentItem = user.selectedCharacter?.equipment.find(x => x.id === e.itemId);
+      if (equipmentItem) {
+        user.selectedCharacter!.equipment = user.selectedCharacter!.equipment.filter(x => x.id !== e.itemId);
+        user.characters.find(x => x.id === e.characterId)?.equipment.push(equipmentItem);
+        return;
+      }
+
+      let invItem = user.selectedCharacter?.items.find(x => x.id === e.itemId);
+      if (invItem) {
+        user.selectedCharacter!.items = user.selectedCharacter!.items.filter(x => x.id !== e.itemId);
+        user.characters.find(x => x.id === e.characterId)?.items.push(invItem);
+      }
+    });
+  });
 
   return <UserContext.Provider value={{ user, setCharacters, createCharacter, deleteCharacter, selectCharacter, updateCharacter, transferItem, selectedItemSlot, setSelectedItemSlot }}>
     {children}

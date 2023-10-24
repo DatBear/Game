@@ -26,6 +26,7 @@ public enum ResponsePacketType
     BuyItem = 21,
     UpdateMarketItem = 22,
     CancelMarketItem = 23,
+    TransferItem = 24,
 
     Error = 255,
 }
